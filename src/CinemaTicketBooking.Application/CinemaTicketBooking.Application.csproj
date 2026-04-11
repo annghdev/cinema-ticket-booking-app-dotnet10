@@ -14,4 +14,9 @@
     <ProjectReference Include="..\CinemaTicketBooking.Domain\CinemaTicketBooking.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\" />
+    <Folder Include="Messaging\" />
+  </ItemGroup>
+
 </Project>
