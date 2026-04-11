@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="WolverineFx" Version="5.30.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CinemaTicketBooking.Domain\CinemaTicketBooking.Domain.csproj" />
   </ItemGroup>
 
