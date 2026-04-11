@@ -1,4 +1,4 @@
-﻿namespace CinemaTicketBooking.Domain.Abstraction;
+﻿namespace CinemaTicketBooking.Domain;
 
 public abstract class AuditableEntity : BaseEntity, ISoftDeletalbe
 {
