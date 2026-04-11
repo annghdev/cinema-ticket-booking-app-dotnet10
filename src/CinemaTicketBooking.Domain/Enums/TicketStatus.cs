@@ -4,5 +4,5 @@ public enum TicketStatus
 {
     Available,
     Locking,
-    Booked
+    Sold
 }
