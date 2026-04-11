@@ -1,6 +1,4 @@
-﻿using CinemaTicketBooking.Domain.Entities;
-
-namespace CinemaTicketBooking.Domain;
+﻿namespace CinemaTicketBooking.Domain;
 
 public class Screen : AuditableEntity
 {

@@ -1,4 +1,4 @@
-﻿namespace CinemaTicketBooking.Domain.Entities;
+﻿namespace CinemaTicketBooking.Domain;
 
 public class Cinema : AuditableEntity
 {
