@@ -29,7 +29,6 @@ public class Screen : AuditableEntity
     // 1 1 0 2 2 2 1 0
     // 1 1 0 2 2 2 1 0
     // 3 0 0 3 0 3 0 0
-
     public void GenerateSeats(string seatMap)
     {
         // Parse the seat map to 2D array, validate and generate seats based on the provided map

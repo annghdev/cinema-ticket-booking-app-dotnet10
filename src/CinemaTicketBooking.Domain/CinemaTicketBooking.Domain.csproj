@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Events\" />
+    <Folder Include="Services\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
 
