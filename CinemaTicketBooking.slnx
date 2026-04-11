@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/CinemaTicketBooking.Application/CinemaTicketBooking.Application.csproj" />
+    <Project Path="src/CinemaTicketBooking.Domain/CinemaTicketBooking.Domain.csproj" />
+    <Project Path="src/CinemaTicketBooking.Infrastructure/CinemaTicketBooking.Infrastructure.csproj" />
+    <Project Path="src/CinemaTicketBooking.WebServer/CinemaTicketBooking.WebServer.csproj" />
+  </Folder>
+  <Folder Name="/src/aspire/">
+    <Project Path="src/Aspire.AppHost/Aspire.AppHost.csproj" />
+    <Project Path="src/Aspire.ServiceDefaults/Aspire.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
