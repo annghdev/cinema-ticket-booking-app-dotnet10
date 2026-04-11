@@ -323,6 +323,11 @@ __pycache__/
 # Tabs Studio
 *.tss
 
+# Tools
+.cursor/
+.agent/
+*.env
+
 # Telerik's JustMock configuration file
 *.jmconfig
 
@@ -361,4 +366,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
 /src/CinemaTicketBooking.WebServer/appsettings.Development.json
+CinemaTicketBooking.sln
