@@ -23,4 +23,13 @@
     <ProjectReference Include="..\CinemaTicketBooking.Application\CinemaTicketBooking.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Auth\" />
+    <Folder Include="Cache\" />
+    <Folder Include="Notifications\" />
+    <Folder Include="Persistence\Migrations\" />
+    <Folder Include="Persistence\Configurations\" />
+    <Folder Include="Persistence\Repositories\" />
+  </ItemGroup>
+
 </Project>

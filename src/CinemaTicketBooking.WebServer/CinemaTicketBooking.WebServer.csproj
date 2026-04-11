@@ -18,4 +18,8 @@
     <ProjectReference Include="..\CinemaTicketBooking.Infrastructure\CinemaTicketBooking.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Endpoints\" />
+  </ItemGroup>
+
 </Project>
