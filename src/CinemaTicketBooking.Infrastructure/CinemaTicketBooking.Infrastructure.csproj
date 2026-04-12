@@ -26,6 +26,8 @@
   <ItemGroup>
     <Folder Include="Auth\" />
     <Folder Include="Cache\" />
+    <Folder Include="FileStorages\" />
+    <Folder Include="Payments\" />
     <Folder Include="Notifications\" />
     <Folder Include="Persistence\Migrations\" />
     <Folder Include="Persistence\Configurations\" />

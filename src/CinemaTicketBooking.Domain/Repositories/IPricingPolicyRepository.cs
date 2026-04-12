@@ -1,5 +1,10 @@
 namespace CinemaTicketBooking.Domain;
 
+/// <summary>
+/// Repository interface for the PricingPolicy entity.
+/// Provides queries to resolve the correct pricing policy for ticket generation,
+/// supporting cinema-specific overrides and fallback to default policies.
+/// </summary>
 public interface IPricingPolicyRepository : IRepository<PricingPolicy>
 {
     /// <summary>

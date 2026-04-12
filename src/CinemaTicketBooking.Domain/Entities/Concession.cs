@@ -1,5 +1,9 @@
-﻿namespace CinemaTicketBooking.Domain;
+namespace CinemaTicketBooking.Domain;
 
+/// <summary>
+/// Concession represents a snack or drink item available for purchase at the cinema
+/// (e.g., popcorn, soda). Can be added to a Booking alongside tickets.
+/// </summary>
 public class Concession : AuditableEntity
 {
     public required string Name { get; set; }
