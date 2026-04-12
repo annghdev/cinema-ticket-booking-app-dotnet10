@@ -29,7 +29,12 @@
 
   <ItemGroup>
     <Folder Include="ApiTests\" />
+    <Folder Include="ApplicationTests\FeatureTests\" />
+    <Folder Include="ApplicationTests\MessagingTests\" />
+    <Folder Include="InfrastructureTests\AuthTests\" />
     <Folder Include="InfrastructureTests\PersistenceTests\" />
+    <Folder Include="Shared\Fixtures\" />
+    <Folder Include="Shared\DataSeeders\" />
   </ItemGroup>
 
   <ItemGroup>
