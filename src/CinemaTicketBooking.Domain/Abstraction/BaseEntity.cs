@@ -16,4 +16,9 @@ public abstract class BaseEntity: IEntity
     {
         _events.Add(@event);
     }
+
+    public void ClearEvents()
+    {
+        _events.Clear();
+    }
 }
