@@ -15,5 +15,8 @@
     <Project Path="src/Aspire.AppHost/Aspire.AppHost.csproj" />
     <Project Path="src/Aspire.ServiceDefaults/Aspire.ServiceDefaults.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/CinemaTicketBooking.IntegrationTests/CinemaTicketBooking.IntegrationTests.csproj" Id="759008d0-d37f-4e94-ad8d-f1ff5398071f" />
+    <Project Path="tests/CinemaTicketBooking.UnitTests/CinemaTicketBooking.UnitTests.csproj" Id="4d2c70a7-4d01-48d6-8964-3ef1d210fcb7" />
+  </Folder>
 </Solution>
