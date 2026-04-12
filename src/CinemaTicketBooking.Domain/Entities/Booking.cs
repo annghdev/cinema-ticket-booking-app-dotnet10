@@ -132,6 +132,17 @@ public class Booking : AuditableEntity
             }
             bookingTicket.Ticket.MarkAsSold(Id);
         }
+
+        RaiseEvent(new BookingConfirmed(
+            BookingId: Id,
+            ShowTimeId: ShowTimeId,
+            CustomerId: CustomerId,
+            CustomerName: CustomerName,
+            Email: Email,
+            PhoneNumber: PhoneNumber,
+            FinalAmount: FinalAmount,
+            TicketCount: Tickets.Count,
+            ShowTimeStartAt: ShowTime?.StartAt ?? DateTimeOffset.MinValue));
     }
 
     /// <summary>
@@ -150,9 +161,11 @@ public class Booking : AuditableEntity
             throw new InvalidOperationException("Checked-in bookings cannot be cancelled.");
         }
 
+        var previousStatus = Status;
         Status = BookingStatus.Cancelled;
 
         // Release each ticket back to the available pool
+        var releasedTicketIds = new List<Guid>();
         foreach (var bookingTicket in Tickets)
         {
             if (bookingTicket.Ticket == null)
@@ -160,7 +173,19 @@ public class Booking : AuditableEntity
                 throw new InvalidOperationException("Booking ticket must have an associated ticket.");
             }
             bookingTicket.Ticket.Release();
+            releasedTicketIds.Add(bookingTicket.TicketId);
         }
+
+        RaiseEvent(new BookingCancelled(
+            BookingId: Id,
+            ShowTimeId: ShowTimeId,
+            CustomerId: CustomerId,
+            CustomerName: CustomerName,
+            Email: Email,
+            PhoneNumber: PhoneNumber,
+            FinalAmount: FinalAmount,
+            PreviousStatus: previousStatus,
+            ReleasedTicketIds: releasedTicketIds));
     }
 
     /// <summary>
@@ -174,6 +199,14 @@ public class Booking : AuditableEntity
             throw new InvalidOperationException("Only confirmed bookings can be checked in.");
         }
         Status = BookingStatus.CheckedIn;
+
+        RaiseEvent(new BookingCheckedIn(
+            BookingId: Id,
+            ShowTimeId: ShowTimeId,
+            CustomerId: CustomerId,
+            CustomerName: CustomerName,
+            TicketCount: Tickets.Count,
+            FinalAmount: FinalAmount));
     }
 
     // =============================================================

@@ -15,4 +15,23 @@ public class Cinema : AuditableEntity
     public string? Geo { get; set; }
     public string Address { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
+
+    // =============================================================
+    // State Transitions
+    // =============================================================
+
+    /// <summary>
+    /// Toggles the cinema's active status and raises a domain event.
+    /// Deactivating a cinema should trigger side effects on related screens and showtimes.
+    /// </summary>
+    public void ToggleActive()
+    {
+        IsActive = !IsActive;
+
+        RaiseEvent(new CinemaStatusChanged(
+            CinemaId: Id,
+            Name: Name,
+            Address: Address,
+            IsActive: IsActive));
+    }
 }

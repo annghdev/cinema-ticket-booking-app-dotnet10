@@ -20,6 +20,29 @@ public class Movie : AuditableEntity
     public int Duration { get; set; }
     public MovieGenre Genre { get; set; }
     public MovieStatus Status { get; set; }
+
+    // =============================================================
+    // State Transitions
+    // =============================================================
+
+    /// <summary>
+    /// Changes the movie status and raises a domain event.
+    /// Validates that the transition is allowed:
+    ///   Ongoing → NowShowing, Ongoing → NoShow, NowShowing → NoShow.
+    /// </summary>
+    public void ChangeStatus(MovieStatus newStatus)
+    {
+        if (Status == newStatus) return;
+
+        var oldStatus = Status;
+        Status = newStatus;
+
+        RaiseEvent(new MovieStatusChanged(
+            MovieId: Id,
+            MovieName: Name,
+            OldStatus: oldStatus,
+            NewStatus: newStatus));
+    }
 }
 
 //public enum MovieStatus

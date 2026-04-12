@@ -79,7 +79,16 @@ public class ShowTime : AuditableEntity
         showTime.GenerateTickets(screen, pricingPolicies);
 
         // 9. Raise domain event
-        showTime.RaiseEvent(new ShowTimeCreated(showTime.Id, screen.Id));
+        showTime.RaiseEvent(new ShowTimeCreated(
+            ShowTimeId: showTime.Id,
+            MovieId: movie.Id,
+            MovieName: movie.Name,
+            ScreenId: screen.Id,
+            ScreenCode: screen.Code,
+            Date: showTime.Date,
+            StartAt: showTime.StartAt,
+            EndAt: showTime.EndAt,
+            TicketCount: showTime.Tickets.Count));
 
         return showTime;
     }
@@ -133,6 +142,12 @@ public class ShowTime : AuditableEntity
             throw new InvalidOperationException(
                 "Only ongoing showtimes can start showing.");
         Status = ShowTimeStatus.Showing;
+
+        RaiseEvent(new ShowTimeStarted(
+            ShowTimeId: Id,
+            MovieId: MovieId,
+            ScreenId: ScreenId,
+            StartAt: StartAt));
     }
 
     public void Complete()
@@ -141,6 +156,13 @@ public class ShowTime : AuditableEntity
             throw new InvalidOperationException(
                 "Only showing showtimes can be completed.");
         Status = ShowTimeStatus.Completed;
+
+        RaiseEvent(new ShowTimeCompleted(
+            ShowTimeId: Id,
+            MovieId: MovieId,
+            ScreenId: ScreenId,
+            StartAt: StartAt,
+            EndAt: EndAt));
     }
 
     public void Cancel()
@@ -150,6 +172,14 @@ public class ShowTime : AuditableEntity
                 "Cannot cancel a showtime that is showing or already completed.");
 
         Status = ShowTimeStatus.Cancelled;
-        RaiseEvent(new ShowTimeCancelled(Id));
+
+        RaiseEvent(new ShowTimeCancelled(
+            ShowTimeId: Id,
+            MovieId: MovieId,
+            MovieName: Movie?.Name ?? string.Empty,
+            ScreenId: ScreenId,
+            ScreenCode: Screen?.Code ?? string.Empty,
+            Date: Date,
+            StartAt: StartAt));
     }
 }

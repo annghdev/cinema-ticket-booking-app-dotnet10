@@ -43,4 +43,37 @@ public class PricingPolicy : AuditableEntity
     /// Calculates the final ticket price.
     /// </summary>
     public decimal CalculatePrice() => BasePrice * ScreenCoefficient;
+
+    // =============================================================
+    // Update Pricing
+    // =============================================================
+
+    /// <summary>
+    /// Updates the pricing values and raises a domain event with old and new values.
+    /// Side effects: invalidate pricing cache, recalculate affected future showtime tickets.
+    /// </summary>
+    public void UpdatePricing(decimal newBasePrice, decimal newScreenCoefficient)
+    {
+        if (newBasePrice < 0)
+            throw new ArgumentException("Base price cannot be negative.", nameof(newBasePrice));
+
+        if (newScreenCoefficient <= 0)
+            throw new ArgumentException("Screen coefficient must be positive.", nameof(newScreenCoefficient));
+
+        var oldBasePrice = BasePrice;
+        var oldScreenCoefficient = ScreenCoefficient;
+
+        BasePrice = newBasePrice;
+        ScreenCoefficient = newScreenCoefficient;
+
+        RaiseEvent(new PricingPolicyUpdated(
+            PricingPolicyId: Id,
+            CinemaId: CinemaId,
+            ScreenType: ScreenType,
+            SeatType: SeatType,
+            OldBasePrice: oldBasePrice,
+            NewBasePrice: newBasePrice,
+            OldScreenCoefficient: oldScreenCoefficient,
+            NewScreenCoefficient: newScreenCoefficient));
+    }
 }
