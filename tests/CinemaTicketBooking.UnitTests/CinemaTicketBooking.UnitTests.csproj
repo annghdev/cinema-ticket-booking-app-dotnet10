@@ -24,13 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EntityTests\" />
-    <Folder Include="DomainServiceTests\" />
-    <Folder Include="Shared\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\CinemaTicketBooking.Application\CinemaTicketBooking.Application.csproj" />
+    <ProjectReference Include="..\..\src\CinemaTicketBooking.Domain\CinemaTicketBooking.Domain.csproj" />
   </ItemGroup>
 
 </Project>
