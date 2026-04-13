@@ -371,3 +371,4 @@ FodyWeavers.xsd
 
 /src/CinemaTicketBooking.WebServer/appsettings.Development.json
 CinemaTicketBooking.sln
+/src/CinemaTicketBooking.Application/Features/Tests/TestRequest.cs

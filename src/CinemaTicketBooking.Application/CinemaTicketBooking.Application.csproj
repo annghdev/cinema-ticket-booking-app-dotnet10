@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="WolverineFx" Version="5.30.0" />
+    <PackageReference Include="WolverineFx.FluentValidation" Version="5.30.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\" />
     <Folder Include="Messaging\" />
     <Folder Include="Helpers\" />
   </ItemGroup>

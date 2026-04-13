@@ -30,9 +30,7 @@
     <Folder Include="FileStorages\" />
     <Folder Include="Payments\" />
     <Folder Include="Notifications\" />
-    <Folder Include="Persistence\Migrations\" />
     <Folder Include="Persistence\Configurations\" />
-    <Folder Include="Persistence\Repositories\" />
   </ItemGroup>
 
 </Project>
