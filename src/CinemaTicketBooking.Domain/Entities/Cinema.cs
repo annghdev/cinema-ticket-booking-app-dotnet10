@@ -17,21 +17,34 @@ public class Cinema : AuditableEntity
     public bool IsActive { get; set; } = true;
 
     // =============================================================
-    // State Transitions
+    // State transitions
     // =============================================================
 
     /// <summary>
-    /// Toggles the cinema's active status and raises a domain event.
-    /// Deactivating a cinema should trigger side effects on related screens and showtimes.
+    /// Activates the cinema for operations. No-op when already active (idempotent).
     /// </summary>
-    public void ToggleActive()
+    public void Activate()
     {
-        IsActive = !IsActive;
+        if (IsActive)
+        {
+            return;
+        }
 
-        RaiseEvent(new CinemaStatusChanged(
-            CinemaId: Id,
-            Name: Name,
-            Address: Address,
-            IsActive: IsActive));
+        IsActive = true;
+        RaiseEvent(new CinemaActivated(Id, Name, Address));
+    }
+
+    /// <summary>
+    /// Deactivates the cinema. No-op when already inactive (idempotent).
+    /// </summary>
+    public void Deactivate()
+    {
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+        RaiseEvent(new CinemaDeactivated(Id, Name, Address));
     }
 }

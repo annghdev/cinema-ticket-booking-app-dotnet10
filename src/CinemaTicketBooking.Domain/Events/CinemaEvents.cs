@@ -1,11 +1,11 @@
 namespace CinemaTicketBooking.Domain;
 
 /// <summary>
-/// Raised when a cinema's active status changes (activated or deactivated).
-/// Side effects: update listing cache, notify affected screen schedules.
+/// Raised when a cinema location becomes active again.
 /// </summary>
-public record CinemaStatusChanged(
-    Guid CinemaId,
-    string Name,
-    string Address,
-    bool IsActive) : IDomainEvent;
+public record CinemaActivated(Guid CinemaId, string Name, string Address) : IDomainEvent;
+
+/// <summary>
+/// Raised when a cinema location is deactivated.
+/// </summary>
+public record CinemaDeactivated(Guid CinemaId, string Name, string Address) : IDomainEvent;

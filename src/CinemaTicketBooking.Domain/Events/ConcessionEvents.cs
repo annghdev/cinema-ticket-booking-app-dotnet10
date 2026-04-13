@@ -1,11 +1,11 @@
 namespace CinemaTicketBooking.Domain;
 
 /// <summary>
-/// Raised when a concession item's availability changes.
-/// Side effects: update real-time menu display, notify staff.
+/// Raised when a concession item is marked available for purchase.
 /// </summary>
-public record ConcessionAvailabilityChanged(
-    Guid ConcessionId,
-    string Name,
-    bool IsAvailable,
-    decimal Price) : IDomainEvent;
+public record ConcessionMarkedAvailable(Guid ConcessionId, string Name, decimal Price) : IDomainEvent;
+
+/// <summary>
+/// Raised when a concession item is marked unavailable (e.g., out of stock).
+/// </summary>
+public record ConcessionMarkedUnavailable(Guid ConcessionId, string Name, decimal Price) : IDomainEvent;

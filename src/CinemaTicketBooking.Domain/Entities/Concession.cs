@@ -12,21 +12,34 @@ public class Concession : AuditableEntity
     public bool IsAvailable { get; set; } = true;
 
     // =============================================================
-    // State Transitions
+    // State transitions
     // =============================================================
 
     /// <summary>
-    /// Toggles the concession's availability and raises a domain event.
-    /// Side effects: update real-time menu display for customers.
+    /// Marks the concession as available for purchase. No-op when already available (idempotent).
     /// </summary>
-    public void ToggleAvailability()
+    public void MarkAsAvailable()
     {
-        IsAvailable = !IsAvailable;
+        if (IsAvailable)
+        {
+            return;
+        }
 
-        RaiseEvent(new ConcessionAvailabilityChanged(
-            ConcessionId: Id,
-            Name: Name,
-            IsAvailable: IsAvailable,
-            Price: Price));
+        IsAvailable = true;
+        RaiseEvent(new ConcessionMarkedAvailable(Id, Name, Price));
+    }
+
+    /// <summary>
+    /// Marks the concession as unavailable (e.g., out of stock). No-op when already unavailable (idempotent).
+    /// </summary>
+    public void MarkAsUnavailable()
+    {
+        if (!IsAvailable)
+        {
+            return;
+        }
+
+        IsAvailable = false;
+        RaiseEvent(new ConcessionMarkedUnavailable(Id, Name, Price));
     }
 }

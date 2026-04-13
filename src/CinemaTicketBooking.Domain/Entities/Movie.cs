@@ -22,45 +22,51 @@ public class Movie : AuditableEntity
     public MovieStatus Status { get; set; }
 
     // =============================================================
-    // State Transitions
+    // State transitions: explicit commands per allowed transition
     // =============================================================
 
     /// <summary>
-    /// Changes the movie status and raises a domain event.
-    /// Validates that the transition is allowed:
-    ///   Ongoing → NowShowing, Ongoing → NoShow, NowShowing → NoShow.
+    /// Promotes the movie from Ongoing to NowShowing so it can be scheduled.
     /// </summary>
-    public void ChangeStatus(MovieStatus newStatus)
+    public void PromoteToNowShowing()
     {
-        if (Status == newStatus) return;
+        if (Status != MovieStatus.Ongoing)
+        {
+            throw new InvalidOperationException(
+                $"Cannot promote movie '{Name}' to NowShowing from status {Status}. Only Ongoing movies can be promoted.");
+        }
 
-        var oldStatus = Status;
-        Status = newStatus;
+        Status = MovieStatus.NowShowing;
+        RaiseEvent(new MoviePromotedToNowShowing(Id, Name));
+    }
 
-        RaiseEvent(new MovieStatusChanged(
-            MovieId: Id,
-            MovieName: Name,
-            OldStatus: oldStatus,
-            NewStatus: newStatus));
+    /// <summary>
+    /// Marks an upcoming movie (Ongoing) as NoShow before it reaches screens.
+    /// </summary>
+    public void WithdrawUpcomingRunAsNoShow()
+    {
+        if (Status != MovieStatus.Ongoing)
+        {
+            throw new InvalidOperationException(
+                $"Cannot withdraw upcoming run for movie '{Name}' from status {Status}. Only Ongoing movies can be withdrawn this way.");
+        }
+
+        Status = MovieStatus.NoShow;
+        RaiseEvent(new MovieWithdrawnAsNoShowWhileUpcoming(Id, Name));
+    }
+
+    /// <summary>
+    /// Closes a movie that is currently on screens (NowShowing) and marks it NoShow.
+    /// </summary>
+    public void CloseNowShowingRunAsNoShow()
+    {
+        if (Status != MovieStatus.NowShowing)
+        {
+            throw new InvalidOperationException(
+                $"Cannot close now-showing run for movie '{Name}' from status {Status}. Only NowShowing movies can be closed this way.");
+        }
+
+        Status = MovieStatus.NoShow;
+        RaiseEvent(new MovieRunClosedAsNoShow(Id, Name));
     }
 }
-
-//public enum MovieStatus
-//{
-//    Ongoing,
-//    NowShowing,
-//    NoShow
-//}
-
-//public enum MovieGenre
-//{
-//    Action,
-//    Comedy,
-//    Drama,
-//    Horror,
-//    SciFi,
-//    Romance,
-//    Thriller,
-//    Animation,
-//    Documentary
-//}

@@ -1,11 +1,16 @@
 namespace CinemaTicketBooking.Domain;
 
 /// <summary>
-/// Raised when a movie's status changes (e.g., Ongoing → NowShowing, NowShowing → NoShow).
-/// Side effects: invalidate schedule cache, notify if movie becomes unavailable.
+/// Raised when a movie moves from Ongoing to NowShowing (eligible for ShowTime scheduling).
 /// </summary>
-public record MovieStatusChanged(
-    Guid MovieId,
-    string MovieName,
-    MovieStatus OldStatus,
-    MovieStatus NewStatus) : IDomainEvent;
+public record MoviePromotedToNowShowing(Guid MovieId, string MovieName) : IDomainEvent;
+
+/// <summary>
+/// Raised when an upcoming movie (Ongoing) is withdrawn before it reaches screens.
+/// </summary>
+public record MovieWithdrawnAsNoShowWhileUpcoming(Guid MovieId, string MovieName) : IDomainEvent;
+
+/// <summary>
+/// Raised when a movie that is currently on screens (NowShowing) is closed and marked NoShow.
+/// </summary>
+public record MovieRunClosedAsNoShow(Guid MovieId, string MovieName) : IDomainEvent;
