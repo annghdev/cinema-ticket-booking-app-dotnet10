@@ -11,7 +11,7 @@ public interface IShowTimeRepository : IRepository<ShowTime>
     /// Loads a ShowTime with all related entities (Movie, Screen, Tickets).
     /// Returns null if the ShowTime does not exist.
     /// </summary>
-    Task<Booking?> LoadFullAsync(Guid id, CancellationToken ct = default);
+    Task<ShowTime?> LoadFullAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
     /// Gets all non-cancelled ShowTimes for a given Screen within a date range.

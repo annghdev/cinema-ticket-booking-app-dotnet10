@@ -1,0 +1,101 @@
+﻿using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Domain;
+using CinemaTicketBooking.Domain.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Wolverine;
+
+namespace CinemaTicketBooking.Infrastructure.Persistence;
+
+public class EFUnitOfWork(
+    AppDbContext db,
+    IMessageBus bus,
+    IUserContext user,
+    IServiceProvider serviceProvider) : IUnitOfWork
+{
+    private ICinemaRepository? _cinemas;
+    private IMovieRepository? _movies;
+    private IBookingRepository? _bookings;
+    private ITicketRepository? _tickets;
+    private IShowTimeRepository? _showTimes;
+    private IScreenRepository? _screens;
+    private IConcessionRepository? _concessions;
+    private ICustomerRepository? _customers;
+    private IPricingPolicyRepository? _pricingPolicies;
+
+    public ICinemaRepository Cinemas => _cinemas ??= serviceProvider.GetRequiredService<ICinemaRepository>();
+    public IMovieRepository Movies => _movies ??= serviceProvider.GetRequiredService<IMovieRepository>();
+    public IBookingRepository Bookings => _bookings ??= serviceProvider.GetRequiredService<IBookingRepository>();
+    public ITicketRepository Tickets => _tickets ??= serviceProvider.GetRequiredService<ITicketRepository>();
+    public IShowTimeRepository ShowTimes => _showTimes ??= serviceProvider.GetRequiredService<IShowTimeRepository>();
+    public IScreenRepository Screens => _screens ??= serviceProvider.GetRequiredService<IScreenRepository>();
+    public IConcessionRepository Concessions => _concessions ??= serviceProvider.GetRequiredService<IConcessionRepository>();
+    public ICustomerRepository Customers => _customers ??= serviceProvider.GetRequiredService<ICustomerRepository>();
+    public IPricingPolicyRepository PricingPolicies => _pricingPolicies ??= serviceProvider.GetRequiredService<IPricingPolicyRepository>();
+
+    public async Task CommitAsync(CancellationToken ct = default)
+    {
+        ApplyAuditingInformation();
+        ApplySoftDelete();
+
+        // Wolverine will automatically save changes to the database when dispatching messages with Outbox pattern,
+        // so we don't need to call SaveChangesAsync here.
+
+        await DispatchEventsAsync(ct);
+    }
+
+    private async Task DispatchEventsAsync(CancellationToken ct)
+    {
+        var entitiesWithEvents = db.ChangeTracker
+            .Entries<IDefaultEntity>()
+            .Where(x => x.Entity.Events.Count > 0)
+            .Select(x => x.Entity)
+            .ToList();
+
+        var events = entitiesWithEvents
+            .SelectMany(x => x.Events)
+            .ToList();
+
+        foreach (var @event in events)
+        {
+            await bus.PublishAsync(@event);
+        }
+
+        foreach (var entity in entitiesWithEvents)
+        {
+            entity.ClearEvents();
+        }
+    }
+
+    private void ApplyAuditingInformation()
+    {
+        var entries = db.ChangeTracker.Entries<IAuditableEntity>();
+        foreach (var entry in entries)
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedBy = user.UserName;
+                entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedBy = user.UserName;
+                entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+        }
+    }
+
+    private void ApplySoftDelete()
+    {
+        var entries = db.ChangeTracker.Entries<ISoftDeletalbe>();
+        foreach (var entry in entries)
+        {
+            if (entry.State == EntityState.Deleted)
+            {
+                entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
+                entry.State = EntityState.Modified;
+            }
+        }
+    }
+}

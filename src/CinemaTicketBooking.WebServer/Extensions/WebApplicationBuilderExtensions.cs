@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using JasperFx;
 using JasperFx.Core;
@@ -41,6 +42,17 @@ public static class WebApplicationBuilderExtensions
             .Then.MoveToErrorQueue();
 
             opts.AutoBuildMessageStorageOnStartup = AutoCreate.CreateOrUpdate;
+
+            //opts.PublishAllMessages().Locally().MaximumParallelMessages(4).UseDurableInbox();
+
+            opts.Publish(rule =>
+            {
+                rule.MessagesImplementing<IDomainEvent>();
+
+                rule.ToLocalQueue("domain_events")
+                    .MaximumParallelMessages(4)
+                    .UseDurableInbox();
+            });
         });
     }
 }

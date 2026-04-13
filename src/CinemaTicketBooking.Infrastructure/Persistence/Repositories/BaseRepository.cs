@@ -1,21 +1,13 @@
 ﻿using CinemaTicketBooking.Domain;
-using CinemaTicketBooking.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace CinemaTicketBooking.Infrastructure.Persistence;
 
-public class BaseRepository<T> : IRepository<T>
+public class BaseRepository<T>(AppDbContext db) : IRepository<T>
     where T : class
 {
-    private readonly AppDbContext _db;
-    protected readonly DbSet<T> _dbSet;
-
-    public BaseRepository(AppDbContext db)
-    {
-        _db = db;
-        _dbSet = db.Set<T>();
-    }
+    protected readonly DbSet<T> _dbSet = db.Set<T>();
 
     public virtual void Add(T entity)
     {
@@ -24,7 +16,7 @@ public class BaseRepository<T> : IRepository<T>
 
     public void Update(T entity)
     {
-        _db.Entry(entity).State = EntityState.Modified;
+        db.Entry(entity).State = EntityState.Modified;
     }
 
     public void Delete(T entity)

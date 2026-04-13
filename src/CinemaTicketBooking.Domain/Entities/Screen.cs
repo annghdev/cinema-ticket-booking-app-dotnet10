@@ -42,7 +42,7 @@ public class Screen : AuditableEntity
     public string SeatMap { get; set; } = string.Empty;
     public ScreenType Type { get; set; }
     public bool IsActive { get; set; } = true;
-    public List<Seat> Seat { get; set; } = [];
+    public List<Seat> Seats { get; set; } = [];
 
     // =============================================================
     // Generate Seats from SeatMap
@@ -96,7 +96,7 @@ public class Screen : AuditableEntity
                 }
             }
         }
-        Seat = seats;
+        Seats = seats;
 
         RaiseEvent(new ScreenSeatsGenerated(
             ScreenId: Id,

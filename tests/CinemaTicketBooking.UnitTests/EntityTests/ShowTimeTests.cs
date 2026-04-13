@@ -20,7 +20,7 @@ public class ShowTimeTests
         showTime.MovieId.Should().Be(movie.Id);
         showTime.ScreenId.Should().Be(screen.Id);
         showTime.Status.Should().Be(ShowTimeStatus.Ongoing);
-        showTime.Tickets.Should().HaveCount(screen.Seat.Count(s => s.IsActive));
+        showTime.Tickets.Should().HaveCount(screen.Seats.Count(s => s.IsActive));
         showTime.EndAt.Should().Be(start.Add(ShowTime.TrailerTime).Add(TimeSpan.FromMinutes(movie.Duration)));
         showTime.Events.Should().ContainSingle().Which.Should().BeOfType<ShowTimeCreated>();
     }
@@ -76,7 +76,7 @@ public class ShowTimeTests
             Code = "EMPTY",
             Type = ScreenType.TwoD,
             IsActive = true,
-            Seat = []
+            Seats = []
         };
         var policies = DomainTestBuilders.PoliciesForRegularAndVip(cinemaId, screen.Type);
 

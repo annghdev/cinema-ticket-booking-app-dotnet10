@@ -5,12 +5,11 @@ namespace CinemaTicketBooking.Domain;
 
 public abstract class BaseEntity: IDefaultEntity
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.CreateVersion7();
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public uint Version { get; set; }
 
     private readonly List<IDomainEvent> _events = [];
-    [NotMapped]
     public IReadOnlyCollection<IDomainEvent> Events => _events.AsReadOnly();
 
     public void RaiseEvent(IDomainEvent @event)

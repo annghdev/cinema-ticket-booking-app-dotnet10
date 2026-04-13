@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace CinemaTicketBooking.Infrastructure.Migrations
+namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -977,7 +977,7 @@ namespace CinemaTicketBooking.Infrastructure.Migrations
             modelBuilder.Entity("CinemaTicketBooking.Domain.Seat", b =>
                 {
                     b.HasOne("CinemaTicketBooking.Domain.Screen", null)
-                        .WithMany("Seat")
+                        .WithMany("Seats")
                         .HasForeignKey("ScreenId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1073,7 +1073,7 @@ namespace CinemaTicketBooking.Infrastructure.Migrations
 
             modelBuilder.Entity("CinemaTicketBooking.Domain.Screen", b =>
                 {
-                    b.Navigation("Seat");
+                    b.Navigation("Seats");
                 });
 
             modelBuilder.Entity("CinemaTicketBooking.Domain.ShowTime", b =>

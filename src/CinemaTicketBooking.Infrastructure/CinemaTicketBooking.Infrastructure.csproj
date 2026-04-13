@@ -31,6 +31,7 @@
     <Folder Include="Payments\" />
     <Folder Include="Notifications\" />
     <Folder Include="Persistence\Configurations\" />
+    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 
 </Project>

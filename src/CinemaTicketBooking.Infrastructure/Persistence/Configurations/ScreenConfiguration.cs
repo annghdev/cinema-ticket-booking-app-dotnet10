@@ -24,7 +24,7 @@ public class ScreenConfiguration : IEntityTypeConfiguration<Screen>
             .HasForeignKey(x => x.CinemaId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(x => x.Seat)
+        builder.HasMany(x => x.Seats)
             .WithOne()
             .HasForeignKey("ScreenId")
             .OnDelete(DeleteBehavior.Cascade);

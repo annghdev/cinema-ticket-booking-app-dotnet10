@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace CinemaTicketBooking.Infrastructure.Migrations
+namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class InitDb : Migration
