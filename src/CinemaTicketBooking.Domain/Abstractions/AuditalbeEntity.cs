@@ -1,6 +1,6 @@
 ﻿namespace CinemaTicketBooking.Domain;
 
-public abstract class AuditableEntity : BaseEntity, ISoftDeletalbe
+public abstract class AuditableEntity : BaseEntity, ITrackable, ISoftDeletalbe
 {
     public string? CreatedBy { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }

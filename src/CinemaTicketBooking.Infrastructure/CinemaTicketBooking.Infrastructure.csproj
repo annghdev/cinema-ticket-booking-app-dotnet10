@@ -24,7 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Auth\" />
+    <Folder Include="Auth\Authentication\" />
+    <Folder Include="Auth\Authorization\" />
     <Folder Include="Cache\" />
     <Folder Include="FileStorages\" />
     <Folder Include="Payments\" />
