@@ -70,18 +70,25 @@ public class EFUnitOfWork(
 
     private void ApplyAuditingInformation()
     {
-        var entries = db.ChangeTracker.Entries<IAuditableEntity>();
+        var entries = db.ChangeTracker
+            .Entries()
+            .Where(entry => entry.Entity is ITrackable);
+
         foreach (var entry in entries)
         {
+            var trackable = (ITrackable)entry.Entity;
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedBy = user.UserName;
-                entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+                trackable.CreatedBy = user.UserName;
+                if (entry.Entity is IDefaultEntity defaultEntity)
+                {
+                    defaultEntity.CreatedAt = DateTimeOffset.UtcNow;
+                }
             }
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.UpdatedBy = user.UserName;
-                entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+                trackable.UpdatedBy = user.UserName;
+                trackable.UpdatedAt = DateTimeOffset.UtcNow;
             }
         }
     }

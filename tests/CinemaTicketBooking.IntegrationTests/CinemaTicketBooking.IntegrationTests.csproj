@@ -13,7 +13,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="7.2.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.11.0" />
     <PackageReference Include="Testcontainers.Redis" Version="4.11.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -32,14 +34,13 @@
     <Folder Include="ApplicationTests\FeatureTests\" />
     <Folder Include="ApplicationTests\MessagingTests\" />
     <Folder Include="InfrastructureTests\AuthTests\" />
-    <Folder Include="InfrastructureTests\PersistenceTests\" />
-    <Folder Include="Shared\Fixtures\" />
-    <Folder Include="Shared\DataSeeders\" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\CinemaTicketBooking.Application\CinemaTicketBooking.Application.csproj" />
+    <ProjectReference Include="..\..\src\CinemaTicketBooking.Domain\CinemaTicketBooking.Domain.csproj" />
+    <ProjectReference Include="..\..\src\CinemaTicketBooking.Infrastructure\CinemaTicketBooking.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\CinemaTicketBooking.WebServer\CinemaTicketBooking.WebServer.csproj" />
-    <ProjectReference Include="..\CinemaTicketBooking.UnitTests\CinemaTicketBooking.UnitTests.csproj" />
   </ItemGroup>
 
 </Project>
