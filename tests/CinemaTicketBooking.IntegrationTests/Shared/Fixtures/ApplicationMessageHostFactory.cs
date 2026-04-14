@@ -22,6 +22,12 @@ public static class ApplicationMessageHostFactory
             {
                 services.AddInfrastructure(new ConfigurationBuilder().Build());
                 services.AddSingleton<IUserContext, FakeUserContext>();
+                services.Configure<TicketLockingOptions>(opts =>
+                {
+                    opts.LockHoldSeconds = 1;
+                    opts.PaymentHoldSeconds = 2;
+                    opts.RecoveryBatchSize = 200;
+                });
             })
             .UseWolverine(opts =>
             {
