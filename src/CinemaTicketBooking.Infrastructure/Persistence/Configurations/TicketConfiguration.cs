@@ -11,10 +11,10 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.ToTable("tickets");
         builder.ConfigureAuditableEntity();
 
-        builder.Property(x => x.Code).HasMaxLength(ColumnMaxLengths.TicketCode).IsRequired();
-        builder.Property(x => x.Description).HasMaxLength(ColumnMaxLengths.TicketDescription);
+        builder.Property(x => x.Code).HasMaxLength(MaxLengthConsts.TicketCode).IsRequired();
+        builder.Property(x => x.Description).HasMaxLength(MaxLengthConsts.TicketDescription);
         builder.Property(x => x.Price).HasPrecision(18, 2).IsRequired();
-        builder.Property(x => x.LockingBy).HasMaxLength(ColumnMaxLengths.SessionId);
+        builder.Property(x => x.LockingBy).HasMaxLength(MaxLengthConsts.SessionId);
         builder.Property(x => x.Status).IsRequired();
 
         builder.HasOne(x => x.ShowTime)

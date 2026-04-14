@@ -11,7 +11,7 @@ public class ScreenConfiguration : IEntityTypeConfiguration<Screen>
         builder.ToTable("screens");
         builder.ConfigureAuditableEntity();
 
-        builder.Property(x => x.Code).HasMaxLength(ColumnMaxLengths.ScreenCode).IsRequired();
+        builder.Property(x => x.Code).HasMaxLength(MaxLengthConsts.ScreenCode).IsRequired();
         builder.Property(x => x.RowOfSeats).IsRequired();
         builder.Property(x => x.ColumnOfSeats).IsRequired();
         builder.Property(x => x.TotalSeats).IsRequired();

@@ -1,6 +1,4 @@
-﻿using CinemaTicketBooking.Domain;
-using CinemaTicketBooking.Domain.Abstractions;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CinemaTicketBooking.Infrastructure.Auth;

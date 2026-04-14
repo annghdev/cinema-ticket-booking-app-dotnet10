@@ -1,7 +1,5 @@
 ﻿using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Domain;
-using CinemaTicketBooking.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine;

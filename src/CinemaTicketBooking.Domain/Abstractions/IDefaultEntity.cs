@@ -1,4 +1,4 @@
-﻿namespace CinemaTicketBooking.Domain.Abstractions;
+﻿namespace CinemaTicketBooking.Domain;
 
 public interface IDefaultEntity : IEntity
 {

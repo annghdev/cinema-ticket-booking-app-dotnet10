@@ -13,13 +13,13 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.ConfigureTrackable();
         builder.ConfigureSoftDeletable();
 
-        builder.Property(x => x.Email).HasMaxLength(ColumnMaxLengths.Email);
-        builder.Property(x => x.PhoneNumber).HasMaxLength(ColumnMaxLengths.PhoneNumber);
-        builder.Property(x => x.UserName).HasMaxLength(ColumnMaxLengths.Email);
-        builder.Property(x => x.NormalizedUserName).HasMaxLength(ColumnMaxLengths.Email);
-        builder.Property(x => x.NormalizedEmail).HasMaxLength(ColumnMaxLengths.Email);
-        builder.Property(x => x.PasswordHash).HasMaxLength(ColumnMaxLengths.PasswordHash);
-        builder.Property(x => x.SecurityStamp).HasMaxLength(ColumnMaxLengths.SecurityStamp);
-        builder.Property(x => x.ConcurrencyStamp).HasMaxLength(ColumnMaxLengths.ConcurrencyStamp);
+        builder.Property(x => x.Email).HasMaxLength(MaxLengthConsts.Email);
+        builder.Property(x => x.PhoneNumber).HasMaxLength(MaxLengthConsts.PhoneNumber);
+        builder.Property(x => x.UserName).HasMaxLength(MaxLengthConsts.Email);
+        builder.Property(x => x.NormalizedUserName).HasMaxLength(MaxLengthConsts.Email);
+        builder.Property(x => x.NormalizedEmail).HasMaxLength(MaxLengthConsts.Email);
+        builder.Property(x => x.PasswordHash).HasMaxLength(MaxLengthConsts.PasswordHash);
+        builder.Property(x => x.SecurityStamp).HasMaxLength(MaxLengthConsts.SecurityStamp);
+        builder.Property(x => x.ConcurrencyStamp).HasMaxLength(MaxLengthConsts.ConcurrencyStamp);
     }
 }

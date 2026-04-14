@@ -11,12 +11,12 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.ToTable("bookings");
         builder.ConfigureAuditableEntity();
 
-        builder.Property(x => x.CustomerName).HasMaxLength(ColumnMaxLengths.Name).IsRequired();
-        builder.Property(x => x.PhoneNumber).HasMaxLength(ColumnMaxLengths.PhoneNumber);
-        builder.Property(x => x.Email).HasMaxLength(ColumnMaxLengths.Email);
+        builder.Property(x => x.CustomerName).HasMaxLength(MaxLengthConsts.Name).IsRequired();
+        builder.Property(x => x.PhoneNumber).HasMaxLength(MaxLengthConsts.PhoneNumber);
+        builder.Property(x => x.Email).HasMaxLength(MaxLengthConsts.Email);
         builder.Property(x => x.OriginAmount).HasPrecision(18, 2).IsRequired();
         builder.Property(x => x.FinalAmount).HasPrecision(18, 2).IsRequired();
-        builder.Property(x => x.QrCode).HasMaxLength(ColumnMaxLengths.QrCode);
+        builder.Property(x => x.QrCode).HasMaxLength(MaxLengthConsts.QrCode);
         builder.Property(x => x.Status).IsRequired();
 
         builder.HasOne(x => x.ShowTime)

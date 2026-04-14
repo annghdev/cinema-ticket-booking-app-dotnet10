@@ -12,7 +12,7 @@ public class SeatConfiguration : IEntityTypeConfiguration<Seat>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id).ValueGeneratedNever();
-        builder.Property(x => x.Code).HasMaxLength(ColumnMaxLengths.SeatCode).IsRequired();
+        builder.Property(x => x.Code).HasMaxLength(MaxLengthConsts.SeatCode).IsRequired();
         builder.Property(x => x.Row).IsRequired();
         builder.Property(x => x.Column).IsRequired();
         builder.Property(x => x.IsAvailable).IsRequired();

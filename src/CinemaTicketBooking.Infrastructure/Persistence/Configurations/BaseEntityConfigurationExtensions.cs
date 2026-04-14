@@ -1,5 +1,3 @@
-using CinemaTicketBooking.Domain;
-using CinemaTicketBooking.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,8 +22,8 @@ public static class BaseEntityConfigurationExtensions
     public static void ConfigureTrackable<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, ITrackable
     {
-        builder.Property(x => x.CreatedBy).HasMaxLength(ColumnMaxLengths.ActorName);
-        builder.Property(x => x.UpdatedBy).HasMaxLength(ColumnMaxLengths.ActorName);
+        builder.Property(x => x.CreatedBy).HasMaxLength(MaxLengthConsts.ActorName);
+        builder.Property(x => x.UpdatedBy).HasMaxLength(MaxLengthConsts.ActorName);
         builder.Property(x => x.UpdatedAt);
     }
 

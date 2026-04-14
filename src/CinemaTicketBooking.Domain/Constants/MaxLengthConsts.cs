@@ -1,6 +1,6 @@
-namespace CinemaTicketBooking.Infrastructure.Persistence.Configurations;
+﻿namespace CinemaTicketBooking.Domain;
 
-public static class ColumnMaxLengths
+public static class MaxLengthConsts
 {
     public const int Name = 256;
     public const int ActorName = 256;

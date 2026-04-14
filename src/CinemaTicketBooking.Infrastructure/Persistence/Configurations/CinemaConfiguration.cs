@@ -11,10 +11,10 @@ public class CinemaConfiguration : IEntityTypeConfiguration<Cinema>
         builder.ToTable("cinemas");
         builder.ConfigureAuditableEntity();
 
-        builder.Property(x => x.Name).HasMaxLength(ColumnMaxLengths.Name).IsRequired();
-        builder.Property(x => x.ThumbnailUrl).HasMaxLength(ColumnMaxLengths.Url);
-        builder.Property(x => x.Geo).HasMaxLength(ColumnMaxLengths.Geo);
-        builder.Property(x => x.Address).HasMaxLength(ColumnMaxLengths.Address).IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(MaxLengthConsts.Name).IsRequired();
+        builder.Property(x => x.ThumbnailUrl).HasMaxLength(MaxLengthConsts.Url);
+        builder.Property(x => x.Geo).HasMaxLength(MaxLengthConsts.Geo);
+        builder.Property(x => x.Address).HasMaxLength(MaxLengthConsts.Address).IsRequired();
         builder.Property(x => x.IsActive).IsRequired();
 
         builder.HasMany<Screen>()

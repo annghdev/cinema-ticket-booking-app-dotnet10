@@ -16,6 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\Cinemas\Queries\" />
+    <Folder Include="Features\Customers\" />
+    <Folder Include="Features\Bookings\" />
+    <Folder Include="Features\Concessions\" />
+    <Folder Include="Features\PricingPolicies\" />
+    <Folder Include="Features\Screens\Queries\" />
+    <Folder Include="Features\Tickets\" />
     <Folder Include="Messaging\" />
     <Folder Include="Helpers\" />
   </ItemGroup>

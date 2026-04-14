@@ -13,9 +13,9 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.ConfigureTrackable();
         builder.ConfigureSoftDeletable();
 
-        builder.Property(x => x.DisplayName).HasMaxLength(ColumnMaxLengths.Name).IsRequired();
-        builder.Property(x => x.Name).HasMaxLength(ColumnMaxLengths.Name);
-        builder.Property(x => x.NormalizedName).HasMaxLength(ColumnMaxLengths.Name);
-        builder.Property(x => x.ConcurrencyStamp).HasMaxLength(ColumnMaxLengths.ConcurrencyStamp);
+        builder.Property(x => x.DisplayName).HasMaxLength(MaxLengthConsts.Name).IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(MaxLengthConsts.Name);
+        builder.Property(x => x.NormalizedName).HasMaxLength(MaxLengthConsts.Name);
+        builder.Property(x => x.ConcurrencyStamp).HasMaxLength(MaxLengthConsts.ConcurrencyStamp);
     }
 }

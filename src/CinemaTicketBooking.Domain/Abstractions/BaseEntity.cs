@@ -1,7 +1,4 @@
-﻿using CinemaTicketBooking.Domain.Abstractions;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace CinemaTicketBooking.Domain;
+﻿namespace CinemaTicketBooking.Domain;
 
 public abstract class BaseEntity: IDefaultEntity
 {
