@@ -19,7 +19,12 @@ var postgres = builder.AddPostgres(
 
 var cinemadb = postgres.AddDatabase("cinemadb");
 
+var redis = builder.AddRedis("redis");
+
 builder.AddProject<Projects.CinemaTicketBooking_WebServer>("cinematicketbooking-webserver")
-    .WithReference(cinemadb).WaitFor(cinemadb);
+    .WithReference(cinemadb)
+    .WithReference(redis)
+    .WaitFor(cinemadb)
+    .WaitFor(redis);
 
 builder.Build().Run();
