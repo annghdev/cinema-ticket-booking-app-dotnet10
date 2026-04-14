@@ -119,6 +119,7 @@ public class BookingTests
         var booking = DomainTestBuilders.PendingBooking(showTimeId, customer);
         var ticket = DomainTestBuilders.LockingTicket(showTimeId, 55_000m, customer.SessionId);
         booking.AddTicket(ticket);
+        ticket.StartPayment(booking.Id, customer.SessionId, DateTimeOffset.UtcNow.AddMinutes(15));
         booking.UpdateFinalAmount(5_000m);
 
         booking.Confirm();

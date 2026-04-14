@@ -12,6 +12,18 @@ public record TicketLocked(
     decimal Price) : BaseDomainEvent;
 
 /// <summary>
+/// Raised when a ticket enters pending payment state (Locking → PendingPayment).
+/// Side effects: schedule payment-timeout auto release and push seat reservation updates.
+/// </summary>
+public record TicketPendingPayment(
+    Guid TicketId,
+    Guid ShowTimeId,
+    Guid BookingId,
+    string TicketCode,
+    DateTimeOffset PaymentExpiresAt,
+    decimal Price) : BaseDomainEvent;
+
+/// <summary>
 /// Raised when a ticket is released back to available.
 /// Side effects: push real-time seat availability via SignalR.
 /// </summary>
@@ -21,7 +33,7 @@ public record TicketReleased(
     string TicketCode) : BaseDomainEvent;
 
 /// <summary>
-/// Raised when a ticket is marked as sold (Locking → Sold).
+/// Raised when a ticket is marked as sold (PendingPayment → Sold).
 /// Side effects: real-time seat status update via SignalR, analytics.
 /// </summary>
 public record TicketSold(

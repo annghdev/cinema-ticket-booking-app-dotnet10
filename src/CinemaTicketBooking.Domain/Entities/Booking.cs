@@ -150,6 +150,7 @@ public class Booking : AggregateRoot
 
     /// <summary>
     /// Confirms the booking and marks all associated tickets as Sold.
+    /// Tickets must already be in PendingPayment state.
     /// Only Pending bookings can be confirmed.
     /// </summary>
     public void Confirm()

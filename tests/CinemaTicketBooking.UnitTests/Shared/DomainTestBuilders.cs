@@ -145,7 +145,8 @@ public static class DomainTestBuilders
         Guid showTimeId,
         decimal price,
         string lockedBy,
-        string code = "T1")
+        string code = "T1",
+        DateTimeOffset? lockExpiresAt = null)
     {
         return new Ticket
         {
@@ -154,7 +155,30 @@ public static class DomainTestBuilders
             Code = code,
             Price = price,
             Status = TicketStatus.Locking,
-            LockingBy = lockedBy
+            LockingBy = lockedBy,
+            LockExpiresAt = lockExpiresAt ?? DateTimeOffset.UtcNow.AddMinutes(5)
+        };
+    }
+
+    /// <summary>
+    /// Ticket in PendingPayment state for a showtime and booking.
+    /// </summary>
+    public static Ticket PendingPaymentTicket(
+        Guid showTimeId,
+        Guid bookingId,
+        decimal price,
+        DateTimeOffset? paymentExpiresAt = null,
+        string code = "T1")
+    {
+        return new Ticket
+        {
+            Id = Guid.CreateVersion7(),
+            ShowTimeId = showTimeId,
+            Code = code,
+            Price = price,
+            Status = TicketStatus.PendingPayment,
+            BookingId = bookingId,
+            PaymentExpiresAt = paymentExpiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)
         };
     }
 }
