@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.4" />
     <PackageReference Include="WolverineFx" Version="5.30.0" />
     <PackageReference Include="WolverineFx.FluentValidation" Version="5.30.0" />
   </ItemGroup>
@@ -16,13 +17,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\Bookings\Commands\" />
+    <Folder Include="Features\Bookings\Queries\" />
+    <Folder Include="Features\Bookings\ResponseDTOs\" />
     <Folder Include="Features\Cinemas\Queries\" />
-    <Folder Include="Features\Customers\" />
-    <Folder Include="Features\Bookings\" />
-    <Folder Include="Features\Concessions\" />
-    <Folder Include="Features\PricingPolicies\" />
+    <Folder Include="Features\Concessions\Commands\" />
+    <Folder Include="Features\Concessions\Queries\" />
+    <Folder Include="Features\Concessions\ResponseDTOs\" />
+    <Folder Include="Features\Customers\Commands\" />
+    <Folder Include="Features\Customers\Queries\" />
+    <Folder Include="Features\Customers\ResponseDTOs\" />
+    <Folder Include="Features\PricingPolicies\Commands\" />
+    <Folder Include="Features\PricingPolicies\ResponseDTOs\" />
+    <Folder Include="Features\PricingPolicies\Queries\" />
     <Folder Include="Features\Screens\Queries\" />
-    <Folder Include="Features\Tickets\" />
+    <Folder Include="Features\Tickets\Commands\" />
+    <Folder Include="Features\Tickets\Queries\" />
+    <Folder Include="Features\Tickets\ResponseDTOs\" />
     <Folder Include="Messaging\" />
     <Folder Include="Helpers\" />
   </ItemGroup>

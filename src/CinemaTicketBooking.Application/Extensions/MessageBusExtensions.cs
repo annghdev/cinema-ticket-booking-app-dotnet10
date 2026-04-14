@@ -1,13 +1,10 @@
-﻿using CinemaTicketBooking.Domain;
-using Wolverine;
-
-namespace CinemaTicketBooking.Application.Extensions;
+﻿namespace CinemaTicketBooking.Application.Extensions;
 
 public static class MessageBusExtensions
 {
     public static async Task DispatchEventsAsync(
         this IMessageBus messageBus,
-        params BaseEntity[] entities)
+        params DefaultEntity[] entities)
     {
         var events = entities
             .SelectMany(e => e.Events)
