@@ -19,8 +19,8 @@ public static class BaseEntityConfigurationExtensions
         builder.Ignore(x => x.Events);
     }
 
-    public static void ConfigureTrackable<TEntity>(this EntityTypeBuilder<TEntity> builder)
-        where TEntity : class, ITrackable
+    public static void ConfigureAuditable<TEntity>(this EntityTypeBuilder<TEntity> builder)
+        where TEntity : class, IAuditable
     {
         builder.Property(x => x.CreatedBy).HasMaxLength(MaxLengthConsts.ActorName);
         builder.Property(x => x.UpdatedBy).HasMaxLength(MaxLengthConsts.ActorName);
@@ -28,17 +28,17 @@ public static class BaseEntityConfigurationExtensions
     }
 
     public static void ConfigureSoftDeletable<TEntity>(this EntityTypeBuilder<TEntity> builder)
-        where TEntity : class, ISoftDeletalbe
+        where TEntity : class, ISoftDeletable
     {
         builder.Property(x => x.DeletedAt);
         builder.Ignore(x => x.IsDeleted);
     }
 
-    public static void ConfigureAuditableEntity<TEntity>(this EntityTypeBuilder<TEntity> builder)
-        where TEntity : AuditableEntity
+    public static void ConfigureAggregateRoot<TEntity>(this EntityTypeBuilder<TEntity> builder)
+        where TEntity : AggregateRoot
     {
         builder.ConfigureDefaultEntity();
-        builder.ConfigureTrackable();
+        builder.ConfigureAuditable();
         builder.ConfigureSoftDeletable();
     }
 }

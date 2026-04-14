@@ -11,13 +11,13 @@ public static class ModelBuilderConfigurationExtensions
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (!typeof(ISoftDeletalbe).IsAssignableFrom(entityType.ClrType))
+            if (!typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
             {
                 continue;
             }
 
             var parameter = Expression.Parameter(entityType.ClrType, "entity");
-            var deletedAtProperty = Expression.Property(parameter, nameof(ISoftDeletalbe.DeletedAt));
+            var deletedAtProperty = Expression.Property(parameter, nameof(ISoftDeletable.DeletedAt));
             var deletedAtIsNull = Expression.Equal(
                 deletedAtProperty,
                 Expression.Constant(null, typeof(DateTimeOffset?)));

@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CinemaTicketBooking.Domain.Abstractions;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CinemaTicketBooking.Infrastructure.Auth;
 
-public class Role : IdentityRole<Guid>, IDefaultEntity, ITrackable, ISoftDeletalbe
+public class Role : IdentityRole<Guid>, IAggregateRoot
 {
     public string DisplayName { get; set; } = string.Empty;
     public uint Version { get; set; }

@@ -7,7 +7,7 @@ namespace CinemaTicketBooking.UnitTests.EntityTests;
 /// <summary>
 /// Tests for BaseEntity domain event collection behavior (via AuditableEntity).
 /// </summary>
-public class BaseEntityTests
+public class DefaultEntityTests
 {
     [Fact]
     public void ClearEvents_Should_RemoveAllEvents_When_CalledAfterDomainEventRaised()

@@ -7,7 +7,7 @@ namespace CinemaTicketBooking.Domain;
 /// Lifecycle: Available → Locking (customer selects) → Sold (booking confirmed).
 /// A locked ticket can be released back to Available if the customer abandons it.
 /// </summary>
-public class Ticket : AuditableEntity
+public class Ticket : AggregateRoot
 {
     /// <summary>
     /// Unique ticket code. Format: "{Date:yyyyMMdd}-{ScreenCode}-{SeatCode}"

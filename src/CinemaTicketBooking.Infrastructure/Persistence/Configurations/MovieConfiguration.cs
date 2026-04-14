@@ -9,7 +9,7 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
     public void Configure(EntityTypeBuilder<Movie> builder)
     {
         builder.ToTable("movies");
-        builder.ConfigureAuditableEntity();
+        builder.ConfigureAggregateRoot();
 
         builder.Property(x => x.Name).HasMaxLength(MaxLengthConsts.Name).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(MaxLengthConsts.Description);

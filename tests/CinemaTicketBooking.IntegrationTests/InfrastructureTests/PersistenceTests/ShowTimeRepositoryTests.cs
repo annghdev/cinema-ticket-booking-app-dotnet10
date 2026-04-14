@@ -29,7 +29,7 @@ public sealed class ShowTimeRepositoryTests(PostgresContainerFixture databaseFix
         var rangeStart = DateTimeOffset.UtcNow.AddHours(1);
         var rangeEnd = DateTimeOffset.UtcNow.AddHours(8);
 
-        var inRangeOngoing = IntegrationEntityBuilder.ShowTime(movie.Id, screenA.Id, ShowTimeStatus.Ongoing);
+        var inRangeOngoing = IntegrationEntityBuilder.ShowTime(movie.Id, screenA.Id, ShowTimeStatus.Upcoming);
         inRangeOngoing.StartAt = DateTimeOffset.UtcNow.AddHours(2);
         inRangeOngoing.EndAt = inRangeOngoing.StartAt.AddHours(2);
 
@@ -41,11 +41,11 @@ public sealed class ShowTimeRepositoryTests(PostgresContainerFixture databaseFix
         cancelled.StartAt = DateTimeOffset.UtcNow.AddHours(3);
         cancelled.EndAt = cancelled.StartAt.AddHours(2);
 
-        var wrongScreen = IntegrationEntityBuilder.ShowTime(movie.Id, screenB.Id, ShowTimeStatus.Ongoing);
+        var wrongScreen = IntegrationEntityBuilder.ShowTime(movie.Id, screenB.Id, ShowTimeStatus.Upcoming);
         wrongScreen.StartAt = DateTimeOffset.UtcNow.AddHours(3);
         wrongScreen.EndAt = wrongScreen.StartAt.AddHours(2);
 
-        var outsideRange = IntegrationEntityBuilder.ShowTime(movie.Id, screenA.Id, ShowTimeStatus.Ongoing);
+        var outsideRange = IntegrationEntityBuilder.ShowTime(movie.Id, screenA.Id, ShowTimeStatus.Upcoming);
         outsideRange.StartAt = DateTimeOffset.UtcNow.AddHours(10);
         outsideRange.EndAt = outsideRange.StartAt.AddHours(2);
 

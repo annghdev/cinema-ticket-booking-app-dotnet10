@@ -26,7 +26,7 @@ namespace CinemaTicketBooking.Domain;
 ///  [1,1,0,2,2,2,1,0],
 ///  [3,0,0,3,0,3,0,0]]
 /// </summary>
-public class Screen : AuditableEntity
+public class Screen : AggregateRoot
 {
     public Guid CinemaId { get; set; }
     public Cinema? Cinema { get; set; }
@@ -43,6 +43,139 @@ public class Screen : AuditableEntity
     public ScreenType Type { get; set; }
     public bool IsActive { get; set; } = true;
     public List<Seat> Seats { get; set; } = [];
+
+    // =============================================================
+    // Factory and data mutation
+    // =============================================================
+
+    /// <summary>
+    /// Creates a new screen and raises a creation event.
+    /// </summary>
+    public static Screen Create(
+        Guid cinemaId,
+        string code,
+        int rowOfSeats,
+        int columnOfSeats,
+        int totalSeats,
+        string seatMap,
+        ScreenType type,
+        bool isActive = true)
+    {
+        var screen = new Screen
+        {
+            CinemaId = cinemaId,
+            Code = code,
+            RowOfSeats = rowOfSeats,
+            ColumnOfSeats = columnOfSeats,
+            TotalSeats = totalSeats,
+            SeatMap = seatMap,
+            Type = type,
+            IsActive = isActive
+        };
+
+        screen.RaiseEvent(new ScreenCreated(
+            ScreenId: screen.Id,
+            CinemaId: screen.CinemaId,
+            ScreenCode: screen.Code,
+            ScreenType: screen.Type,
+            RowOfSeats: screen.RowOfSeats,
+            ColumnOfSeats: screen.ColumnOfSeats,
+            TotalSeats: screen.TotalSeats,
+            IsActive: screen.IsActive));
+
+        return screen;
+    }
+
+    /// <summary>
+    /// Updates basic screen fields and raises an update event.
+    /// </summary>
+    public void UpdateBasicInfo(
+        string code,
+        int rowOfSeats,
+        int columnOfSeats,
+        int totalSeats,
+        string seatMap,
+        ScreenType type)
+    {
+        Code = code;
+        RowOfSeats = rowOfSeats;
+        ColumnOfSeats = columnOfSeats;
+        TotalSeats = totalSeats;
+        SeatMap = seatMap;
+        Type = type;
+
+        RaiseEvent(new ScreenBasicInfoUpdated(
+            ScreenId: Id,
+            CinemaId: CinemaId,
+            ScreenCode: Code,
+            ScreenType: Type,
+            RowOfSeats: RowOfSeats,
+            ColumnOfSeats: ColumnOfSeats,
+            TotalSeats: TotalSeats));
+    }
+
+    /// <summary>
+    /// Activates this screen. No-op when already active (idempotent).
+    /// </summary>
+    public void Activate()
+    {
+        if (IsActive)
+        {
+            return;
+        }
+
+        IsActive = true;
+        RaiseEvent(new ScreenActivated(Id, CinemaId, Code));
+    }
+
+    /// <summary>
+    /// Deactivates this screen. No-op when already inactive (idempotent).
+    /// </summary>
+    public void Deactivate()
+    {
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+        RaiseEvent(new ScreenDeactivated(Id, CinemaId, Code));
+    }
+
+    /// <summary>
+    /// Activates a seat in this screen.
+    /// </summary>
+    public void ActivateSeat(Guid seatId)
+    {
+        var seat = Seats.FirstOrDefault(x => x.Id == seatId)
+            ?? throw new InvalidOperationException($"Seat with ID '{seatId}' was not found in screen '{Code}'.");
+
+        if (seat.IsActive)
+        {
+            return;
+        }
+
+        seat.IsActive = true;
+        RaiseEvent(new ScreenSeatActivated(Id, seat.Id, Code, seat.Code));
+    }
+
+    /// <summary>
+    /// Deactivates a seat in this screen.
+    /// </summary>
+    public void DeactivateSeat(Guid seatId)
+    {
+        var seat = Seats.FirstOrDefault(x => x.Id == seatId)
+            ?? throw new InvalidOperationException($"Seat with ID '{seatId}' was not found in screen '{Code}'.");
+
+        if (!seat.IsActive)
+        {
+            return;
+        }
+
+        seat.IsActive = false;
+        seat.IsAvailable = false;
+        RaiseEvent(new ScreenSeatDeactivated(Id, seat.Id, Code, seat.Code));
+    }
 
     // =============================================================
     // Generate Seats from SeatMap

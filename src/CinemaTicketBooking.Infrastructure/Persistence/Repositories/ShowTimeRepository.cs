@@ -13,7 +13,7 @@ public class ShowTimeRepository(AppDbContext db) : BaseRepository<ShowTime>(db),
         return _dbSet.Where(st => st.ScreenId == screenId
             && st.StartAt >= rangeStart
             && st.EndAt <= rangeEnd
-            && (st.Status == ShowTimeStatus.Ongoing || st.Status == ShowTimeStatus.Showing))
+            && (st.Status == ShowTimeStatus.Upcoming || st.Status == ShowTimeStatus.Showing))
             .ToListAsync(ct);
     }
 

@@ -2,7 +2,7 @@
 
 public enum MovieStatus
 {
-    Ongoing,
+    Upcoming,
     NowShowing,
     NoShow
 }

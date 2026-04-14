@@ -10,7 +10,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
     {
         builder.ToTable("accounts");
         builder.ConfigureDefaultEntity();
-        builder.ConfigureTrackable();
+        builder.ConfigureAuditable();
         builder.ConfigureSoftDeletable();
 
         builder.Property(x => x.Email).HasMaxLength(MaxLengthConsts.Email);

@@ -1,5 +1,5 @@
 ﻿namespace CinemaTicketBooking.Domain;
 
-public interface IAuditableEntity : IDefaultEntity, ITrackable, ISoftDeletalbe
+public interface IAuditableEntity : IDefaultEntity, IAuditable, ISoftDeletable
 {
 }

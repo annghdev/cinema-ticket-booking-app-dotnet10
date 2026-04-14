@@ -16,7 +16,7 @@ namespace CinemaTicketBooking.Domain;
 /// | IMAX       | Regular   | 50,000    | 2.0               | 100,000     |
 /// | IMAX       | SweetBox  | 150,000   | 2.0               | 300,000     |
 /// </summary>
-public class PricingPolicy : AuditableEntity
+public class PricingPolicy : AggregateRoot
 {
     /// <summary>
     /// Optional: scope to a specific Cinema. Null = applies to all cinemas (default policy).
@@ -38,6 +38,53 @@ public class PricingPolicy : AuditableEntity
     public decimal ScreenCoefficient { get; set; } = 1.0m;
 
     public bool IsActive { get; set; } = true;
+
+    // =============================================================
+    // Factory and data mutation
+    // =============================================================
+
+    /// <summary>
+    /// Creates a new pricing policy and raises a creation event.
+    /// </summary>
+    public static PricingPolicy Create(
+        Guid? cinemaId,
+        ScreenType screenType,
+        SeatType seatType,
+        decimal basePrice,
+        decimal screenCoefficient,
+        bool isActive = true)
+    {
+        if (basePrice < 0)
+        {
+            throw new ArgumentException("Base price cannot be negative.", nameof(basePrice));
+        }
+
+        if (screenCoefficient <= 0)
+        {
+            throw new ArgumentException("Screen coefficient must be positive.", nameof(screenCoefficient));
+        }
+
+        var pricingPolicy = new PricingPolicy
+        {
+            CinemaId = cinemaId,
+            ScreenType = screenType,
+            SeatType = seatType,
+            BasePrice = basePrice,
+            ScreenCoefficient = screenCoefficient,
+            IsActive = isActive
+        };
+
+        pricingPolicy.RaiseEvent(new PricingPolicyCreated(
+            PricingPolicyId: pricingPolicy.Id,
+            CinemaId: pricingPolicy.CinemaId,
+            ScreenType: pricingPolicy.ScreenType,
+            SeatType: pricingPolicy.SeatType,
+            BasePrice: pricingPolicy.BasePrice,
+            ScreenCoefficient: pricingPolicy.ScreenCoefficient,
+            IsActive: pricingPolicy.IsActive));
+
+        return pricingPolicy;
+    }
 
     /// <summary>
     /// Calculates the final ticket price.

@@ -1,6 +1,6 @@
 ﻿namespace CinemaTicketBooking.Domain;
 
-public interface ISoftDeletalbe
+public interface ISoftDeletable
 {
     DateTimeOffset? DeletedAt { get; set; }
     bool IsDeleted { get; }

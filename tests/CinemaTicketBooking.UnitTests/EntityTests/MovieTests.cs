@@ -12,7 +12,7 @@ public class MovieTests
         {
             Id = Guid.CreateVersion7(),
             Name = "Inception",
-            Status = MovieStatus.Ongoing
+            Status = MovieStatus.Upcoming
         };
 
         movie.PromoteToNowShowing();
@@ -56,7 +56,7 @@ public class MovieTests
         {
             Id = Guid.CreateVersion7(),
             Name = "Cancelled",
-            Status = MovieStatus.Ongoing
+            Status = MovieStatus.Upcoming
         };
 
         movie.WithdrawUpcomingRunAsNoShow();
@@ -116,7 +116,7 @@ public class MovieTests
         {
             Id = Guid.CreateVersion7(),
             Name = "M5",
-            Status = MovieStatus.Ongoing
+            Status = MovieStatus.Upcoming
         };
 
         var act = () => movie.CloseNowShowingRunAsNoShow();

@@ -19,7 +19,7 @@ public class ShowTimeTests
 
         showTime.MovieId.Should().Be(movie.Id);
         showTime.ScreenId.Should().Be(screen.Id);
-        showTime.Status.Should().Be(ShowTimeStatus.Ongoing);
+        showTime.Status.Should().Be(ShowTimeStatus.Upcoming);
         showTime.Tickets.Should().HaveCount(screen.Seats.Count(s => s.IsActive));
         showTime.EndAt.Should().Be(start.Add(ShowTime.TrailerTime).Add(TimeSpan.FromMinutes(movie.Duration)));
         showTime.Events.Should().ContainSingle().Which.Should().BeOfType<ShowTimeCreated>();
@@ -30,7 +30,7 @@ public class ShowTimeTests
     {
         var cinemaId = Guid.CreateVersion7();
         var movie = DomainTestBuilders.MovieNowShowing();
-        movie.Status = MovieStatus.Ongoing;
+        movie.Status = MovieStatus.Upcoming;
         var screen = DomainTestBuilders.ScreenWithSeatMap(cinemaId);
         var policies = DomainTestBuilders.PoliciesForRegularAndVip(cinemaId, screen.Type);
 
@@ -107,14 +107,14 @@ public class ShowTimeTests
             ScreenId = Guid.CreateVersion7(),
             StartAt = DateTimeOffset.Parse("2026-04-13T10:00:00Z"),
             EndAt = DateTimeOffset.Parse("2026-04-13T12:00:00Z"),
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
         var b = new ShowTime
         {
             ScreenId = Guid.CreateVersion7(),
             StartAt = DateTimeOffset.Parse("2026-04-13T10:30:00Z"),
             EndAt = DateTimeOffset.Parse("2026-04-13T11:30:00Z"),
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
 
         a.ConflictsWith(b).Should().BeFalse();
@@ -129,7 +129,7 @@ public class ShowTimeTests
             ScreenId = screenId,
             StartAt = DateTimeOffset.Parse("2026-04-13T10:00:00Z"),
             EndAt = DateTimeOffset.Parse("2026-04-13T12:00:00Z"),
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
         var b = new ShowTime
         {
@@ -151,14 +151,14 @@ public class ShowTimeTests
             ScreenId = screenId,
             StartAt = DateTimeOffset.Parse("2026-04-13T10:00:00Z"),
             EndAt = DateTimeOffset.Parse("2026-04-13T11:00:00Z"),
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
         var b = new ShowTime
         {
             ScreenId = screenId,
             StartAt = DateTimeOffset.Parse("2026-04-13T11:10:00Z"),
             EndAt = DateTimeOffset.Parse("2026-04-13T12:00:00Z"),
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
 
         a.ConflictsWith(b).Should().BeTrue();
@@ -175,7 +175,7 @@ public class ShowTimeTests
             Date = new DateOnly(2026, 4, 13),
             StartAt = DateTimeOffset.Parse("2026-04-13T10:00:00Z"),
             EndAt = DateTimeOffset.Parse("2026-04-13T12:00:00Z"),
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
 
         showTime.StartShowing();
@@ -241,7 +241,7 @@ public class ShowTimeTests
             Screen = screen,
             Date = new DateOnly(2026, 4, 13),
             StartAt = DateTimeOffset.Parse("2026-04-13T10:00:00Z"),
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
 
         showTime.Cancel();

@@ -2,7 +2,7 @@
 
 public enum ShowTimeStatus
 {
-    Ongoing,
+    Upcoming,
     Showing,
     Completed,
     Cancelled

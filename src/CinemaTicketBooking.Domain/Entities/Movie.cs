@@ -4,7 +4,7 @@ namespace CinemaTicketBooking.Domain;
 /// Movie represents a film available for scheduling in the cinema system.
 /// Only movies with Status = NowShowing can be assigned to a ShowTime.
 /// </summary>
-public class Movie : AuditableEntity
+public class Movie : AggregateRoot
 {
     public required string Name { get; set; }
     public string Description { get; set; } = string.Empty;
@@ -22,6 +22,74 @@ public class Movie : AuditableEntity
     public MovieStatus Status { get; set; }
 
     // =============================================================
+    // Factory and data mutation
+    // =============================================================
+
+    /// <summary>
+    /// Creates a new movie and raises a creation event.
+    /// </summary>
+    public static Movie Create(
+        string name,
+        string description,
+        string thumbnailUrl,
+        string studio,
+        string director,
+        string? officialTrailerUrl,
+        int duration,
+        MovieGenre genre,
+        MovieStatus status)
+    {
+        var movie = new Movie
+        {
+            Name = name,
+            Description = description,
+            ThumbnailUrl = thumbnailUrl,
+            Studio = studio,
+            Director = director,
+            OfficialTrailerUrl = officialTrailerUrl,
+            Duration = duration,
+            Genre = genre,
+            Status = status
+        };
+
+        movie.RaiseEvent(new MovieCreated(movie.Id, movie.Name, movie.Status, movie.Genre));
+        return movie;
+    }
+
+    /// <summary>
+    /// Updates basic movie metadata and raises an update event.
+    /// </summary>
+    public void UpdateBasicInfo(
+        string name,
+        string description,
+        string thumbnailUrl,
+        string studio,
+        string director,
+        string? officialTrailerUrl,
+        int duration,
+        MovieGenre genre)
+    {
+        Name = name;
+        Description = description;
+        ThumbnailUrl = thumbnailUrl;
+        Studio = studio;
+        Director = director;
+        OfficialTrailerUrl = officialTrailerUrl;
+        Duration = duration;
+        Genre = genre;
+
+        RaiseEvent(new MovieBasicInfoUpdated(Id, Name, Status, Genre));
+    }
+
+    /// <summary>
+    /// Marks this movie as deleted (soft delete handled by infrastructure).
+    /// </summary>
+    public void MarkAsDeleted()
+    {
+        RaiseEvent(new MovieDeleted(Id, Name));
+    }
+
+    // =============================================================
     // State Transitions
     // =============================================================
 
@@ -30,7 +98,7 @@ public class Movie : AuditableEntity
     /// </summary>
     public void PromoteToNowShowing()
     {
-        if (Status != MovieStatus.Ongoing)
+        if (Status != MovieStatus.Upcoming)
         {
             throw new InvalidOperationException(
                 $"Cannot promote movie '{Name}' to NowShowing from status {Status}. Only Ongoing movies can be promoted.");
@@ -45,7 +113,7 @@ public class Movie : AuditableEntity
     /// </summary>
     public void WithdrawUpcomingRunAsNoShow()
     {
-        if (Status != MovieStatus.Ongoing)
+        if (Status != MovieStatus.Upcoming)
         {
             throw new InvalidOperationException(
                 $"Cannot withdraw upcoming run for movie '{Name}' from status {Status}. Only Ongoing movies can be withdrawn this way.");

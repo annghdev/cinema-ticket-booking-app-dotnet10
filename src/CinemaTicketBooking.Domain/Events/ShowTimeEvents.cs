@@ -13,7 +13,7 @@ public record ShowTimeCreated(
     DateOnly Date,
     DateTimeOffset StartAt,
     DateTimeOffset EndAt,
-    int TicketCount) : IDomainEvent;
+    int TicketCount) : BaseDomainEvent;
 
 /// <summary>
 /// Raised when a ShowTime is cancelled.
@@ -26,7 +26,7 @@ public record ShowTimeCancelled(
     Guid ScreenId,
     string ScreenCode,
     DateOnly Date,
-    DateTimeOffset StartAt) : IDomainEvent;
+    DateTimeOffset StartAt) : BaseDomainEvent;
 
 /// <summary>
 /// Raised when a ShowTime transitions from Ongoing → Showing.
@@ -36,7 +36,7 @@ public record ShowTimeStarted(
     Guid ShowTimeId,
     Guid MovieId,
     Guid ScreenId,
-    DateTimeOffset StartAt) : IDomainEvent;
+    DateTimeOffset StartAt) : BaseDomainEvent;
 
 /// <summary>
 /// Raised when a ShowTime transitions from Showing → Completed.
@@ -47,4 +47,4 @@ public record ShowTimeCompleted(
     Guid MovieId,
     Guid ScreenId,
     DateTimeOffset StartAt,
-    DateTimeOffset EndAt) : IDomainEvent;
+    DateTimeOffset EndAt) : BaseDomainEvent;

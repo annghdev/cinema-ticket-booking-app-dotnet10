@@ -9,7 +9,7 @@ public class CinemaConfiguration : IEntityTypeConfiguration<Cinema>
     public void Configure(EntityTypeBuilder<Cinema> builder)
     {
         builder.ToTable("cinemas");
-        builder.ConfigureAuditableEntity();
+        builder.ConfigureAggregateRoot();
 
         builder.Property(x => x.Name).HasMaxLength(MaxLengthConsts.Name).IsRequired();
         builder.Property(x => x.ThumbnailUrl).HasMaxLength(MaxLengthConsts.Url);

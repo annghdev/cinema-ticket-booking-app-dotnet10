@@ -70,11 +70,11 @@ public class EFUnitOfWork(
     {
         var entries = db.ChangeTracker
             .Entries()
-            .Where(entry => entry.Entity is ITrackable);
+            .Where(entry => entry.Entity is IAuditable);
 
         foreach (var entry in entries)
         {
-            var trackable = (ITrackable)entry.Entity;
+            var trackable = (IAuditable)entry.Entity;
             if (entry.State == EntityState.Added)
             {
                 trackable.CreatedBy = user.UserName;
@@ -93,7 +93,7 @@ public class EFUnitOfWork(
 
     private void ApplySoftDelete()
     {
-        var entries = db.ChangeTracker.Entries<ISoftDeletalbe>();
+        var entries = db.ChangeTracker.Entries<ISoftDeletable>();
         foreach (var entry in entries)
         {
             if (entry.State == EntityState.Deleted)

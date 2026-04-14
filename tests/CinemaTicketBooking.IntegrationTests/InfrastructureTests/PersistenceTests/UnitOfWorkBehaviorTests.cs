@@ -90,7 +90,7 @@ public sealed class UnitOfWorkBehaviorTests(
         await using var db = databaseFixture.CreateDbContext();
         wolverineFixture.Probe.Reset();
 
-        var movie = IntegrationEntityBuilder.Movie(status: Domain.MovieStatus.Ongoing);
+        var movie = IntegrationEntityBuilder.Movie(status: Domain.MovieStatus.Upcoming);
         db.Movies.Add(movie);
 
         movie.PromoteToNowShowing();
@@ -109,7 +109,7 @@ public sealed class UnitOfWorkBehaviorTests(
         await using var db = databaseFixture.CreateDbContext();
         wolverineFixture.Probe.Reset();
 
-        var movie = IntegrationEntityBuilder.Movie(status: Domain.MovieStatus.Ongoing);
+        var movie = IntegrationEntityBuilder.Movie(status: Domain.MovieStatus.Upcoming);
         db.Movies.Add(movie);
 
         movie.PromoteToNowShowing();

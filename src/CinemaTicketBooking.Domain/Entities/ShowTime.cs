@@ -1,6 +1,6 @@
 namespace CinemaTicketBooking.Domain;
 
-public class ShowTime : AuditableEntity
+public class ShowTime : AggregateRoot
 {
     public Guid MovieId { get; set; }
     public Movie? Movie { get; set; }
@@ -72,7 +72,7 @@ public class ShowTime : AuditableEntity
             Date = DateOnly.FromDateTime(startAt.DateTime),
             StartAt = startAt,
             EndAt = endAt,
-            Status = ShowTimeStatus.Ongoing
+            Status = ShowTimeStatus.Upcoming
         };
 
         // 8. Generate tickets with pricing for every active seat in the screen
@@ -138,7 +138,7 @@ public class ShowTime : AuditableEntity
     // =============================================================
     public void StartShowing()
     {
-        if (Status != ShowTimeStatus.Ongoing)
+        if (Status != ShowTimeStatus.Upcoming)
             throw new InvalidOperationException(
                 "Only ongoing showtimes can start showing.");
         Status = ShowTimeStatus.Showing;

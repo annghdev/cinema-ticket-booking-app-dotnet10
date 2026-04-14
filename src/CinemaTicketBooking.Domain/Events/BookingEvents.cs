@@ -1,6 +1,18 @@
 namespace CinemaTicketBooking.Domain;
 
 /// <summary>
+/// Raised when a booking is created.
+/// </summary>
+public record BookingCreated(
+    Guid BookingId,
+    Guid ShowTimeId,
+    Guid? CustomerId,
+    string CustomerName,
+    string Email,
+    string PhoneNumber,
+    BookingStatus Status) : BaseDomainEvent;
+
+/// <summary>
 /// Raised when a booking is confirmed (Pending → Confirmed).
 /// Side effects: send confirmation email/SMS, generate QR code, push notification.
 /// </summary>
@@ -13,7 +25,7 @@ public record BookingConfirmed(
     string PhoneNumber,
     decimal FinalAmount,
     int TicketCount,
-    DateTimeOffset ShowTimeStartAt) : IDomainEvent;
+    DateTimeOffset ShowTimeStartAt) : BaseDomainEvent;
 
 /// <summary>
 /// Raised when a booking is cancelled (Pending/Confirmed → Cancelled).
@@ -28,7 +40,7 @@ public record BookingCancelled(
     string PhoneNumber,
     decimal FinalAmount,
     BookingStatus PreviousStatus,
-    List<Guid> ReleasedTicketIds) : IDomainEvent;
+    List<Guid> ReleasedTicketIds) : BaseDomainEvent;
 
 /// <summary>
 /// Raised when a customer checks in at the cinema (Confirmed → CheckedIn).
@@ -40,4 +52,4 @@ public record BookingCheckedIn(
     Guid? CustomerId,
     string CustomerName,
     int TicketCount,
-    decimal FinalAmount) : IDomainEvent;
+    decimal FinalAmount) : BaseDomainEvent;

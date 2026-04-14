@@ -10,7 +10,7 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         builder.ToTable("roles");
         builder.ConfigureDefaultEntity();
-        builder.ConfigureTrackable();
+        builder.ConfigureAuditable();
         builder.ConfigureSoftDeletable();
 
         builder.Property(x => x.DisplayName).HasMaxLength(MaxLengthConsts.Name).IsRequired();

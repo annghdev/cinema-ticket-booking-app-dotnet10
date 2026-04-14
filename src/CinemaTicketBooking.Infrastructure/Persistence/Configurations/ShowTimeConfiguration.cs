@@ -9,7 +9,7 @@ public class ShowTimeConfiguration : IEntityTypeConfiguration<ShowTime>
     public void Configure(EntityTypeBuilder<ShowTime> builder)
     {
         builder.ToTable("show_times");
-        builder.ConfigureAuditableEntity();
+        builder.ConfigureAggregateRoot();
 
         builder.Property(x => x.Date).IsRequired();
         builder.Property(x => x.StartAt).IsRequired();

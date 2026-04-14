@@ -7,7 +7,7 @@ namespace CinemaTicketBooking.Domain;
 /// It aggregates tickets and concessions, tracks pricing (original and discounted),
 /// and enforces state transitions: Pending → Confirmed → CheckedIn, or → Cancelled.
 /// </summary>
-public class Booking : AuditableEntity
+public class Booking : AggregateRoot
 {
     public Guid ShowTimeId { get; set; }
     public ShowTime? ShowTime { get; set; }
@@ -31,6 +31,43 @@ public class Booking : AuditableEntity
     public List<BookingConcession> Concessions { get; set; } = [];
     public string? QrCode { get; set; }
     public BookingStatus Status { get; set; }
+
+    // =============================================================
+    // Factory and data mutation
+    // =============================================================
+
+    /// <summary>
+    /// Creates a new booking and raises a creation event.
+    /// </summary>
+    public static Booking Create(
+        Guid showTimeId,
+        Guid? customerId,
+        string customerName,
+        string phoneNumber,
+        string email,
+        BookingStatus status = BookingStatus.Pending)
+    {
+        var booking = new Booking
+        {
+            ShowTimeId = showTimeId,
+            CustomerId = customerId,
+            CustomerName = customerName,
+            PhoneNumber = phoneNumber,
+            Email = email,
+            Status = status
+        };
+
+        booking.RaiseEvent(new BookingCreated(
+            BookingId: booking.Id,
+            ShowTimeId: booking.ShowTimeId,
+            CustomerId: booking.CustomerId,
+            CustomerName: booking.CustomerName,
+            Email: booking.Email,
+            PhoneNumber: booking.PhoneNumber,
+            Status: booking.Status));
+
+        return booking;
+    }
 
     // =============================================================
     // Add Items: Tickets and Concessions
