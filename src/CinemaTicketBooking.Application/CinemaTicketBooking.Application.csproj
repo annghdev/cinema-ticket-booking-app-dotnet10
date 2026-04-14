@@ -23,12 +23,10 @@
     <Folder Include="Features\Cinemas\Queries\" />
     <Folder Include="Features\Concessions\Commands\" />
     <Folder Include="Features\Concessions\Queries\" />
-    <Folder Include="Features\Concessions\ResponseDTOs\" />
     <Folder Include="Features\Customers\Commands\" />
     <Folder Include="Features\Customers\Queries\" />
     <Folder Include="Features\Customers\ResponseDTOs\" />
     <Folder Include="Features\PricingPolicies\Commands\" />
-    <Folder Include="Features\PricingPolicies\ResponseDTOs\" />
     <Folder Include="Features\PricingPolicies\Queries\" />
     <Folder Include="Features\Screens\Queries\" />
     <Folder Include="Features\Tickets\Commands\" />
