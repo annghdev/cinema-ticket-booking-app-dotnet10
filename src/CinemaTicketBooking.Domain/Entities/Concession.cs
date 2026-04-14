@@ -46,6 +46,34 @@ public class Concession : AggregateRoot
         return concession;
     }
 
+    /// <summary>
+    /// Updates basic concession fields and raises an update event.
+    /// </summary>
+    public void UpdateBasicInfo(
+        string name,
+        decimal price,
+        string imageUrl)
+    {
+        if (price < 0)
+        {
+            throw new ArgumentException("Concession price cannot be negative.", nameof(price));
+        }
+
+        Name = name;
+        Price = price;
+        ImageUrl = imageUrl;
+
+        RaiseEvent(new ConcessionBasicInfoUpdated(Id, Name));
+    }
+
+    /// <summary>
+    /// Marks this concession as deleted (soft delete handled by infrastructure).
+    /// </summary>
+    public void MarkAsDeleted()
+    {
+        RaiseEvent(new ConcessionDeleted(Id, Name));
+    }
+
     // =============================================================
     // State transitions
     // =============================================================

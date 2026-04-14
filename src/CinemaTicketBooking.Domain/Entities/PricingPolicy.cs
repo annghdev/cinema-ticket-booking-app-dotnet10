@@ -87,6 +87,44 @@ public class PricingPolicy : AggregateRoot
     }
 
     /// <summary>
+    /// Updates basic pricing policy fields and raises an update event.
+    /// </summary>
+    public void UpdateBasicInfo(
+        Guid? cinemaId,
+        ScreenType screenType,
+        SeatType seatType,
+        decimal basePrice,
+        decimal screenCoefficient,
+        bool isActive)
+    {
+        if (basePrice < 0)
+        {
+            throw new ArgumentException("Base price cannot be negative.", nameof(basePrice));
+        }
+
+        if (screenCoefficient <= 0)
+        {
+            throw new ArgumentException("Screen coefficient must be positive.", nameof(screenCoefficient));
+        }
+
+        CinemaId = cinemaId;
+        ScreenType = screenType;
+        SeatType = seatType;
+        BasePrice = basePrice;
+        ScreenCoefficient = screenCoefficient;
+        IsActive = isActive;
+
+        RaiseEvent(new PricingPolicyBasicInfoUpdated(
+            PricingPolicyId: Id,
+            CinemaId: CinemaId,
+            ScreenType: ScreenType,
+            SeatType: SeatType,
+            BasePrice: BasePrice,
+            ScreenCoefficient: ScreenCoefficient,
+            IsActive: IsActive));
+    }
+
+    /// <summary>
     /// Calculates the final ticket price.
     /// </summary>
     public decimal CalculatePrice() => BasePrice * ScreenCoefficient;
@@ -122,5 +160,41 @@ public class PricingPolicy : AggregateRoot
             NewBasePrice: newBasePrice,
             OldScreenCoefficient: oldScreenCoefficient,
             NewScreenCoefficient: newScreenCoefficient));
+    }
+
+    /// <summary>
+    /// Activates this pricing policy. No-op when already active (idempotent).
+    /// </summary>
+    public void Activate()
+    {
+        if (IsActive)
+        {
+            return;
+        }
+
+        IsActive = true;
+        RaiseEvent(new PricingPolicyActivated(Id, CinemaId, ScreenType, SeatType));
+    }
+
+    /// <summary>
+    /// Deactivates this pricing policy. No-op when already inactive (idempotent).
+    /// </summary>
+    public void Deactivate()
+    {
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+        RaiseEvent(new PricingPolicyDeactivated(Id, CinemaId, ScreenType, SeatType));
+    }
+
+    /// <summary>
+    /// Marks this pricing policy as deleted (soft delete handled by infrastructure).
+    /// </summary>
+    public void MarkAsDeleted()
+    {
+        RaiseEvent(new PricingPolicyDeleted(Id, CinemaId, ScreenType, SeatType));
     }
 }

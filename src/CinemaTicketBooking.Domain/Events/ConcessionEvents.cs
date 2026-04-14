@@ -15,6 +15,11 @@ public record ConcessionCreated(
 public record ConcessionBasicInfoUpdated(Guid ConcessionId, string Name) : BaseDomainEvent;
 
 /// <summary>
+/// Raised when a concession item is deleted (soft delete).
+/// </summary>
+public record ConcessionDeleted(Guid ConcessionId, string Name) : BaseDomainEvent;
+
+/// <summary>
 /// Raised when a concession item is marked available for purchase.
 /// </summary>
 public record ConcessionMarkedAvailable(Guid ConcessionId) : BaseDomainEvent;
