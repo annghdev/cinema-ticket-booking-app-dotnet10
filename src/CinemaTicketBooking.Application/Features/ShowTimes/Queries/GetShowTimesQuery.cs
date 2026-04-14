@@ -43,6 +43,7 @@ public class GetShowTimesHandler(IUnitOfWork uow)
                 x.EndAt,
                 x.Status,
                 x.Tickets.Count,
+                // Only Available is bookable; Locking/PendingPayment/Sold are unavailable.
                 x.Tickets.Count(t => t.Status == TicketStatus.Available),
                 x.CreatedAt))
             .ToListAsync(ct);

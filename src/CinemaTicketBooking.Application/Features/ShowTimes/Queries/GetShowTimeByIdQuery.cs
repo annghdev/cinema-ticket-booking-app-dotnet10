@@ -43,6 +43,8 @@ public class GetShowTimeByIdHandler(IUnitOfWork uow)
                 x.Status))
             .ToList();
 
+        var availableTicketCount = showTime.Tickets.Count(x => x.Status == TicketStatus.Available);
+
         return new ShowTimeDetailDto(
             showTime.Id,
             showTime.MovieId,
@@ -56,7 +58,7 @@ public class GetShowTimeByIdHandler(IUnitOfWork uow)
             showTime.EndAt,
             showTime.Status,
             showTime.Tickets.Count,
-            showTime.Tickets.Count(x => x.Status == TicketStatus.Available),
+            availableTicketCount,
             showTime.CreatedAt,
             tickets);
     }

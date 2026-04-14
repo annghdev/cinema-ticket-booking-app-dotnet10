@@ -32,7 +32,6 @@
     <Folder Include="Features\Tickets\Commands\" />
     <Folder Include="Features\Tickets\Queries\" />
     <Folder Include="Features\Tickets\ResponseDTOs\" />
-    <Folder Include="Messaging\" />
     <Folder Include="Helpers\" />
   </ItemGroup>
 

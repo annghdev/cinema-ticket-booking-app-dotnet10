@@ -1,6 +1,7 @@
 using CinemaTicketBooking.Application.Features.Tests;
 using CinemaTicketBooking.Infrastructure;
 using CinemaTicketBooking.Infrastructure.Persistence;
+using CinemaTicketBooking.WebServer.CronJobs;
 using CinemaTicketBooking.WebServer;
 using JasperFx;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHostedService<TicketLockRecoveryHostedService>();
 
 var app = builder.Build();
 

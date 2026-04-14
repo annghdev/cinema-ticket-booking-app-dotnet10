@@ -3,6 +3,7 @@ using System;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414154821_AddTicketLockExpiresAt")]
+    partial class AddTicketLockExpiresAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -612,9 +615,6 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<DateTimeOffset?>("PaymentExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
@@ -643,8 +643,6 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     b.HasIndex("ShowTimeId");
 
                     b.HasIndex("Status", "LockExpiresAt");
-
-                    b.HasIndex("Status", "PaymentExpiresAt");
 
                     b.ToTable("tickets", (string)null);
                 });

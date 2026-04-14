@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Domain;
+using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure.Cache;
 using CinemaTicketBooking.Infrastructure.Persistence;
@@ -14,21 +15,29 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var redisConnectionString = configuration.GetConnectionString("redis");
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = redisConnectionString;
-            options.InstanceName = "CinemaTicketBooking:";
-        });
-        services.AddSingleton<IConnectionMultiplexer>(_ =>
-        {
-            if (string.IsNullOrWhiteSpace(redisConnectionString))
-            {
-                throw new InvalidOperationException("Redis connection string 'redis' is not configured.");
-            }
+        services.Configure<TicketLockingOptions>(configuration.GetSection(TicketLockingOptions.SectionName));
 
-            return ConnectionMultiplexer.Connect(redisConnectionString);
-        });
-        services.AddScoped(typeof(ICacheService<>), typeof(RedisCacheService<>));
+        if (!string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+                options.InstanceName = "CinemaTicketBooking:";
+            });
+            services.AddSingleton<IConnectionMultiplexer>(_ =>
+            {
+                var redisOptions = ConfigurationOptions.Parse(redisConnectionString);
+                redisOptions.AbortOnConnectFail = false;
+
+                return ConnectionMultiplexer.Connect(redisOptions);
+            });
+            services.AddScoped(typeof(ICacheService<>), typeof(RedisCacheService<>));
+            services.AddScoped<ITicketLocker, RedisTicketLocker>();
+        }
+        else
+        {
+            services.AddScoped<ITicketLocker, NoRedisTicketLocker>();
+        }
 
         services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
         services.AddScoped<IBookingRepository, BookingRepository>();
