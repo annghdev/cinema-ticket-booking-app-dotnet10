@@ -10,6 +10,7 @@ public class StartTicketPaymentCommand : ICommand
     public Guid TicketId { get; set; }
     public Guid BookingId { get; set; }
     public string StartBy { get; set; } = string.Empty;
+    public DateTimeOffset? PaymentExpiresAtUtc { get; set; }
     public string CorrelationId { get; set; } = string.Empty;
 }
 
@@ -32,7 +33,7 @@ public class StartTicketPaymentHandler(
             throw new InvalidOperationException($"Ticket with ID '{cmd.TicketId}' not found.");
         }
 
-        var paymentExpiresAt = DateTimeOffset.UtcNow.Add(options.Value.PaymentHoldDuration);
+        var paymentExpiresAt = cmd.PaymentExpiresAtUtc ?? DateTimeOffset.UtcNow.Add(options.Value.PaymentHoldDuration);
         ticket.StartPayment(cmd.BookingId, cmd.StartBy, paymentExpiresAt);
         uow.Tickets.Update(ticket);
         await uow.CommitAsync(ct);
@@ -57,5 +58,9 @@ public class StartTicketPaymentValidator : AbstractValidator<StartTicketPaymentC
         RuleFor(x => x.StartBy)
             .NotEmpty().WithMessage("Payment actor is required.")
             .MaximumLength(MaxLengthConsts.SessionId);
+
+        RuleFor(x => x.PaymentExpiresAtUtc)
+            .Must(x => !x.HasValue || x.Value > DateTimeOffset.UtcNow)
+            .WithMessage("Payment expiration must be in the future.");
     }
 }

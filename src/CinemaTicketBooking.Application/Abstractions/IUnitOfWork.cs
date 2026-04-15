@@ -13,6 +13,7 @@ public interface IUnitOfWork
     IConcessionRepository Concessions { get; }
     ICustomerRepository Customers { get; }
     IPricingPolicyRepository PricingPolicies { get; }
+    ISeatSelectionPolicyRepository SeatSelectionPolicies { get; }
 
     Task CommitAsync(CancellationToken cancellationToken = default);
 }
