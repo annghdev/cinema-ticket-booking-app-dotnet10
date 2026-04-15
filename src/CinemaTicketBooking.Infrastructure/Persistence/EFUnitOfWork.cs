@@ -21,6 +21,7 @@ public class EFUnitOfWork(
     private IConcessionRepository? _concessions;
     private ICustomerRepository? _customers;
     private IPricingPolicyRepository? _pricingPolicies;
+    private ISeatSelectionPolicyRepository? _seatSelectionPolicies;
 
     public ICinemaRepository Cinemas => _cinemas ??= serviceProvider.GetRequiredService<ICinemaRepository>();
     public IMovieRepository Movies => _movies ??= serviceProvider.GetRequiredService<IMovieRepository>();
@@ -31,6 +32,7 @@ public class EFUnitOfWork(
     public IConcessionRepository Concessions => _concessions ??= serviceProvider.GetRequiredService<IConcessionRepository>();
     public ICustomerRepository Customers => _customers ??= serviceProvider.GetRequiredService<ICustomerRepository>();
     public IPricingPolicyRepository PricingPolicies => _pricingPolicies ??= serviceProvider.GetRequiredService<IPricingPolicyRepository>();
+    public ISeatSelectionPolicyRepository SeatSelectionPolicies => _seatSelectionPolicies ??= serviceProvider.GetRequiredService<ISeatSelectionPolicyRepository>();
 
     public async Task CommitAsync(CancellationToken ct = default)
     {

@@ -19,6 +19,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Seat> Seats => Set<Seat>();
     public DbSet<ShowTime> ShowTimes => Set<ShowTime>();
     public DbSet<Ticket> Tickets => Set<Ticket>();
+    public DbSet<SeatSelectionPolicy> SeatSelectionPolicies => Set<SeatSelectionPolicy>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<BookingTicket> BookingTickets => Set<BookingTicket>();
     public DbSet<BookingConcession> BookingConcessions => Set<BookingConcession>();

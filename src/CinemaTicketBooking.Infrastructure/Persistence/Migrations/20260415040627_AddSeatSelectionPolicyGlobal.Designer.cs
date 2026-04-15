@@ -3,6 +3,7 @@ using System;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260415040627_AddSeatSelectionPolicyGlobal")]
+    partial class AddSeatSelectionPolicyGlobal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -686,14 +689,6 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<string>("SeatCode")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<Guid?>("SeatId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("ShowTimeId")
                         .HasColumnType("uuid");
 
@@ -715,8 +710,7 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ShowTimeId", "SeatCode")
-                        .IsUnique();
+                    b.HasIndex("ShowTimeId");
 
                     b.HasIndex("Status", "LockExpiresAt");
 

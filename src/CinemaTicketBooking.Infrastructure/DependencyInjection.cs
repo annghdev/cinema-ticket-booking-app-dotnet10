@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IMovieRepository, MovieRepository>();
         services.AddScoped<IScreenRepository, ScreenRepository>();
         services.AddScoped<IPricingPolicyRepository, PricingPolicyRepository>();
+        services.AddScoped<ISeatSelectionPolicyRepository, SeatSelectionPolicyRepository>();
         services.AddScoped<IShowTimeRepository, ShowTimeRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IUnitOfWork, EFUnitOfWork>();

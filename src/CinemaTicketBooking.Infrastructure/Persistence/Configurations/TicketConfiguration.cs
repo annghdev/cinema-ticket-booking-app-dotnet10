@@ -11,6 +11,8 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.ToTable("tickets");
         builder.ConfigureAggregateRoot();
 
+        builder.Property(x => x.SeatId);
+        builder.Property(x => x.SeatCode).HasMaxLength(MaxLengthConsts.SeatCode).IsRequired();
         builder.Property(x => x.Code).HasMaxLength(MaxLengthConsts.TicketCode).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(MaxLengthConsts.TicketDescription);
         builder.Property(x => x.Price).HasPrecision(18, 2).IsRequired();
@@ -20,6 +22,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.Property(x => x.Status).IsRequired();
         builder.HasIndex(x => new { x.Status, x.LockExpiresAt });
         builder.HasIndex(x => new { x.Status, x.PaymentExpiresAt });
+        builder.HasIndex(x => new { x.ShowTimeId, x.SeatCode }).IsUnique();
 
         builder.HasOne(x => x.ShowTime)
             .WithMany(x => x.Tickets)
