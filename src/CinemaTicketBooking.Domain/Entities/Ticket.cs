@@ -10,6 +10,16 @@ namespace CinemaTicketBooking.Domain;
 public class Ticket : AggregateRoot
 {
     /// <summary>
+    /// Seat identifier from Screen.Seats used to map ticket back to seat layout.
+    /// </summary>
+    public Guid? SeatId { get; set; }
+
+    /// <summary>
+    /// Canonical seat code (A1, B3, Sweet2...) used by seat-layout validation.
+    /// </summary>
+    public string SeatCode { get; set; } = string.Empty;
+
+    /// <summary>
     /// Unique ticket code. Format: "{Date:yyyyMMdd}-{ScreenCode}-{SeatCode}"
     /// Example: "20260415-S1-A3"
     /// </summary>

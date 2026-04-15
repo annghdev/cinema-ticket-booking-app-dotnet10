@@ -110,6 +110,8 @@ public class ShowTime : AggregateRoot
             Tickets.Add(new Ticket
             {
                 Id = Guid.CreateVersion7(),
+                SeatId = seat.Id,
+                SeatCode = seat.Code,
                 Code = $"{Date:yyyyMMdd}-{screen.Code}-{seat.Code}",
                 Description = $"{seat.Code} - {seat.Type}",
                 Price = policy.CalculatePrice(),
