@@ -12,6 +12,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Code = "20260413-S1-A1",
             Price = 50_000m,
             Status = TicketStatus.Available
@@ -33,6 +34,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.Locking,
             LockingBy = "a"
         };
@@ -48,6 +50,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.Locking,
             LockingBy = "session-x"
         };
@@ -66,6 +69,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.Available
         };
 
@@ -80,6 +84,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.Locking,
             LockingBy = "session-a"
         };
@@ -95,6 +100,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Code = "20260413-S1-A1",
             Price = 80_000m,
             Status = TicketStatus.Locking,
@@ -121,6 +127,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.Available
         };
 
@@ -135,6 +142,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.Locking,
             LockingBy = "session-a",
             LockExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
@@ -151,6 +159,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.PendingPayment,
             BookingId = Guid.CreateVersion7(),
             PaymentExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
@@ -174,6 +183,7 @@ public class TicketTests
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = Guid.CreateVersion7(),
+            SeatCode = "A1",
             Status = TicketStatus.Available
         };
 
