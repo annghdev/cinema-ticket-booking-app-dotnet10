@@ -65,12 +65,14 @@ public static class IntegrationEntityBuilder
 
     public static Ticket Ticket(Guid showTimeId, string code = "T-001", TicketStatus status = TicketStatus.Available)
     {
+        const string seatCode = "A1";
         return new Ticket
         {
             Id = Guid.CreateVersion7(),
             ShowTimeId = showTimeId,
             Code = code,
-            Description = "Seat A1",
+            SeatCode = seatCode,
+            Description = $"{seatCode} - Regular",
             Price = 100_000m,
             Status = status
         };
