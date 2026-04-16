@@ -1,4 +1,4 @@
-﻿using CinemaTicketBooking.Domain;
+using CinemaTicketBooking.Domain;
 
 namespace CinemaTicketBooking.Application.Abstractions;
 
@@ -14,6 +14,7 @@ public interface IUnitOfWork
     ICustomerRepository Customers { get; }
     IPricingPolicyRepository PricingPolicies { get; }
     ISeatSelectionPolicyRepository SeatSelectionPolicies { get; }
+    IPaymentTransactionRepository PaymentTransactions { get; }
 
     Task CommitAsync(CancellationToken cancellationToken = default);
 }

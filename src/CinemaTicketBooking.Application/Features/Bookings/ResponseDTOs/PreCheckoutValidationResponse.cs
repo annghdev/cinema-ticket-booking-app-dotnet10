@@ -1,3 +1,5 @@
+using CinemaTicketBooking.Domain;
+
 namespace CinemaTicketBooking.Application.Features;
 
 public sealed record PreCheckoutViolationDto(
@@ -11,4 +13,5 @@ public sealed record PreCheckoutValidationResponse(
     bool CanProceed,
     IReadOnlyList<PreCheckoutViolationDto> Warnings,
     IReadOnlyList<PreCheckoutViolationDto> Errors,
-    IReadOnlyList<string> Hints);
+    IReadOnlyList<string> Hints,
+    IReadOnlyList<PaymentGatewayOptionDto>? PaymentOptions = null);

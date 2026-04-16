@@ -14,7 +14,9 @@ public sealed class ValidatePreCheckoutSeatSelectionCommand : ICommand
 /// <summary>
 /// Handles pre-checkout seat-layout validation.
 /// </summary>
-public sealed class ValidatePreCheckoutSeatSelectionHandler(IUnitOfWork uow)
+public sealed class ValidatePreCheckoutSeatSelectionHandler(
+    IUnitOfWork uow,
+    IPaymentServiceFactory paymentServiceFactory)
 {
     /// <summary>
     /// Loads seat-layout context and returns warning/error details for checkout UI.
@@ -39,12 +41,15 @@ public sealed class ValidatePreCheckoutSeatSelectionHandler(IUnitOfWork uow)
             command.SelectedTicketIds,
             command.CustomerSessionId);
 
-        // 4. Map domain result to API-facing DTO.
+        // 4. Map domain result to API-facing DTO, include payment options when checkout can proceed.
         return new PreCheckoutValidationResponse(
             CanProceed: validationResult.CanProceed,
             Warnings: validationResult.Warnings.Select(ToViolationDto).ToList(),
             Errors: validationResult.Errors.Select(ToViolationDto).ToList(),
-            Hints: validationResult.Hints);
+            Hints: validationResult.Hints,
+            PaymentOptions: validationResult.CanProceed
+                ? paymentServiceFactory.GetAvailableOptions()
+                : null);
     }
 
     private static PreCheckoutViolationDto ToViolationDto(SeatSelectionViolation violation)

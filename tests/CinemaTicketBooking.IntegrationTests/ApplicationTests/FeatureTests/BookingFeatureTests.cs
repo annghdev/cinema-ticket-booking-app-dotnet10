@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinemaTicketBooking.IntegrationTests.ApplicationTests.FeatureTests;
 
-public sealed class CheckoutFeatureTests(PostgresContainerFixture databaseFixture)
+public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture)
     : ApplicationFeatureTestBase(databaseFixture)
 {
     [Fact]
@@ -54,16 +54,18 @@ public sealed class CheckoutFeatureTests(PostgresContainerFixture databaseFixtur
 
         response.CanProceed.Should().BeTrue();
         response.Errors.Should().BeEmpty();
+        response.PaymentOptions.Should().NotBeNullOrEmpty();
+        response.PaymentOptions!.Should().Contain(x => x.Method == "None");
     }
 
     [Fact]
-    public async Task CreateBookingAndProcessPayment_Should_UseSharedPaymentExpiry_ForAllSelectedTickets()
+    public async Task CreateBooking_Should_UseSharedPaymentExpiry_ForAllSelectedTickets_And_CreatePaymentTransaction()
     {
         await ResetDatabaseAsync();
         var seed = await SeedCheckoutGraphAsync();
         var concessionId = await SeedConcessionAsync();
 
-        var response = await InvokeAsync<CreateBookingAndProcessPaymentResponse>(new CreateBookingAndProcessPaymentCommand
+        var response = await InvokeAsync<CreateBookingResponse>(new CreateBookingCommand
         {
             ShowTimeId = seed.ShowTimeId,
             CustomerSessionId = seed.SessionId,
@@ -77,6 +79,9 @@ public sealed class CheckoutFeatureTests(PostgresContainerFixture databaseFixtur
             ],
             Concessions = [new CheckoutConcessionSelection(concessionId, 2)],
             DiscountAmount = 10_000m,
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
             CorrelationId = "it-create-booking-process-payment"
         });
 
@@ -99,6 +104,15 @@ public sealed class CheckoutFeatureTests(PostgresContainerFixture databaseFixtur
             .BeCloseTo(response.PaymentExpiresAt, precision: TimeSpan.FromMilliseconds(10));
         response.PaymentStatus.Should().Be("pending_payment");
         response.FinalAmount.Should().Be(booking.FinalAmount);
+        response.PaymentUrl.Should().NotBeNullOrEmpty();
+        response.RedirectBehavior.Should().Be(PaymentRedirectBehavior.QrCode);
+        response.PaymentTransactionId.Should().NotBeNull();
+
+        var paymentTransaction = await db.PaymentTransactions
+            .SingleAsync(x => x.BookingId == response.BookingId);
+        paymentTransaction.Method.Should().Be(PaymentMethod.None);
+        paymentTransaction.Status.Should().Be(PaymentTransactionStatus.Pending);
+        paymentTransaction.Amount.Should().Be(booking.FinalAmount);
     }
 
     private async Task<(Guid ShowTimeId, string SessionId, Dictionary<string, Guid> TicketsBySeatCode)> SeedCheckoutGraphAsync()

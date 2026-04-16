@@ -23,6 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<BookingTicket> BookingTickets => Set<BookingTicket>();
     public DbSet<BookingConcession> BookingConcessions => Set<BookingConcession>();
+    public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

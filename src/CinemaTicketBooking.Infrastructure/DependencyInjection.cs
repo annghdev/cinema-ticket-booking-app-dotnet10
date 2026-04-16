@@ -1,7 +1,8 @@
-﻿using CinemaTicketBooking.Domain;
+using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure.Cache;
+using CinemaTicketBooking.Infrastructure.Payments;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
@@ -50,7 +51,13 @@ public static class DependencyInjection
         services.AddScoped<ISeatSelectionPolicyRepository, SeatSelectionPolicyRepository>();
         services.AddScoped<IShowTimeRepository, ShowTimeRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
+        services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
         services.AddScoped<IUnitOfWork, EFUnitOfWork>();
+
+        // Payment services
+        services.AddScoped<IPaymentService, NoPaymentGatewayService>();
+        services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
+
         return services;
     }
 }
