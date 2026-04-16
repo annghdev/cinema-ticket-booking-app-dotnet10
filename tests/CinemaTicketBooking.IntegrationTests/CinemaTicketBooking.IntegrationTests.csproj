@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <Folder Include="ApiTests\" />
-    <Folder Include="ApplicationTests\FeatureTests\" />
     <Folder Include="ApplicationTests\MessagingTests\" />
     <Folder Include="InfrastructureTests\AuthTests\" />
   </ItemGroup>

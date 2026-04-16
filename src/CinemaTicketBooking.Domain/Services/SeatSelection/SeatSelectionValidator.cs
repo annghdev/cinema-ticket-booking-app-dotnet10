@@ -37,6 +37,7 @@ public sealed class SeatSelectionValidator
         IReadOnlyCollection<Guid> selectedTicketIds,
         string customerSessionId)
     {
+        // 1. Guard mandatory aggregate graph required by layout rules.
         if (showTime.Screen is null)
         {
             throw new InvalidOperationException("Showtime screen data is required for seat-layout validation.");
@@ -48,6 +49,7 @@ public sealed class SeatSelectionValidator
         }
 
         var result = new SeatSelectionValidationResult();
+        // 2. Fast fail for empty selection, keep response shape consistent.
         if (selectedTicketIds.Count == 0)
         {
             result.AddViolation(new SeatSelectionViolation(
@@ -64,6 +66,7 @@ public sealed class SeatSelectionValidator
         var selectedSeats = new List<Seat>(selectedTicketIds.Count);
         var selectedSeatCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        // 3. Resolve selected ticket ids to valid ticket-seat pairs for this showtime.
         var ticketById = showTime.Tickets.ToDictionary(x => x.Id, x => x);
         foreach (var ticketId in selectedTicketIds)
         {
@@ -104,12 +107,14 @@ public sealed class SeatSelectionValidator
             selectedSeatCodes.Add(seat.Code);
         }
 
+        // 4. Stop early when selected set is already invalid/unavailable.
         if (result.Errors.Count > 0)
         {
             PopulateHints(result);
             return result;
         }
 
+        // 5. Build immutable context consumed by all rule strategies.
         var occupiedSeatCodes = ResolveOccupiedSeatCodes(showTime, customerSessionId);
         var aisleColumnsByRow = ParseAisleColumnsByRow(showTime.Screen.SeatMap);
         var activeSeatsByRow = showTime.Screen.Seats
@@ -139,6 +144,7 @@ public sealed class SeatSelectionValidator
             SelectedSeatsByRow = selectedSeatsByRow
         };
 
+        // 6. Execute rule chain and aggregate all violations by policy level.
         foreach (var rule in _rules)
         {
             foreach (var violation in rule.Evaluate(context))
@@ -151,6 +157,9 @@ public sealed class SeatSelectionValidator
         return result;
     }
 
+    /// <summary>
+    /// Defines whether current session is allowed to proceed with a ticket.
+    /// </summary>
     private static bool CanUseTicket(Ticket ticket, string customerSessionId)
     {
         return ticket.Status switch
@@ -164,6 +173,7 @@ public sealed class SeatSelectionValidator
     private static HashSet<string> ResolveOccupiedSeatCodes(ShowTime showTime, string customerSessionId)
     {
         var occupied = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        // 1. Convert ticket statuses to occupancy map used by pattern rules.
         foreach (var ticket in showTime.Tickets)
         {
             var seatCode = ticket.SeatCode;
@@ -174,6 +184,7 @@ public sealed class SeatSelectionValidator
 
             var shouldOccupy = ticket.Status is TicketStatus.Sold or TicketStatus.PendingPayment
                                || (ticket.Status == TicketStatus.Locking && ticket.LockingBy != customerSessionId);
+            // 2. Locking by another session is treated as occupied to avoid false hints.
             if (shouldOccupy)
             {
                 occupied.Add(seatCode);
@@ -187,6 +198,7 @@ public sealed class SeatSelectionValidator
     {
         var seatArray = ParseSeatMapArray(seatMap);
         var result = new Dictionary<int, IReadOnlyList<int>>();
+        // 1. Translate seat map matrix into aisle column indexes per row (1-based).
         for (var row = 0; row < seatArray.GetLength(0); row++)
         {
             var aisles = new List<int>();
@@ -206,6 +218,7 @@ public sealed class SeatSelectionValidator
 
     private static int[,] ParseSeatMapArray(string seatMap)
     {
+        // 1. Keep parser compatible with both JSON and plain-text seat-map formats.
         if (string.IsNullOrWhiteSpace(seatMap))
         {
             return new int[0, 0];
@@ -214,6 +227,7 @@ public sealed class SeatSelectionValidator
         var normalized = seatMap.Trim();
         if (normalized.StartsWith("[", StringComparison.Ordinal))
         {
+            // 2. JSON matrix path.
             var array = JsonSerializer.Deserialize<int[][]>(normalized)
                 ?? throw new FormatException("SeatMap JSON is invalid.");
             if (array.Length == 0)
@@ -239,6 +253,7 @@ public sealed class SeatSelectionValidator
             return result;
         }
 
+        // 3. Plain-text matrix path (space/comma delimited).
         var lines = normalized.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
         var firstColumns = lines[0].Split([',', ' '], StringSplitOptions.RemoveEmptyEntries).Length;
         var plainResult = new int[lines.Length, firstColumns];
@@ -267,11 +282,13 @@ public sealed class SeatSelectionValidator
 
     private static void PopulateHints(SeatSelectionValidationResult result)
     {
+        // 1. Hints are added only when there is at least one warning/error.
         if (result.Errors.Count == 0 && result.Warnings.Count == 0)
         {
             return;
         }
 
+        // 2. Generate actionable UX hints from violation categories.
         var allViolations = result.Errors.Concat(result.Warnings).ToList();
         if (allViolations.Any(x => x.Type == SeatSelectionViolationType.OrphanSeat))
         {

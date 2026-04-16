@@ -17,9 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Bookings\Commands\" />
     <Folder Include="Features\Bookings\Queries\" />
-    <Folder Include="Features\Bookings\ResponseDTOs\" />
     <Folder Include="Features\Cinemas\Queries\" />
     <Folder Include="Features\Concessions\Commands\" />
     <Folder Include="Features\Concessions\Queries\" />
