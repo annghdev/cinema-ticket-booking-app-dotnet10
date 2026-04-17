@@ -1,0 +1,43 @@
+@baseUrl = http://localhost:5000
+@showTimeId = 019d9bfc-8906-7623-8706-b3216a756417
+@movieId = 019d9bfc-88eb-72e0-a5bb-e90161c15912
+@screenId = 019d9bfc-88f0-7713-a762-90030a334093
+@cinemaId = 019d9bfc-88e8-7867-83cd-1876f359738d
+
+### 1) Get all showtimes
+GET {{baseUrl}}/api/showtimes
+
+### 2) Get showtimes with filters
+GET {{baseUrl}}/api/showtimes?cinemaId={{cinemaId}}&movieId={{movieId}}&status=Upcoming
+
+### 3) Get paged showtimes
+GET {{baseUrl}}/api/showtimes/paged?pageNumber=1&pageSize=10&sortBy=startat&sortDirection=asc
+
+### 4) Get paged showtimes by date
+GET {{baseUrl}}/api/showtimes/paged?pageNumber=1&pageSize=10&date=2026-04-17&sortBy=startat&sortDirection=asc
+
+### 5) Get showtime dropdown
+GET {{baseUrl}}/api/showtimes/dropdown?maxItems=20&status=Upcoming
+
+### 6) Get showtime detail by id
+GET {{baseUrl}}/api/showtimes/{{showTimeId}}
+
+### 7) Add showtime
+POST {{baseUrl}}/api/showtimes
+Content-Type: application/json
+
+{
+  "movieId": "{{movieId}}",
+  "screenId": "{{screenId}}",
+  "startAt": "2026-04-20T12:30:00+00:00",
+  "correlationId": "sample-add-showtime"
+}
+
+### 8) Start showtime
+POST {{baseUrl}}/api/showtimes/{{showTimeId}}/start
+
+### 9) Complete showtime
+POST {{baseUrl}}/api/showtimes/{{showTimeId}}/complete
+
+### 10) Cancel showtime
+POST {{baseUrl}}/api/showtimes/{{showTimeId}}/cancel
