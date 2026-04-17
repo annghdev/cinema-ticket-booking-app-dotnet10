@@ -1,4 +1,4 @@
-using CinemaTicketBooking.Application.Features.Bookings.Queries;
+using CinemaTicketBooking.Application.Features;
 using Wolverine;
 
 namespace CinemaTicketBooking.WebServer.ApiEndpoints;
@@ -19,7 +19,7 @@ public static class BookingEndpoints
                 {
                     try
                     {
-                        var dto = await bus.InvokeAsync<BookingSummaryDto?>(
+                        var dto = await bus.InvokeAsync<BookingDetailsDto?>(
                             new GetBookingByIdQuery
                             {
                                 BookingId = bookingId,
