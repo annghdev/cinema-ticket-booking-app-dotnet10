@@ -1,4 +1,5 @@
 using CinemaTicketBooking.Application.Features;
+using CinemaTicketBooking.Application.Features.Bookings.Commands;
 using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.IntegrationTests.Shared.DataSeeders;
 using CinemaTicketBooking.IntegrationTests.Shared.Fixtures;
@@ -113,6 +114,249 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
         paymentTransaction.Method.Should().Be(PaymentMethod.None);
         paymentTransaction.Status.Should().Be(PaymentTransactionStatus.Pending);
         paymentTransaction.Amount.Should().Be(booking.FinalAmount);
+    }
+
+    [Fact]
+    public async Task VerifyPayment_Should_ConfirmBooking_SetQrAndSoldTickets_When_GatewayConfirms()
+    {
+        var (bookingId, gatewayTxId, paymentTxId, _) = await ArrangePendingBookingForVerifyPaymentAsync();
+
+        var verifyResponse = await InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+        {
+            BookingId = bookingId,
+            GatewayTransactionId = gatewayTxId,
+            PaymentMethod = "None",
+            GatewayResponseParams = [],
+            CorrelationId = "it-verify-payment-success"
+        });
+
+        verifyResponse.IsSuccess.Should().BeTrue();
+        verifyResponse.Status.Should().Be("confirmed");
+        verifyResponse.PaymentTransactionId.Should().Be(paymentTxId);
+        verifyResponse.CheckinQrCode.Should().NotBeNullOrEmpty();
+        verifyResponse.CheckinQrCode!.Should().StartWith("data:image/png;base64,");
+        verifyResponse.CheckinQrCode.Length.Should().BeLessOrEqualTo(MaxLengthConsts.QrCode);
+        verifyResponse.CanRetry.Should().BeFalse();
+
+        await using var db = CreateDbContext();
+        var bookingAfter = await db.Bookings
+            .Include(x => x.Tickets)
+            .ThenInclude(x => x.Ticket)
+            .SingleAsync(x => x.Id == bookingId);
+
+        bookingAfter.Status.Should().Be(BookingStatus.Confirmed);
+        bookingAfter.QrCode.Should().Be(verifyResponse.CheckinQrCode);
+        bookingAfter.Tickets.Should().ContainSingle();
+        bookingAfter.Tickets.Single().Ticket!.Status.Should().Be(TicketStatus.Sold);
+
+        var paymentAfter = await db.PaymentTransactions.SingleAsync(x => x.Id == paymentTxId);
+        paymentAfter.Status.Should().Be(PaymentTransactionStatus.Success);
+        paymentAfter.PaidAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task VerifyPayment_Should_Throw_When_GatewayTransactionIdDoesNotMatchPending()
+    {
+        var (bookingId, gatewayTxId, _, _) = await ArrangePendingBookingForVerifyPaymentAsync();
+
+        var act = async () => await InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+        {
+            BookingId = bookingId,
+            GatewayTransactionId = "WRONG-" + gatewayTxId,
+            PaymentMethod = "None",
+            GatewayResponseParams = [],
+            CorrelationId = "it-verify-payment-mismatch"
+        });
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*Gateway transaction ID mismatch*");
+    }
+
+    [Fact]
+    public async Task VerifyPayment_Should_MarkTransactionFailed_And_KeepBookingPending_When_CallbackSignatureInvalid()
+    {
+        var (bookingId, gatewayTxId, paymentTxId, _) = await ArrangePendingBookingForVerifyPaymentAsync();
+
+        var verifyResponse = await InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+        {
+            BookingId = bookingId,
+            GatewayTransactionId = gatewayTxId,
+            PaymentMethod = "None",
+            GatewayResponseParams = new Dictionary<string, string>
+            {
+                ["vnp_ResponseCode"] = "00",
+                ["vnp_TxnRef"] = gatewayTxId,
+                ["vnp_SecureHash"] = "deadbeef"
+            },
+            CorrelationId = "it-verify-payment-bad-signature"
+        });
+
+        verifyResponse.IsSuccess.Should().BeFalse();
+        verifyResponse.Status.Should().Be("payment_failed");
+        verifyResponse.CanRetry.Should().BeTrue();
+        verifyResponse.CheckinQrCode.Should().BeNull();
+        verifyResponse.AvailableGateways.Should().NotBeNullOrEmpty();
+        verifyResponse.ErrorMessage.Should().Contain("signature");
+
+        await using var db = CreateDbContext();
+        var bookingAfter = await db.Bookings
+            .Include(x => x.Tickets)
+            .ThenInclude(x => x.Ticket)
+            .SingleAsync(x => x.Id == bookingId);
+
+        bookingAfter.Status.Should().Be(BookingStatus.Pending);
+        bookingAfter.QrCode.Should().BeNull();
+        bookingAfter.Tickets.Single().Ticket!.Status.Should().Be(TicketStatus.PendingPayment);
+
+        var paymentAfter = await db.PaymentTransactions.SingleAsync(x => x.Id == paymentTxId);
+        paymentAfter.Status.Should().Be(PaymentTransactionStatus.Failed);
+    }
+
+    [Fact]
+    public async Task RetryPayment_Should_CreateNewPendingTransaction_When_PreviousVerificationFailed()
+    {
+        var (bookingId, sessionId) = await ArrangeBookingWithFailedPaymentAsync();
+
+        var retryResponse = await InvokeAsync<CreateBookingResponse>(new RetryPaymentCommand
+        {
+            BookingId = bookingId,
+            CustomerSessionId = sessionId,
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            CorrelationId = "it-retry-payment-after-fail"
+        });
+
+        retryResponse.BookingId.Should().Be(bookingId);
+        retryResponse.PaymentStatus.Should().Be("pending_payment");
+        retryResponse.PaymentUrl.Should().NotBeNullOrEmpty();
+        retryResponse.PaymentTransactionId.Should().NotBeNull();
+        retryResponse.RedirectBehavior.Should().Be(PaymentRedirectBehavior.QrCode);
+
+        await using var db = CreateDbContext();
+        var transactions = await db.PaymentTransactions
+            .Where(x => x.BookingId == bookingId)
+            .ToListAsync();
+
+        transactions.Should().HaveCount(2);
+        transactions.Should().ContainSingle(x => x.Status == PaymentTransactionStatus.Failed);
+        var pendingRetry = transactions.Single(x => x.Status == PaymentTransactionStatus.Pending);
+        pendingRetry.Id.Should().Be(retryResponse.PaymentTransactionId!.Value);
+
+        var booking = await db.Bookings
+            .Include(x => x.Tickets)
+            .ThenInclude(x => x.Ticket)
+            .SingleAsync(x => x.Id == bookingId);
+
+        booking.Status.Should().Be(BookingStatus.Pending);
+        booking.Tickets.Single().Ticket!.PaymentExpiresAt
+            .Should()
+            .BeCloseTo(retryResponse.PaymentExpiresAt, precision: TimeSpan.FromMilliseconds(50));
+    }
+
+    [Fact]
+    public async Task RetryPayment_Should_Throw_When_PaymentStillPending()
+    {
+        await ResetDatabaseAsync();
+        var seed = await SeedCheckoutGraphAsync();
+
+        var createResponse = await InvokeAsync<CreateBookingResponse>(new CreateBookingCommand
+        {
+            ShowTimeId = seed.ShowTimeId,
+            CustomerSessionId = seed.SessionId,
+            CustomerName = "Retry Blocked",
+            CustomerPhoneNumber = "0123456789",
+            CustomerEmail = "retry.blocked@example.com",
+            SelectedTicketIds = [seed.TicketsBySeatCode["A1"]],
+            Concessions = [],
+            DiscountAmount = 0,
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            CorrelationId = "it-retry-while-pending"
+        });
+
+        var act = async () => await InvokeAsync<CreateBookingResponse>(new RetryPaymentCommand
+        {
+            BookingId = createResponse.BookingId,
+            CustomerSessionId = seed.SessionId,
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            CorrelationId = "it-retry-while-pending-2"
+        });
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*already in progress*");
+    }
+
+    [Fact]
+    public async Task RetryPayment_Should_Throw_When_CustomerSessionDoesNotMatch()
+    {
+        var (bookingId, _) = await ArrangeBookingWithFailedPaymentAsync();
+
+        var act = async () => await InvokeAsync<CreateBookingResponse>(new RetryPaymentCommand
+        {
+            BookingId = bookingId,
+            CustomerSessionId = "another-session",
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            CorrelationId = "it-retry-wrong-session"
+        });
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*not authorized*");
+    }
+
+    private async Task<(Guid BookingId, string SessionId)> ArrangeBookingWithFailedPaymentAsync()
+    {
+        var (bookingId, gatewayTxId, _, sessionId) = await ArrangePendingBookingForVerifyPaymentAsync();
+
+        await InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+        {
+            BookingId = bookingId,
+            GatewayTransactionId = gatewayTxId,
+            PaymentMethod = "None",
+            GatewayResponseParams = new Dictionary<string, string>
+            {
+                ["vnp_ResponseCode"] = "00",
+                ["vnp_SecureHash"] = "invalid"
+            },
+            CorrelationId = "it-arrange-failed-payment"
+        });
+
+        return (bookingId, sessionId);
+    }
+
+    private async Task<(Guid BookingId, string GatewayTransactionId, Guid PaymentTransactionId, string SessionId)>
+        ArrangePendingBookingForVerifyPaymentAsync()
+    {
+        await ResetDatabaseAsync();
+        var seed = await SeedCheckoutGraphAsync();
+
+        var createResponse = await InvokeAsync<CreateBookingResponse>(new CreateBookingCommand
+        {
+            ShowTimeId = seed.ShowTimeId,
+            CustomerSessionId = seed.SessionId,
+            CustomerName = "Verify Payment IT",
+            CustomerPhoneNumber = "0123456789",
+            CustomerEmail = "verify.payment.it@example.com",
+            SelectedTicketIds = [seed.TicketsBySeatCode["A1"]],
+            Concessions = [],
+            DiscountAmount = 0,
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            CorrelationId = "it-arrange-pending-booking"
+        });
+
+        await using var db = CreateDbContext();
+        var transaction = await db.PaymentTransactions
+            .AsNoTracking()
+            .SingleAsync(x => x.BookingId == createResponse.BookingId);
+
+        return (createResponse.BookingId, transaction.GatewayTransactionId, transaction.Id, seed.SessionId);
     }
 
     private async Task<(Guid ShowTimeId, string SessionId, Dictionary<string, Guid> TicketsBySeatCode)> SeedCheckoutGraphAsync()
