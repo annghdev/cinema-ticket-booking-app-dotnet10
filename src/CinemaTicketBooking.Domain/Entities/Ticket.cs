@@ -96,6 +96,17 @@ public class Ticket : AggregateRoot
     }
 
     /// <summary>
+    /// Extends the payment window while the ticket stays in pending payment (e.g. client retries another gateway).
+    /// </summary>
+    public void ExtendPaymentHold(DateTimeOffset paymentExpiresAt)
+    {
+        if (Status != TicketStatus.PendingPayment)
+            throw new InvalidOperationException("Only pending payment tickets can extend the payment hold.");
+
+        PaymentExpiresAt = paymentExpiresAt;
+    }
+
+    /// <summary>
     /// Releases the ticket unconditionally (used during booking cancellation).
     /// Resets status to Available and clears the lock owner.
     /// </summary>
