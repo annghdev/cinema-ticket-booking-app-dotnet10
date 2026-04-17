@@ -16,7 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="CinemaTicketBooking.IntegrationTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Aspire.ServiceDefaults\Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\CinemaTicketBooking.Application\CinemaTicketBooking.Application.csproj" />
     <ProjectReference Include="..\CinemaTicketBooking.Infrastructure\CinemaTicketBooking.Infrastructure.csproj" />
   </ItemGroup>
 

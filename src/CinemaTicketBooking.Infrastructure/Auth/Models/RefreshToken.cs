@@ -1,0 +1,40 @@
+using CinemaTicketBooking.Domain.Abstractions;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CinemaTicketBooking.Infrastructure.Auth;
+
+/// <summary>
+/// Rotating refresh token record (stored hash only).
+/// </summary>
+public class RefreshToken : IAggregateRoot
+{
+    public Guid Id { get; set; }
+    public Guid AccountId { get; set; }
+    public Account? Account { get; set; }
+
+    /// <summary>
+    /// SHA-256 hex of the raw token bytes.
+    /// </summary>
+    public string TokenHash { get; set; } = string.Empty;
+
+    public DateTimeOffset ExpiresAt { get; set; }
+    public DateTimeOffset? RevokedAt { get; set; }
+    public Guid? ReplacedByTokenId { get; set; }
+
+    public string? CreatedFromIp { get; set; }
+
+    public uint Version { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
+    public string? UpdatedBy { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+    public bool IsDeleted => DeletedAt.HasValue;
+
+    private readonly List<IDomainEvent> _events = [];
+    [NotMapped]
+    public IReadOnlyCollection<IDomainEvent> Events => _events.AsReadOnly();
+
+    public void RaiseEvent(IDomainEvent @event) => _events.Add(@event);
+    public void ClearEvents() => _events.Clear();
+}

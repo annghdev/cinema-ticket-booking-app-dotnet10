@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Bookings\Queries\" />
+    <Folder Include="Common\PipelineMiddlewares\" />
     <Folder Include="Features\Cinemas\Queries\" />
     <Folder Include="Features\Concessions\Commands\" />
     <Folder Include="Features\Concessions\Queries\" />

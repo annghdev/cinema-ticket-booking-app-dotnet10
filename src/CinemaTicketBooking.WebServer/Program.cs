@@ -1,9 +1,12 @@
 using CinemaTicketBooking.Application.Features.Tests;
 using CinemaTicketBooking.Infrastructure;
+using CinemaTicketBooking.Infrastructure.Auth;
 using CinemaTicketBooking.Infrastructure.Persistence;
+using CinemaTicketBooking.WebServer.ApiEndpoints;
 using CinemaTicketBooking.WebServer.CronJobs;
 using CinemaTicketBooking.WebServer;
 using JasperFx;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Wolverine;
@@ -20,6 +23,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAuthInfrastructure(builder.Configuration);
 builder.Services.AddHostedService<TicketLockRecoveryHostedService>();
 
 var app = builder.Build();
@@ -38,11 +42,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapOpenApi();
 app.MapScalarApiReference();
 app.MapGet("/apis", () => Results.Redirect("scalar/v1"));
 
-app.UseAuthorization();
+app.MapAuthEndpoints();
+app.MapBookingEndpoints();
 
 app.MapStaticAssets();
 
@@ -52,12 +60,16 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 
-using var scope = app.Services.CreateScope();
+await using var scope = app.Services.CreateAsyncScope();
 try
 {
     // Migrate Orders
     var orderContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await orderContext.Database.MigrateAsync();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+    var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+    await IdentityDataSeeder.SeedAsync(roleManager, loggerFactory.CreateLogger("IdentitySeed"));
 
     // Seed data
     //var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
@@ -70,3 +82,8 @@ catch (Exception ex)
 }
 
 return await app.RunJasperFxCommands(args);
+
+/// <summary>
+/// Exposes the implicit program class to Alba / WebApplicationFactory integration tests.
+/// </summary>
+public partial class Program;
