@@ -3,12 +3,12 @@ using Microsoft.Extensions.Options;
 
 namespace CinemaTicketBooking.Application.Features;
 
-public sealed record CheckoutConcessionSelection(Guid ConcessionId, int Quantity);
+public record CheckoutConcessionSelection(Guid ConcessionId, int Quantity);
 
 /// <summary>
 /// Creates booking and starts payment processing after pre-checkout validation succeeds.
 /// </summary>
-public sealed class CreateBookingCommand : ICommand
+public class CreateBookingCommand : ICommand
 {
     public Guid ShowTimeId { get; set; }
     public List<Guid> SelectedTicketIds { get; set; } = [];
@@ -27,7 +27,7 @@ public sealed class CreateBookingCommand : ICommand
 /// <summary>
 /// Handles booking creation, payment gateway call, and atomic persistence.
 /// </summary>
-public sealed class CreateBookingHandler(
+public class CreateBookingHandler(
     IUnitOfWork uow,
     ITicketLocker locker,
     IOptions<TicketLockingOptions> options,
@@ -179,7 +179,7 @@ public sealed class CreateBookingHandler(
 /// <summary>
 /// Validates booking + payment start payload.
 /// </summary>
-public sealed class CreateBookingValidator : AbstractValidator<CreateBookingCommand>
+public class CreateBookingValidator : AbstractValidator<CreateBookingCommand>
 {
     public CreateBookingValidator()
     {

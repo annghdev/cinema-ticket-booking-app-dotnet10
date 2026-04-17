@@ -1,5 +1,4 @@
 using CinemaTicketBooking.Application.Features;
-using CinemaTicketBooking.Domain;
 
 namespace CinemaTicketBooking.Application.Abstractions;
 

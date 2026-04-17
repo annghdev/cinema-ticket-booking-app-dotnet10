@@ -4,6 +4,7 @@ using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure.Cache;
 using CinemaTicketBooking.Infrastructure.Payments;
 using CinemaTicketBooking.Infrastructure.Persistence;
+using CinemaTicketBooking.Infrastructure.QrCodes;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +58,8 @@ public static class DependencyInjection
         // Payment services
         services.AddScoped<IPaymentService, NoPaymentGatewayService>();
         services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
+
+        services.AddSingleton<IQrCodeGenerator, QrCodeGenerator>();
 
         return services;
     }
