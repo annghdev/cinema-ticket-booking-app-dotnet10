@@ -1,5 +1,7 @@
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Features.Bookings.Commands;
+using CinemaTicketBooking.Application.Common.Auth;
+using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.IntegrationTests.Shared.DataSeeders;
 using CinemaTicketBooking.IntegrationTests.Shared.Fixtures;
@@ -309,6 +311,79 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
             .WithMessage("*not authorized*");
     }
 
+    [Fact]
+    public async Task GetBookingById_Should_Return_ExpectedBookingDetails_When_BypassingAuthorizationWithFakePermission()
+    {
+        await ResetDatabaseAsync();
+        var seed = await SeedBookingReadGraphAsync();
+        ConfigureFakeUserContext(Guid.CreateVersion7(), Permissions.BookingsViewAll);
+
+        var result = await InvokeAsync<BookingDetailsDto?>(new GetBookingByIdQuery
+        {
+            BookingId = seed.PrimaryBookingId,
+            CorrelationId = "it-get-booking-by-id-read"
+        });
+
+        result.Should().NotBeNull();
+        result!.BookingId.Should().Be(seed.PrimaryBookingId);
+        result.ShowTimeInfo.Screen.Should().Be("READ-SCR-1");
+        result.ShowTimeInfo.Movie.Should().Be("Read Query Movie");
+        result.OriginalAmount.Should().Be(370_000m);
+        result.DiscountAmount.Should().Be(20_000m);
+        result.FinalAmount.Should().Be(350_000m);
+        result.CheckinQrCode.Should().Be("qr://booking/read");
+        result.Tickets.Should().HaveCount(2);
+        result.Tickets.Select(x => x.SeatCode).Should().BeEquivalentTo(["A1", "A2"]);
+        result.Concessions.Should().ContainSingle();
+        result.Concessions.Single().Name.Should().Be("Read Combo");
+        result.Concessions.Single().Quantity.Should().Be(1);
+        result.Concessions.Single().Amount.Should().Be(120_000m);
+    }
+
+    [Fact]
+    public async Task GetBookingHistoryByCustomerId_Should_Return_FilteredPagedData_When_BypassingAuthorizationWithFakePermission()
+    {
+        await ResetDatabaseAsync();
+        var seed = await SeedBookingHistoryGraphAsync();
+        ConfigureFakeUserContext(Guid.CreateVersion7(), Permissions.BookingsViewAll);
+
+        var page1 = await InvokeAsync<PagedResult<BookingMinimalInfoDto>>(new GetBookingHistoryByCustomerIdQuery
+        {
+            CustomerId = seed.OwnerCustomerId,
+            Date = seed.FilterDate,
+            PageNumber = 1,
+            PageSize = 1,
+            CorrelationId = "it-get-booking-history-page-1"
+        });
+
+        page1.TotalItems.Should().Be(2);
+        page1.PageNumber.Should().Be(1);
+        page1.PageSize.Should().Be(1);
+        page1.TotalPages.Should().Be(2);
+        page1.Items.Should().ContainSingle();
+        page1.Items.Single().BookingId.Should().Be(seed.NewestBookingIdOnFilterDate);
+
+        var page2 = await InvokeAsync<PagedResult<BookingMinimalInfoDto>>(new GetBookingHistoryByCustomerIdQuery
+        {
+            CustomerId = seed.OwnerCustomerId,
+            Date = seed.FilterDate,
+            PageNumber = 2,
+            PageSize = 1,
+            CorrelationId = "it-get-booking-history-page-2"
+        });
+
+        page2.TotalItems.Should().Be(2);
+        page2.Items.Should().ContainSingle();
+        page2.Items.Single().BookingId.Should().Be(seed.OldestBookingIdOnFilterDate);
+    }
+
+    private void ConfigureFakeUserContext(Guid? customerId, params string[] permissions)
+    {
+        FakeUserContext.IsAuthenticated = true;
+        FakeUserContext.CustomerId = customerId;
+        FakeUserContext.Permissions = new HashSet<string>(permissions, StringComparer.Ordinal);
+    }
+
     private async Task<(Guid BookingId, string SessionId)> ArrangeBookingWithFailedPaymentAsync()
     {
         var (bookingId, gatewayTxId, _, sessionId) = await ArrangePendingBookingForVerifyPaymentAsync();
@@ -407,5 +482,142 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
         db.Concessions.Add(concession);
         await db.SaveChangesAsync();
         return concession.Id;
+    }
+
+    private async Task<(Guid PrimaryBookingId, Guid OwnerCustomerId)> SeedBookingReadGraphAsync()
+    {
+        await using var db = CreateDbContext();
+
+        var cinema = IntegrationEntityBuilder.Cinema("Read Query Cinema");
+        var movie = IntegrationEntityBuilder.Movie("Read Query Movie", MovieStatus.NowShowing);
+        var screen = IntegrationEntityBuilder.Screen(cinema.Id, "READ-SCR-1", "[[1,1,1]]");
+        var showTime = IntegrationEntityBuilder.ShowTime(movie.Id, screen.Id);
+        showTime.Date = new DateOnly(2026, 4, 16);
+
+        var owner = IntegrationEntityBuilder.Customer("session-owner");
+        owner.IsRegistered = true;
+        var otherCustomer = IntegrationEntityBuilder.Customer("session-other");
+        otherCustomer.IsRegistered = true;
+
+        var ticketA1 = IntegrationEntityBuilder.Ticket(showTime.Id, "READ-T-1", TicketStatus.Sold);
+        ticketA1.SeatCode = "A1";
+        ticketA1.Price = 125_000m;
+        var ticketA2 = IntegrationEntityBuilder.Ticket(showTime.Id, "READ-T-2", TicketStatus.Sold);
+        ticketA2.SeatCode = "A2";
+        ticketA2.Price = 125_000m;
+
+        var concession = IntegrationEntityBuilder.Concession("Read Combo", 120_000m);
+        concession.ImageUrl = "https://img.local/read-combo.png";
+
+        var booking = IntegrationEntityBuilder.Booking(showTime.Id, owner.Id, "Read Owner");
+        booking.CreatedAt = new DateTimeOffset(2026, 4, 16, 12, 0, 0, TimeSpan.Zero);
+        booking.OriginAmount = 370_000m;
+        booking.FinalAmount = 350_000m;
+        booking.Status = BookingStatus.Confirmed;
+        booking.QrCode = "qr://booking/read";
+        booking.Tickets =
+        [
+            new BookingTicket
+            {
+                Id = Guid.CreateVersion7(),
+                BookingId = booking.Id,
+                TicketId = ticketA1.Id,
+                Ticket = ticketA1
+            },
+            new BookingTicket
+            {
+                Id = Guid.CreateVersion7(),
+                BookingId = booking.Id,
+                TicketId = ticketA2.Id,
+                Ticket = ticketA2
+            }
+        ];
+        booking.Concessions =
+        [
+            new BookingConcession
+            {
+                Id = Guid.CreateVersion7(),
+                BookingId = booking.Id,
+                ConcessionId = concession.Id,
+                Concession = concession,
+                Quantity = 1
+            }
+        ];
+
+        var otherBooking = IntegrationEntityBuilder.Booking(showTime.Id, otherCustomer.Id, "Other Owner");
+        otherBooking.OriginAmount = 100_000m;
+        otherBooking.FinalAmount = 100_000m;
+        otherBooking.QrCode = "qr://booking/other";
+
+        db.Cinemas.Add(cinema);
+        db.Movies.Add(movie);
+        db.Screens.Add(screen);
+        db.ShowTimes.Add(showTime);
+        db.Customers.AddRange(owner, otherCustomer);
+        db.Concessions.Add(concession);
+        db.Tickets.AddRange(ticketA1, ticketA2);
+        db.Bookings.AddRange(booking, otherBooking);
+
+        await db.SaveChangesAsync();
+        return (booking.Id, owner.Id);
+    }
+
+    private async Task<(Guid OwnerCustomerId, Guid NewestBookingIdOnFilterDate, Guid OldestBookingIdOnFilterDate, DateOnly FilterDate)>
+        SeedBookingHistoryGraphAsync()
+    {
+        await using var db = CreateDbContext();
+
+        var cinema = IntegrationEntityBuilder.Cinema("History Query Cinema");
+        var movie = IntegrationEntityBuilder.Movie("History Query Movie", MovieStatus.NowShowing);
+        var screen = IntegrationEntityBuilder.Screen(cinema.Id, "HIS-SCR-1", "[[1,1,1]]");
+
+        var filterDate = new DateOnly(2026, 4, 17);
+        var sameDayStart = new DateTimeOffset(2026, 4, 17, 18, 0, 0, TimeSpan.Zero);
+        var otherDayStart = new DateTimeOffset(2026, 4, 18, 9, 0, 0, TimeSpan.Zero);
+
+        var showTimeOnFilterDate = IntegrationEntityBuilder.ShowTime(movie.Id, screen.Id);
+        showTimeOnFilterDate.Date = filterDate;
+        showTimeOnFilterDate.StartAt = sameDayStart;
+        showTimeOnFilterDate.EndAt = sameDayStart.AddHours(2);
+
+        var showTimeOnOtherDate = IntegrationEntityBuilder.ShowTime(movie.Id, screen.Id);
+        showTimeOnOtherDate.Date = DateOnly.FromDateTime(otherDayStart.DateTime);
+        showTimeOnOtherDate.StartAt = otherDayStart;
+        showTimeOnOtherDate.EndAt = otherDayStart.AddHours(2);
+
+        var owner = IntegrationEntityBuilder.Customer("history-owner");
+        owner.IsRegistered = true;
+        var otherCustomer = IntegrationEntityBuilder.Customer("history-other");
+        otherCustomer.IsRegistered = true;
+
+        var oldestBooking = IntegrationEntityBuilder.Booking(showTimeOnFilterDate.Id, owner.Id, "History Owner");
+        oldestBooking.CreatedAt = new DateTimeOffset(2026, 4, 17, 8, 0, 0, TimeSpan.Zero);
+        oldestBooking.FinalAmount = 210_000m;
+        oldestBooking.OriginAmount = 210_000m;
+
+        var newestBooking = IntegrationEntityBuilder.Booking(showTimeOnFilterDate.Id, owner.Id, "History Owner");
+        newestBooking.CreatedAt = new DateTimeOffset(2026, 4, 17, 10, 0, 0, TimeSpan.Zero);
+        newestBooking.FinalAmount = 260_000m;
+        newestBooking.OriginAmount = 260_000m;
+
+        var bookingOnOtherDay = IntegrationEntityBuilder.Booking(showTimeOnOtherDate.Id, owner.Id, "History Owner");
+        bookingOnOtherDay.CreatedAt = new DateTimeOffset(2026, 4, 18, 7, 0, 0, TimeSpan.Zero);
+        bookingOnOtherDay.FinalAmount = 180_000m;
+        bookingOnOtherDay.OriginAmount = 180_000m;
+
+        var bookingOfOtherCustomer = IntegrationEntityBuilder.Booking(showTimeOnFilterDate.Id, otherCustomer.Id, "History Other");
+        bookingOfOtherCustomer.CreatedAt = new DateTimeOffset(2026, 4, 17, 9, 0, 0, TimeSpan.Zero);
+        bookingOfOtherCustomer.FinalAmount = 150_000m;
+        bookingOfOtherCustomer.OriginAmount = 150_000m;
+
+        db.Cinemas.Add(cinema);
+        db.Movies.Add(movie);
+        db.Screens.Add(screen);
+        db.ShowTimes.AddRange(showTimeOnFilterDate, showTimeOnOtherDate);
+        db.Customers.AddRange(owner, otherCustomer);
+        db.Bookings.AddRange(oldestBooking, newestBooking, bookingOnOtherDay, bookingOfOtherCustomer);
+
+        await db.SaveChangesAsync();
+        return (owner.Id, newestBooking.Id, oldestBooking.Id, filterDate);
     }
 }

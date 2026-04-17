@@ -1,3 +1,4 @@
+using CinemaTicketBooking.Application;
 using CinemaTicketBooking.IntegrationTests.Shared.Fixtures;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,18 @@ public abstract class ApplicationFeatureTestBase(PostgresContainerFixture databa
     protected AppDbContext CreateDbContext()
     {
         return DatabaseFixture.CreateDbContext();
+    }
+
+    protected FakeUserContext FakeUserContext
+    {
+        get
+        {
+            var userContext = _messageHost?.Services.GetRequiredService<IUserContext>()
+                ?? throw new InvalidOperationException("Wolverine message host has not been initialized.");
+
+            return userContext as FakeUserContext
+                ?? throw new InvalidOperationException("Configured IUserContext is not FakeUserContext.");
+        }
     }
 
     protected async Task<TResponse> InvokeAsync<TResponse>(object request, CancellationToken ct = default)
