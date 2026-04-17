@@ -125,6 +125,11 @@ public sealed class UnitOfWorkBehaviorTests(
     {
         var userContext = new Mock<IUserContext>();
         userContext.Setup(x => x.UserName).Returns(userName);
+        userContext.Setup(x => x.IsAuthenticated).Returns(true);
+        userContext.Setup(x => x.UserId).Returns(Guid.CreateVersion7());
+        userContext.Setup(x => x.CustomerId).Returns((Guid?)null);
+        userContext.Setup(x => x.Permissions).Returns(new HashSet<string>());
+        userContext.Setup(x => x.HasPermission(It.IsAny<string>())).Returns(false);
 
         return new EFUnitOfWork(
             db,

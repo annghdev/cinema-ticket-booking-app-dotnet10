@@ -1,6 +1,8 @@
 using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Infrastructure;
+using CinemaTicketBooking.Infrastructure.Auth;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using JasperFx;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,7 @@ public static class ApplicationMessageHostFactory
             {
                 services.AddInfrastructure(new ConfigurationBuilder().Build());
                 services.AddSingleton<IUserContext, FakeUserContext>();
+                services.AddScoped<IAccountCustomerLinker, AccountCustomerLinker>();
                 services.Configure<TicketLockingOptions>(opts =>
                 {
                     opts.LockHoldSeconds = 1;
