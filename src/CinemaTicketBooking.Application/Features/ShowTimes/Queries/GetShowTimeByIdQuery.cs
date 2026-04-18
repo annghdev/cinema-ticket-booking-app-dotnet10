@@ -53,6 +53,7 @@ public class GetShowTimeByIdHandler(IUnitOfWork uow)
             showTime.Screen?.Code ?? string.Empty,
             showTime.Screen?.CinemaId ?? Guid.Empty,
             showTime.Screen?.Cinema?.Name ?? string.Empty,
+            showTime.Screen?.SeatMap ?? string.Empty,
             showTime.Date,
             showTime.StartAt,
             showTime.EndAt,

@@ -22,6 +22,17 @@ GET {{baseUrl}}/api/showtimes/dropdown?maxItems=20&status=Upcoming
 ### 6) Get showtime detail by id
 GET {{baseUrl}}/api/showtimes/{{showTimeId}}
 
+### Realtime guide (SignalR)
+# 1. Fetch snapshot first:
+#    GET {{baseUrl}}/api/showtimes/{{showTimeId}}
+# 2. Open SignalR connection to:
+#    {{baseUrl}}/hubs/tickets
+# 3. After connected, invoke hub method:
+#    SubscribeShowTime(showTimeId)
+# 4. Listen for server event:
+#    ticket-status-changed
+# 5. Merge delta payload (ticketId/ticketCode/status) into seat map UI state.
+
 ### 7) Add showtime
 POST {{baseUrl}}/api/showtimes
 Content-Type: application/json

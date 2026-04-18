@@ -4,9 +4,11 @@ using CinemaTicketBooking.Infrastructure.Auth;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using CinemaTicketBooking.WebServer.ApiEndpoints;
 using CinemaTicketBooking.WebServer.CronJobs;
+using CinemaTicketBooking.WebServer.Hubs;
 using CinemaTicketBooking.WebServer.Middlewares;
 using CinemaTicketBooking.WebServer;
 using JasperFx;
+using CinemaTicketBooking.Application.Abstractions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -20,11 +22,13 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthInfrastructure(builder.Configuration);
+builder.Services.AddSingleton<ITicketRealtimePublisher, SignalRTicketRealtimePublisher>();
 builder.Services.AddHostedService<TicketLockRecoveryHostedService>();
 
 var app = builder.Build();
@@ -58,6 +62,7 @@ app.MapShowTimeEndpoints();
 app.MapCinemaEndpoints();
 app.MapMovieEndpoints();
 app.MapScreenEndpoints();
+app.MapHub<TicketStatusHub>("/hubs/tickets").AllowAnonymous();
 
 app.MapStaticAssets();
 
