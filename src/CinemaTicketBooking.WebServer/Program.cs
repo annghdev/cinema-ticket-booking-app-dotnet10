@@ -4,6 +4,7 @@ using CinemaTicketBooking.Infrastructure.Auth;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using CinemaTicketBooking.WebServer.ApiEndpoints;
 using CinemaTicketBooking.WebServer.CronJobs;
+using CinemaTicketBooking.WebServer.Middlewares;
 using CinemaTicketBooking.WebServer;
 using JasperFx;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +28,8 @@ builder.Services.AddAuthInfrastructure(builder.Configuration);
 builder.Services.AddHostedService<TicketLockRecoveryHostedService>();
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.MapDefaultEndpoints();
 
@@ -52,6 +55,9 @@ app.MapGet("/apis", () => Results.Redirect("scalar/v1"));
 app.MapAuthEndpoints();
 app.MapBookingEndpoints();
 app.MapShowTimeEndpoints();
+app.MapCinemaEndpoints();
+app.MapMovieEndpoints();
+app.MapScreenEndpoints();
 
 app.MapStaticAssets();
 
