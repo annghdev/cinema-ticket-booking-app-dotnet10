@@ -6,8 +6,8 @@ using Wolverine;
 namespace CinemaTicketBooking.Application.Common.PipelineMiddlewares;
 
 /// <summary>
-/// En Wolverine middleware: structured logging for message handling (duration, correlation, message name).
-/// En Queries: Information only when under slow threshold; Warning when slow (per logging skill).
+/// Wolverine middleware: structured logging for message handling (duration, correlation, message name).
+/// Queries: Information only when under slow threshold; Warning when slow (per logging skill).
 /// </summary>
 public static class LoggingMiddleware
 {
@@ -22,7 +22,7 @@ public static class LoggingMiddleware
     }
 
     /// <summary>
-    /// En Emits pipeline log line after handler completion (success path; failures are logged by exception policy).
+    /// Emits pipeline log line after handler completion (success path; failures are logged by exception policy).
     /// </summary>
     public static void Finally(
         Stopwatch stopwatch,

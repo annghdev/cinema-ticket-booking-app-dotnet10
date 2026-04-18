@@ -8,9 +8,9 @@ using Wolverine.Runtime.Serialization;
 namespace CinemaTicketBooking.Application.Common.PipelineMiddlewares;
 
 /// <summary>
-/// En Wolverine middleware: optional response caching for messages implementing <see cref="ICachableQuery{TResponse}"/>.
-/// En Serialization uses <see cref="WolverineOptions.DefaultSerializer"/> (same configuration as the Wolverine runtime).
-/// En Cache hit: sets <see cref="Envelope.Response"/> on the active envelope (required for <c>InvokeAsync&lt;T&gt;</c> return). Cache miss: <c>Finally</c> reads <c>Envelope.Response</c> after the handler. Avoids <c>object?</c> middleware parameters that DI resolves as <see cref="object"/>.
+/// Wolverine middleware: optional response caching for messages implementing <see cref="ICachableQuery{TResponse}"/>.
+/// Serialization uses <see cref="WolverineOptions.DefaultSerializer"/> (same configuration as the Wolverine runtime).
+/// Cache hit: sets <see cref="Envelope.Response"/> on the active envelope (required for <c>InvokeAsync&lt;T&gt;</c> return). Cache miss: <c>Finally</c> reads <c>Envelope.Response</c> after the handler. Avoids <c>object?</c> middleware parameters that DI resolves as <see cref="object"/>.
 /// </summary>
 public static class CachingMiddleware
 {
@@ -20,8 +20,8 @@ public static class CachingMiddleware
         typeof(Envelope).GetProperty("Response", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
 
     /// <summary>
-    /// En Returns cached handler result and stops the chain when a cache entry exists.
-    /// En For <c>InvokeAsync&lt;T&gt;</c>, Wolverine returns <see cref="Envelope.Response"/> on the current envelope
+    /// Returns cached handler result and stops the chain when a cache entry exists.
+    /// For <c>InvokeAsync&lt;T&gt;</c>, Wolverine returns <see cref="Envelope.Response"/> on the current envelope
     /// (<see href="https://github.com/JasperFx/wolverine/blob/main/src/Wolverine/Runtime/Handlers/Executor.cs"/>); <c>RespondToSenderAsync</c> does not set that and yields empty results on cache hit.
     /// </summary>
     public static async Task<HandlerContinuation> LoadAsync(
@@ -98,7 +98,7 @@ public static class CachingMiddleware
     }
 
     /// <summary>
-    /// En After handler + other <c>After</c> middleware; persists <see cref="Envelope.Response"/> when present.
+    /// After handler + other <c>After</c> middleware; persists <see cref="Envelope.Response"/> when present.
     /// </summary>
     public static async Task Finally(
         Envelope envelope,

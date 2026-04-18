@@ -4,7 +4,7 @@ using CinemaTicketBooking.Application.Abstractions;
 namespace CinemaTicketBooking.IntegrationTests.ApplicationTests;
 
 /// <summary>
-/// En Wolverine probe message for <see cref="CachingMiddlewareIntegrationTests"/>.
+/// Wolverine probe message for <see cref="CachingMiddlewareIntegrationTests"/>.
 /// </summary>
 public sealed class CachingMiddlewareProbeQuery : ICachableQuery<CachingMiddlewareProbeDto>, ICachable
 {
@@ -17,7 +17,7 @@ public sealed class CachingMiddlewareProbeQuery : ICachableQuery<CachingMiddlewa
 public sealed record CachingMiddlewareProbeDto(int Value);
 
 /// <summary>
-/// En Handler for <see cref="CachingMiddlewareProbeQuery"/>; <see cref="InvocationCount"/> tracks executions.
+/// Handler for <see cref="CachingMiddlewareProbeQuery"/>; <see cref="InvocationCount"/> tracks executions.
 /// </summary>
 public sealed class CachingMiddlewareProbeHandler
 {

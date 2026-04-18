@@ -5,7 +5,7 @@ using CinemaTicketBooking.Application.Abstractions;
 namespace CinemaTicketBooking.IntegrationTests.Shared.Fakes;
 
 /// <summary>
-/// En In-memory <see cref="ICacheService"/> for tests (JSON round-trip matches Redis cache behavior).
+/// In-memory <see cref="ICacheService"/> for tests (JSON round-trip matches Redis cache behavior).
 /// </summary>
 public sealed class InMemoryCacheService : ICacheService
 {

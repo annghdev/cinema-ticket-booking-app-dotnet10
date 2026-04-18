@@ -3,7 +3,7 @@ using CinemaTicketBooking.Application.Abstractions;
 namespace CinemaTicketBooking.Infrastructure.Cache;
 
 /// <summary>
-/// En No Redis: cache interface is inert so callers can still resolve <see cref="ICacheService"/>.
+/// No Redis: cache interface is inert so callers can still resolve <see cref="ICacheService"/>.
 /// </summary>
 public sealed class NoOpCacheService : ICacheService
 {

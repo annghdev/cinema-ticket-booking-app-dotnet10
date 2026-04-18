@@ -37,7 +37,7 @@ public static class WebApplicationBuilderExtensions
             opts.Policies.AutoApplyTransactions();
             opts.Policies.UseDurableLocalQueues();
 
-            // En Message pipeline: logging, optional query cache, exception logging (non-HTTP paths).
+            // Message pipeline: logging, optional query cache, exception logging (non-HTTP paths).
             opts.Policies.AddMiddleware(typeof(LoggingMiddleware));
             opts.Policies.ForMessagesOfType<ICachableQuery>().AddMiddleware(typeof(CachingMiddleware));
 
@@ -51,8 +51,8 @@ public static class WebApplicationBuilderExtensions
             .RetryWithCooldown(50.Milliseconds(), 250.Milliseconds(), 1.Seconds())
             .Then.MoveToErrorQueue();
 
-            // En Last: log any remaining handler failures (Publish, InvokeAsync, cron, scheduled) that are not matched above.
-            // En Uses MoveToErrorQueue as the primary action so .And runs as a side effect (same as default terminal outcome for poison messages).
+            // Last: log any remaining handler failures (Publish, InvokeAsync, cron, scheduled) that are not matched above.
+            // Uses MoveToErrorQueue as the primary action so .And runs as a side effect (same as default terminal outcome for poison messages).
             opts.Policies.OnException<Exception>()
                 .MoveToErrorQueue()
                 .And((runtime, _, ex) =>
