@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets concession items with pagination, filtering, and sorting.
 /// </summary>
-public class GetPagedConcessionsQuery : IQuery
+public class GetPagedConcessionsQuery : IQuery<PagedResult<ConcessionDto>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;

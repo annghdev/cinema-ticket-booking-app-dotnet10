@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets a movie by id.
 /// </summary>
-public class GetMovieByIdQuery : IQuery
+public class GetMovieByIdQuery : IQuery<MovieDto?>
 {
     public Guid Id { get; set; }
     public string CorrelationId { get; set; } = string.Empty;

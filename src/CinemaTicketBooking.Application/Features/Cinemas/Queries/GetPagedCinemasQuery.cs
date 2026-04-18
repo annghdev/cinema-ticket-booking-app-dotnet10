@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets cinemas with pagination, filtering, and sorting.
 /// </summary>
-public class GetPagedCinemasQuery : IQuery
+public class GetPagedCinemasQuery : IQuery<PagedResult<CinemaDto>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;

@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets all pricing policies.
 /// </summary>
-public class GetPricingPoliciesQuery : IQuery
+public class GetPricingPoliciesQuery : IQuery<IReadOnlyList<PricingPolicyDto>>
 {
     public Guid? CinemaId { get; set; }
     public string CorrelationId { get; set; } = string.Empty;

@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets showtimes for dropdown data source.
 /// </summary>
-public class GetShowTimeDropdownQuery : IQuery
+public class GetShowTimeDropdownQuery : IQuery<IReadOnlyList<ShowTimeDropdownDto>>
 {
     public Guid? CinemaId { get; set; }
     public Guid? MovieId { get; set; }

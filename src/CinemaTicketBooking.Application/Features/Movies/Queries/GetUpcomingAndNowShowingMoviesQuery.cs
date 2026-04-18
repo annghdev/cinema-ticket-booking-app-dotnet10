@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets movies that are upcoming or currently showing.
 /// </summary>
-public class GetUpcomingAndNowShowingMoviesQuery : IQuery
+public class GetUpcomingAndNowShowingMoviesQuery : IQuery<IReadOnlyList<MovieDto>>
 {
     public string CorrelationId { get; set; } = string.Empty;
 }

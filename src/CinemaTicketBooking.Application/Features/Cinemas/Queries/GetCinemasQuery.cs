@@ -5,9 +5,13 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets all cinemas.
 /// </summary>
-public class GetCinemasQuery : IQuery
+public class GetCinemasQuery : ICachableQuery<IReadOnlyList<CinemaDto>>
 {
     public string CorrelationId { get; set; } = string.Empty;
+
+    public string CacheKey => "cinemas_all";
+
+    public TimeSpan? SlidingExpiration => TimeSpan.FromMinutes(2);
 }
 
 /// <summary>

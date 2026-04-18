@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets all movies.
 /// </summary>
-public class GetMoviesQuery : IQuery
+public class GetMoviesQuery : IQuery<IReadOnlyList<MovieDto>>
 {
     public string CorrelationId { get; set; } = string.Empty;
 }

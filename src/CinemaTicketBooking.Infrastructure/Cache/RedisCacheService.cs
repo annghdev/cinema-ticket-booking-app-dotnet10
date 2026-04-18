@@ -5,13 +5,14 @@ using StackExchange.Redis;
 
 namespace CinemaTicketBooking.Infrastructure.Cache;
 
-public class RedisCacheService<T>(
+public class RedisCacheService(
     IDistributedCache distributedCache,
-    IConnectionMultiplexer connectionMultiplexer) : ICacheService<T>
+    IConnectionMultiplexer connectionMultiplexer) : ICacheService
 {
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
-    public async Task<T?> GetAsync(string key, CancellationToken ct = default)
+    /// <inheritdoc />
+    public async Task<T?> GetAsync<T>(string key, CancellationToken ct = default)
     {
         var json = await distributedCache.GetStringAsync(key, ct);
         if (string.IsNullOrWhiteSpace(json))
@@ -22,7 +23,8 @@ public class RedisCacheService<T>(
         return JsonSerializer.Deserialize<T>(json, SerializerOptions);
     }
 
-    public async Task SetAsync(string key, T value, TimeSpan? slidingExpiration = null, CancellationToken ct = default)
+    /// <inheritdoc />
+    public async Task SetAsync<T>(string key, T value, TimeSpan? slidingExpiration = null, CancellationToken ct = default)
     {
         var options = new DistributedCacheEntryOptions();
         if (slidingExpiration.HasValue)
@@ -34,22 +36,26 @@ public class RedisCacheService<T>(
         await distributedCache.SetStringAsync(key, json, options, ct);
     }
 
+    /// <inheritdoc />
     public Task RemoveAsync(string key, CancellationToken ct = default)
     {
         return distributedCache.RemoveAsync(key, ct);
     }
 
+    /// <inheritdoc />
     public Task ClearAsync(CancellationToken ct = default)
     {
         return RemoveKeysByPatternAsync("*", ct);
     }
 
+    /// <inheritdoc />
     public async Task<bool> ExistsAsync(string key, CancellationToken ct = default)
     {
         var db = connectionMultiplexer.GetDatabase();
         return await db.KeyExistsAsync(key);
     }
 
+    /// <inheritdoc />
     public Task RemoveByPrefix(string prefix, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(prefix))

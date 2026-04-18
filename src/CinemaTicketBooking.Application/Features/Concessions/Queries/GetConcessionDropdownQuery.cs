@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets concessions for dropdown data source.
 /// </summary>
-public class GetConcessionDropdownQuery : IQuery
+public class GetConcessionDropdownQuery : IQuery<IReadOnlyList<ConcessionDropdownDto>>
 {
     public string? SearchTerm { get; set; }
     public bool OnlyAvailable { get; set; } = true;

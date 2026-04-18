@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets a screen by id.
 /// </summary>
-public class GetScreenByIdQuery : IQuery
+public class GetScreenByIdQuery : IQuery<ScreenDetailDto?>
 {
     public Guid Id { get; set; }
     public string CorrelationId { get; set; } = string.Empty;

@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets a concession item by id.
 /// </summary>
-public class GetConcessionByIdQuery : IQuery
+public class GetConcessionByIdQuery : IQuery<ConcessionDto?>
 {
     public Guid Id { get; set; }
     public string CorrelationId { get; set; } = string.Empty;

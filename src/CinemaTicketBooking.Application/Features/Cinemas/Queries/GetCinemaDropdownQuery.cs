@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets cinemas for dropdown data source.
 /// </summary>
-public class GetCinemaDropdownQuery : IQuery
+public class GetCinemaDropdownQuery : IQuery<IReadOnlyList<CinemaDropdownDto>>
 {
     public string? SearchTerm { get; set; }
     public bool OnlyActive { get; set; } = true;

@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets pricing policies with pagination, filtering, and sorting.
 /// </summary>
-public class GetPagedPricingPoliciesQuery : IQuery
+public class GetPagedPricingPoliciesQuery : IQuery<PagedResult<PricingPolicyDto>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;

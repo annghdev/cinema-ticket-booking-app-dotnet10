@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets a showtime by id.
 /// </summary>
-public class GetShowTimeByIdQuery : IQuery
+public class GetShowTimeByIdQuery : IQuery<ShowTimeDetailDto?>
 {
     public Guid Id { get; set; }
     public string CorrelationId { get; set; } = string.Empty;

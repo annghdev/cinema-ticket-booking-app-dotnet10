@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets showtimes with pagination, filtering, and sorting.
 /// </summary>
-public class GetPagedShowTimesQuery : IQuery
+public class GetPagedShowTimesQuery : IQuery<PagedResult<ShowTimeDto>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;

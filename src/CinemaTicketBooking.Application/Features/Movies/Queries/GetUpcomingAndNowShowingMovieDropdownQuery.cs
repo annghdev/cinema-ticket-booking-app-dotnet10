@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets dropdown data for movies that are upcoming or currently showing.
 /// </summary>
-public class GetUpcomingAndNowShowingMovieDropdownQuery : IQuery
+public class GetUpcomingAndNowShowingMovieDropdownQuery : IQuery<IReadOnlyList<MovieDropdownDto>>
 {
     public string? SearchTerm { get; set; }
     public int MaxItems { get; set; } = 100;

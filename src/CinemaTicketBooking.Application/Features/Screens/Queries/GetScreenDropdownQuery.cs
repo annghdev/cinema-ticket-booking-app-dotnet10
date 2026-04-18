@@ -5,7 +5,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets screens for dropdown data source, optionally filtered by cinema.
 /// </summary>
-public class GetScreenDropdownQuery : IQuery
+public class GetScreenDropdownQuery : IQuery<IReadOnlyList<ScreenDropdownDto>>
 {
     public Guid? CinemaId { get; set; }
     public string? SearchTerm { get; set; }

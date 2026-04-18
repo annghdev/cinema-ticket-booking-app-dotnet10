@@ -3,7 +3,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Gets a cinema by id.
 /// </summary>
-public class GetCinemaByIdQuery : IQuery
+public class GetCinemaByIdQuery : IQuery<CinemaDto?>
 {
     public Guid Id { get; set; }
     public string CorrelationId { get; set; } = string.Empty;
