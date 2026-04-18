@@ -1,0 +1,59 @@
+@baseUrl = http://localhost:5000
+@movieId = 019d9c10-5d68-7343-8504-b66a6ce386c8
+
+### Get all movies
+GET {{baseUrl}}/api/movies
+
+### Get paged movies
+GET {{baseUrl}}/api/movies/paged?pageNumber=1&pageSize=10&sortBy=createdat&sortDirection=desc
+
+### Get paged movies with filters
+GET {{baseUrl}}/api/movies/paged?pageNumber=1&pageSize=10&searchTerm=Chronicles&status=NowShowing&genre=SciFi&sortBy=name&sortDirection=asc
+
+### Get movie dropdown
+GET {{baseUrl}}/api/movies/dropdown?status=NowShowing&maxItems=20
+
+### Get upcoming and now-showing movies
+GET {{baseUrl}}/api/movies/upcoming-now-showing
+
+### Get upcoming and now-showing movie dropdown
+GET {{baseUrl}}/api/movies/upcoming-now-showing/dropdown?searchTerm=Chron&maxItems=20
+
+### Get movie by id
+GET {{baseUrl}}/api/movies/{{movieId}}
+
+### Create movie
+POST {{baseUrl}}/api/movies
+Content-Type: application/json
+
+{
+  "name": "New Movie Sample",
+  "description": "Sample movie for API testing",
+  "thumbnailUrl": "https://images.unsplash.com/photo-1536440136628-849c177e76a1",
+  "studio": "Sample Studio",
+  "director": "Sample Director",
+  "officialTrailerUrl": "https://www.youtube.com/watch?v=2g811Eo7K8U",
+  "duration": 120,
+  "genre": 0,
+  "status": 0,
+  "correlationId": "sample-create-movie"
+}
+
+### Update movie
+PUT {{baseUrl}}/api/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Movie Name",
+  "description": "Updated movie description",
+  "thumbnailUrl": "https://images.unsplash.com/photo-1440404653325-ab127d49abc1",
+  "studio": "Updated Studio",
+  "director": "Updated Director",
+  "officialTrailerUrl": "https://www.youtube.com/watch?v=EXeTwQWrcwY",
+  "duration": 125,
+  "genre": 3,
+  "correlationId": "sample-update-movie"
+}
+
+### Delete movie
+DELETE {{baseUrl}}/api/movies/{{movieId}}

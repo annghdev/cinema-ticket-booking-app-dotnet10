@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:5000
+@cinemaId = 019d9c10-5d67-7eb7-a0b6-89e4beab7323
+
+### Get all cinemas
+GET {{baseUrl}}/api/cinemas
+
+### Get paged cinemas
+GET {{baseUrl}}/api/cinemas/paged?pageNumber=1&pageSize=10&sortBy=createdat&sortDirection=desc
+
+### Get paged cinemas with filters
+GET {{baseUrl}}/api/cinemas/paged?pageNumber=1&pageSize=10&searchTerm=Galaxy&isActive=true&sortBy=name&sortDirection=asc
+
+### Get cinema dropdown
+GET {{baseUrl}}/api/cinemas/dropdown?onlyActive=true&maxItems=20
+
+### Get cinema by id
+GET {{baseUrl}}/api/cinemas/{{cinemaId}}
+
+### Create cinema
+POST {{baseUrl}}/api/cinemas
+Content-Type: application/json
+
+{
+  "name": "Cinema Seed Sample",
+  "thumbnailUrl": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba",
+  "geo": "10.762622,106.660172",
+  "address": "1 Nguyen Hue, District 1, Ho Chi Minh City",
+  "isActive": true,
+  "correlationId": "sample-create-cinema"
+}
+
+### Update cinema
+PUT {{baseUrl}}/api/cinemas/{{cinemaId}}
+Content-Type: application/json
+
+{
+  "name": "Cinema Updated Name",
+  "thumbnailUrl": "https://images.unsplash.com/photo-1517602302552-471fe67acf66",
+  "geo": "10.773300,106.699700",
+  "address": "116 Nguyen Du, District 1, Ho Chi Minh City",
+  "correlationId": "sample-update-cinema"
+}
+
+### Delete cinema
+DELETE {{baseUrl}}/api/cinemas/{{cinemaId}}

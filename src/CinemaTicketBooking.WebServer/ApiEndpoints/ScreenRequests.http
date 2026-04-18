@@ -1,0 +1,63 @@
+@baseUrl = http://localhost:5000
+@screenId = 019d9c10-5d8d-75c1-b8a6-eb3e5fc838d0
+@seatId = 00000000-0000-0000-0000-000000000000
+@cinemaId = 019d9c10-5d67-7eb7-a0b6-89e4beab7323
+
+### Get all screens
+GET {{baseUrl}}/api/screens
+
+### Get screens by cinema
+GET {{baseUrl}}/api/screens?cinemaId={{cinemaId}}
+
+### Get paged screens
+GET {{baseUrl}}/api/screens/paged?pageNumber=1&pageSize=10&sortBy=createdat&sortDirection=desc
+
+### Get paged screens with filters
+GET {{baseUrl}}/api/screens/paged?pageNumber=1&pageSize=10&cinemaId={{cinemaId}}&isActive=true&type=2&sortBy=code&sortDirection=asc
+
+### Get screen dropdown
+GET {{baseUrl}}/api/screens/dropdown?cinemaId={{cinemaId}}&onlyActive=true&maxItems=20
+
+### Get screen by id
+GET {{baseUrl}}/api/screens/{{screenId}}
+
+### Add screen
+POST {{baseUrl}}/api/screens
+Content-Type: application/json
+
+{
+  "cinemaId": "{{cinemaId}}",
+  "code": "S-NEW-01",
+  "rowOfSeats": 5,
+  "columnOfSeats": 8,
+  "totalSeats": 27,
+  "seatMap": "[[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[3,0,0,3,0,3,0,0]]",
+  "type": 1,
+  "correlationId": "sample-add-screen"
+}
+
+### Update screen basic info
+PUT {{baseUrl}}/api/screens/{{screenId}}
+Content-Type: application/json
+
+{
+  "code": "S-UPDATED-01",
+  "rowOfSeats": 5,
+  "columnOfSeats": 8,
+  "totalSeats": 27,
+  "seatMap": "[[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[3,0,0,3,0,3,0,0]]",
+  "type": 2,
+  "correlationId": "sample-update-screen"
+}
+
+### Activate screen
+POST {{baseUrl}}/api/screens/{{screenId}}/activate
+
+### Deactivate screen
+POST {{baseUrl}}/api/screens/{{screenId}}/deactivate
+
+### Activate screen seat
+POST {{baseUrl}}/api/screens/{{screenId}}/seats/{{seatId}}/activate
+
+### Deactivate screen seat
+POST {{baseUrl}}/api/screens/{{screenId}}/seats/{{seatId}}/deactivate
