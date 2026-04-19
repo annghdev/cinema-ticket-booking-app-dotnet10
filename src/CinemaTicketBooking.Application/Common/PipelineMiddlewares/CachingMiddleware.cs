@@ -1,9 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
-using CinemaTicketBooking.Application.Abstractions;
 using Microsoft.Extensions.Logging;
-using Wolverine;
-using Wolverine.Runtime.Serialization;
 
 namespace CinemaTicketBooking.Application.Common.PipelineMiddlewares;
 

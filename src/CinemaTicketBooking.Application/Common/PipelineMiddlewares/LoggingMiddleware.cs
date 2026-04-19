@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Wolverine;
 
 namespace CinemaTicketBooking.Application.Common.PipelineMiddlewares;
 
