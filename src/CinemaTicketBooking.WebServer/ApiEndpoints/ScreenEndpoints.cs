@@ -94,78 +94,33 @@ public static class ScreenEndpoints
         IMessageBus bus,
         CancellationToken ct)
     {
-        try
-        {
-            command.Id = id;
-            await bus.InvokeAsync(command, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        command.Id = id;
+        await bus.InvokeAsync(command, ct);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> ActivateScreenAsync(Guid id, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new ActivateScreenCommand { Id = id }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        await bus.InvokeAsync(new ActivateScreenCommand { Id = id }, ct);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> DeactivateScreenAsync(Guid id, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new DeactivateScreenCommand { Id = id }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        await bus.InvokeAsync(new DeactivateScreenCommand { Id = id }, ct);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> ActivateScreenSeatAsync(Guid screenId, Guid seatId, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new ActivateScreenSeatCommand { ScreenId = screenId, SeatId = seatId }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        await bus.InvokeAsync(new ActivateScreenSeatCommand { ScreenId = screenId, SeatId = seatId }, ct);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> DeactivateScreenSeatAsync(Guid screenId, Guid seatId, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new DeactivateScreenSeatCommand { ScreenId = screenId, SeatId = seatId }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
-    }
-
-    private static IResult HandleInvalidOperation(InvalidOperationException ex)
-    {
-        if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-        {
-            return Results.NotFound(new { Message = ex.Message });
-        }
-
-        return Results.BadRequest(new { Message = ex.Message });
+        await bus.InvokeAsync(new DeactivateScreenSeatCommand { ScreenId = screenId, SeatId = seatId }, ct);
+        return Results.NoContent();
     }
 }
 

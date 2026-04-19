@@ -113,64 +113,26 @@ public static class ShowTimeEndpoints
         IMessageBus bus,
         CancellationToken ct)
     {
-        try
-        {
-            var id = await bus.InvokeAsync<Guid>(command, ct);
-            return Results.Ok(new { Id = id });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        var id = await bus.InvokeAsync<Guid>(command, ct);
+        return Results.Ok(new { Id = id });
     }
 
     private static async Task<IResult> StartShowTimeAsync(Guid id, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new StartShowTimeCommand { Id = id, CorrelationId = string.Empty }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        await bus.InvokeAsync(new StartShowTimeCommand { Id = id, CorrelationId = string.Empty }, ct);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> CompleteShowTimeAsync(Guid id, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new CompleteShowTimeCommand { Id = id, CorrelationId = string.Empty }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        await bus.InvokeAsync(new CompleteShowTimeCommand { Id = id, CorrelationId = string.Empty }, ct);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> CancelShowTimeAsync(Guid id, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new CancelShowTimeCommand { Id = id, CorrelationId = string.Empty }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
-    }
-
-    private static IResult HandleInvalidOperation(InvalidOperationException ex)
-    {
-        if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-        {
-            return Results.NotFound(new { Message = ex.Message });
-        }
-
-        return Results.BadRequest(new { Message = ex.Message });
+        await bus.InvokeAsync(new CancelShowTimeCommand { Id = id, CorrelationId = string.Empty }, ct);
+        return Results.NoContent();
     }
 }
 

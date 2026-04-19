@@ -107,39 +107,15 @@ public static class MovieEndpoints
         IMessageBus bus,
         CancellationToken ct)
     {
-        try
-        {
-            command.Id = id;
-            await bus.InvokeAsync(command, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
+        command.Id = id;
+        await bus.InvokeAsync(command, ct);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> DeleteMovieAsync(Guid id, IMessageBus bus, CancellationToken ct)
     {
-        try
-        {
-            await bus.InvokeAsync(new DeleteMovieCommand { Id = id }, ct);
-            return Results.NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return HandleInvalidOperation(ex);
-        }
-    }
-
-    private static IResult HandleInvalidOperation(InvalidOperationException ex)
-    {
-        if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-        {
-            return Results.NotFound(new { Message = ex.Message });
-        }
-
-        return Results.BadRequest(new { Message = ex.Message });
+        await bus.InvokeAsync(new DeleteMovieCommand { Id = id }, ct);
+        return Results.NoContent();
     }
 }
 
