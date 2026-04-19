@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ApiEndpoints\" />
     <Folder Include="Hubs\" />
     <Folder Include="Middlewares\" />
     <Folder Include="CronJobs\" />
