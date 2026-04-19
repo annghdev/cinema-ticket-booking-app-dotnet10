@@ -79,6 +79,9 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
             case DbUpdateConcurrencyException:
                 return (StatusCodes.Status409Conflict, "The resource was modified by another request.", false);
 
+            case UnauthorizedAccessException:
+                return (StatusCodes.Status403Forbidden, "You do not have permission to perform this action.", false);
+
             default:
                 return (StatusCodes.Status500InternalServerError, "An error occurred while processing your request.", true);
         }

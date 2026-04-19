@@ -6,8 +6,8 @@ namespace CinemaTicketBooking.Application.Features;
 public class GetBookingHistoryByCustomerIdQuery : IQuery<PagedResult<BookingMinimalInfoDto>>
 {
     public Guid CustomerId { get; set; }
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
     public DateOnly? Date { get; set; }
     public string CorrelationId { get; set; } = string.Empty;
 }
