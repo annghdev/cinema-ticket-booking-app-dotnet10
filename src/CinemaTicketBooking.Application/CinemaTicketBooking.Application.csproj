@@ -28,7 +28,6 @@
     <Folder Include="Features\PricingPolicies\Commands\" />
     <Folder Include="Features\PricingPolicies\Queries\" />
     <Folder Include="Features\Screens\Queries\" />
-    <Folder Include="Features\SeatSelectionPolicies\Commands\" />
     <Folder Include="Features\SeatSelectionPolicies\ResponseDTOs\" />
     <Folder Include="Features\SeatSelectionPolicies\Queries\" />
     <Folder Include="Features\Tickets\Commands\" />
