@@ -9,6 +9,10 @@
     <Project Path="src/CinemaTicketBooking.Application/CinemaTicketBooking.Application.csproj" />
     <Project Path="src/CinemaTicketBooking.Domain/CinemaTicketBooking.Domain.csproj" />
     <Project Path="src/CinemaTicketBooking.Infrastructure/CinemaTicketBooking.Infrastructure.csproj" />
+    <Project Path="src/CinemaTicketBooking.WebApp/cinematicketbooking.webapp.esproj">
+      <Build />
+      <Deploy />
+    </Project>
     <Project Path="src/CinemaTicketBooking.WebServer/CinemaTicketBooking.WebServer.csproj" />
   </Folder>
   <Folder Name="/src/aspire/">
