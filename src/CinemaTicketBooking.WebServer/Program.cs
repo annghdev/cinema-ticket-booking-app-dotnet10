@@ -135,6 +135,7 @@ app.MapShowTimeEndpoints();
 app.MapCinemaEndpoints();
 app.MapMovieEndpoints();
 app.MapScreenEndpoints();
+app.MapPaymentEndpoints();
 app.MapHub<TicketStatusHub>("/hubs/tickets").AllowAnonymous();
 
 app.MapStaticAssets();

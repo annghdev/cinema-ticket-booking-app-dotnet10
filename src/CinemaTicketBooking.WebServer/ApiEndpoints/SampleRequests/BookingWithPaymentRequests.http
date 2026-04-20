@@ -1,0 +1,65 @@
+@HostAddress = http://localhost:5000
+
+### Môi trường
+# - Để test các file http này, cần trỏ tới database đã có sẵn ShowTimeId và TicketId 
+# - Bạn có thể copy một ticketId có Status = 1 (Locking) hoặc dùng API lock ticket để có ID
+@showTimeId = REPLACE_WITH_VALID_SHOWTIME_ID
+@ticketId = REPLACE_WITH_VALID_LOCKING_TICKET_ID
+@sessionId = session-123456
+
+### 1. Happy Path: Khách hàng tạo Booking
+# Lưu lại id của Booking từ response để dùng cho các bước tiếp theo
+# Lưu lại PaymentTransactionId từ response hoặc dùng URL.
+POST {{HostAddress}}/api/bookings
+Content-Type: application/json
+
+{
+    "showTimeId": "{{showTimeId}}",
+    "customerSessionId": "{{sessionId}}",
+    "customerName": "Test Customer",
+    "email": "test@example.com",
+    "phoneNumber": "0901234567",
+    "ticketIds": [
+        "{{ticketId}}"
+    ],
+    "concessions": [],
+    "paymentMethod": "None",
+    "returnUrl": "http://localhost:3000/payment-result",
+    "ipAddress": "127.0.0.1"
+}
+
+### 
+
+# Gán Booking Id lấy được từ bước 1
+@bookingId = REPLACE_WITH_CREATED_BOOKING_ID
+@paymentTransactionId = REPLACE_WITH_CREATED_TRANSACTION_ID
+
+### 2. Happy Path: Fake Callback (Thanh toán thành công)
+# Sau khi tạo booking và có URL thanh toán, 
+# Gateway sẽ call ngược về callback url truyền tham số trạng thái.
+# (vnp_ResponseCode=00 biểu thị thành công)
+GET {{HostAddress}}/api/payments/fake-callback?bookingId={{bookingId}}&transactionId={{paymentTransactionId}}&vnp_ResponseCode=00
+
+
+###
+
+### 3. Payment Fail: Giả lập callback báo lỗi (Thanh toán thất bại)
+# Truyền vnp_ResponseCode=99 biểu thị thanh toán thất bại (từ chối từ gateway) 
+# Hệ thống sẽ set giao dịch là Failed nhưng Booking vẫn giữ status là Pending để khách hàng có thể Retry
+GET {{HostAddress}}/api/payments/fake-callback?bookingId={{bookingId}}&transactionId={{paymentTransactionId}}&vnp_ResponseCode=99&vnp_SecureHash=invalid
+
+
+###
+
+### 4. Retry Payment: Thử thanh toán lại 
+# Sau bước 3 khi thanh toán lỗi, người dùng chọn lại phương thức thanh toán và thử lại.
+# Bắt buộc sử dụng cùng SessionId ở bước 1.
+POST {{HostAddress}}/api/bookings/{{bookingId}}/retry-payment
+Content-Type: application/json
+
+{
+    "customerSessionId": "{{sessionId}}",
+    "paymentMethod": "None",
+    "returnUrl": "http://localhost:3000/payment-result-retry",
+    "ipAddress": "127.0.0.1"
+}
