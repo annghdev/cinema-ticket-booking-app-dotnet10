@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:5000
-@screenId = 019d9c10-5d8d-75c1-b8a6-eb3e5fc838d0
+@screenId = 00000000-0000-0000-0000-000000030001
 @seatId = 00000000-0000-0000-0000-000000000000
-@cinemaId = 019d9c10-5d67-7eb7-a0b6-89e4beab7323
+@cinemaId = 00000000-0000-0000-0000-000000000001
 
 ### Get all screens
 GET {{baseUrl}}/api/screens

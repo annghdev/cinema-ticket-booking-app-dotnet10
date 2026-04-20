@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:5000
-@cinemaId = 019d9c10-5d67-7eb7-a0b6-89e4beab7323
+@cinemaId = 00000000-0000-0000-0000-000000000001
 
 ### Get all cinemas
 GET {{baseUrl}}/api/cinemas

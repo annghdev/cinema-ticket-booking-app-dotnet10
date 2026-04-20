@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:5000
-@movieId = 019d9c10-5d68-7343-8504-b66a6ce386c8
+@movieId = 00000000-0000-0000-0000-000000010001
 
 ### Get all movies
 GET {{baseUrl}}/api/movies
