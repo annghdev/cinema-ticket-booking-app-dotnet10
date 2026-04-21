@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Payment Confirmation - Horizon Cinema</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&amp;family=Manrope:wght@400;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#090079",
+                        "tertiary-fixed": "#a7a9ff",
+                        "surface-container-lowest": "#000000",
+                        "surface-dim": "#0b0e14",
+                        "outline-variant": "#45484f",
+                        "on-tertiary-fixed": "#060061",
+                        "on-tertiary-container": "#ffffff",
+                        "on-error-container": "#ffa8a3",
+                        "on-secondary": "#00575b",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "on-surface": "#ecedf6",
+                        "inverse-surface": "#f9f9ff",
+                        "on-background": "#ecedf6",
+                        "background": "#0b0e14",
+                        "tertiary-container": "#4949fc",
+                        "secondary-fixed": "#00f4fe",
+                        "inverse-primary": "#00639f",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "surface-bright": "#282c36",
+                        "primary-dim": "#4fa3ed",
+                        "primary-container": "#52a6f0",
+                        "surface-container-highest": "#22262f",
+                        "on-primary-fixed": "#001222",
+                        "secondary": "#00f4fe",
+                        "surface-tint": "#61b4fe",
+                        "on-primary": "#003152",
+                        "surface-container-low": "#10131a",
+                        "outline": "#73757d",
+                        "on-error": "#490006",
+                        "on-surface-variant": "#a9abb3",
+                        "secondary-container": "#00696e",
+                        "on-secondary-fixed": "#004346",
+                        "error-dim": "#d7383b",
+                        "surface-variant": "#22262f",
+                        "primary-fixed": "#5eb1fc",
+                        "primary": "#61b4fe",
+                        "error": "#ff716c",
+                        "tertiary-dim": "#5c5eff",
+                        "error-container": "#9f0519",
+                        "on-primary-fixed-variant": "#00385d",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "on-primary-container": "#00243f",
+                        "surface": "#0b0e14",
+                        "tertiary": "#9093ff",
+                        "inverse-on-surface": "#52555c",
+                        "on-secondary-fixed-variant": "#006266",
+                        "surface-container-high": "#1c2028",
+                        "surface-container": "#161a21",
+                        "secondary-dim": "#00e5ee",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "on-secondary-container": "#dffdff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": [
+                            "Space Grotesk"
+                        ],
+                        "body": [
+                            "Manrope"
+                        ],
+                        "label": [
+                            "Manrope"
+                        ]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #0b0e14;
+            color: #ecedf6;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .headline {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(34, 38, 47, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(69, 72, 79, 0.2);
+        }
+
+        .neon-text {
+            text-shadow: 0 0 8px rgba(0, 244, 254, 0.5);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background relative overflow-x-hidden pt-24 pb-24 md:pb-0">
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 max-w-4xl mx-auto w-full">
+        <div class="w-full flex justify-start mb-8 md:hidden">
+            <button class="text-on-surface-variant hover:text-white transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span class="font-label">Back</span>
+            </button>
+        </div>
+        <div class="text-center mb-10">
+            <h1 class="headline text-4xl sm:text-5xl font-bold tracking-tight mb-2">Thanh toán thành công</h1>
+            <p class="font-body text-on-surface-variant text-lg">Vé của bạn đã sẵn sàng.</p>
+        </div>
+        <!-- Cinema Details & QR Wrapper -->
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-start relative">
+            <!-- Movie Details Column -->
+            <div class="flex flex-col gap-6 order-2 md:order-1">
+                <div class="glass-panel rounded-xl p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <span class="material-symbols-outlined text-9xl text-secondary">movie</span>
+                    </div>
+                    <h2 class="headline text-3xl font-bold mb-1">Dune: Part Two</h2>
+                    <p class="font-body text-primary-dim text-sm mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">location_on</span>
+                        Horizon IMAX Downtown
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p class="font-label text-on-surface-variant text-xs uppercase tracking-widest mb-1">Date
+                            </p>
+                            <p class="font-body text-on-surface font-semibold">Oct 24, 2024</p>
+                        </div>
+                        <div>
+                            <p class="font-label text-on-surface-variant text-xs uppercase tracking-widest mb-1">Time
+                            </p>
+                            <p class="font-body text-on-surface font-semibold">19:30</p>
+                        </div>
+                        <div>
+                            <p class="font-label text-on-surface-variant text-xs uppercase tracking-widest mb-1">Screen
+                            </p>
+                            <p class="font-body text-on-surface font-semibold">IMAX 1</p>
+                        </div>
+                        <div>
+                            <p class="font-label text-on-surface-variant text-xs uppercase tracking-widest mb-1">Seats
+                            </p>
+                            <p class="font-body text-secondary font-semibold neon-text">H12, H13</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-outline-variant/30 pt-4 mt-4 flex justify-between items-end">
+                        <div>
+                            <p class="font-label text-on-surface-variant text-xs uppercase tracking-widest mb-1">Total
+                                Paid</p>
+                            <p class="headline text-3xl font-bold text-secondary neon-text">$42.50</p>
+                        </div>
+                        <div
+                            class="bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/20 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                            <span class="font-label text-xs">Confirmed</span>
+                        </div>
+                    </div>
+                </div>
+                <button
+                    class="w-full py-4 rounded-full bg-transparent border border-outline-variant/40 text-primary font-bold hover:bg-primary/10 transition-colors flex justify-center items-center gap-2">
+                    <span class="material-symbols-outlined">download</span> Download PDF Ticket
+                </button>
+            </div>
+            <!-- QR Code Column -->
+            <div class="order-1 md:order-2 flex flex-col items-center justify-center h-full">
+                <div class="relative group cursor-pointer w-full max-w-sm">
+                    <!-- Glow Effect behind QR -->
+                    <div
+                        class="absolute inset-0 bg-secondary blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity duration-500 rounded-full">
+                    </div>
+                    <div
+                        class="glass-panel p-8 rounded-xl flex flex-col items-center justify-center relative z-10 w-full aspect-square border-2 border-outline-variant/30 hover:border-secondary/50 transition-colors duration-300">
+                        <!-- Abstract QR representation -->
+                        <div class="w-full h-full bg-white p-2 rounded-lg relative overflow-hidden"
+                            data-alt="High contrast, sharp, abstract black and white geometric pattern resembling a futuristic QR code, clean lines, cinematic lighting">
+                            <img alt="Entry QR Code"
+                                class="w-full h-full object-cover mix-blend-luminosity filter contrast-150 grayscale"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzlO7d9-lRkGjF0NetFy04zyv7cD0UmEb46KN3TGzB7Y4vYTOZhkErB9WCPJ7qfj7qAKtscbAmh3e1Wu6pZ-8j_1Gjca2z8opNafbIp8xZVsFo8sOMLHaHAl9lTslRg1yk3c0LBxhdf0T0mX7-Jd7hR73sdutPd1O5FpJgtvyDYAYNEoxUL2cVgwuG2rNeNRUE6mZ_46xFwGSEM1kQMw6mBIGgM7NmK1vdvOAoJcchdU3aRG6_ADyZBMLrEXFliW5iX2Vd9aT3keg" />
+                            <!-- Scan line animation effect (static for this task, but design suggests it) -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/30 to-transparent h-1/4 top-1/2 -translate-y-1/2 opacity-50">
+                            </div>
+                        </div>
+                        <div class="mt-6 text-center">
+                            <p class="font-label text-on-surface-variant text-xs uppercase tracking-widest mb-2">Scan at
+                                Entry</p>
+                            <p class="headline text-xl text-on-surface tracking-widest font-bold">TKT-8942-XYZ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-[#10131a]/80 backdrop-blur-2xl rounded-t-3xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <a class="flex flex-col items-center justify-center text-slate-500 hover:text-blue-300 scale-110 transition-transform duration-500 ease-out"
+            href="#">
+            <span class="material-symbols-outlined mb-1">home</span>
+            <span class="font-label text-[10px] font-bold uppercase tracking-widest">Home</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-cyan-400 drop-shadow-[0_0_8px_rgba(0,244,254,0.6)] scale-110 transition-transform duration-500 ease-out"
+            href="#">
+            <span class="material-symbols-outlined mb-1"
+                style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
+            <span class="font-label text-[10px] font-bold uppercase tracking-widest">Tickets</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-500 hover:text-blue-300 scale-110 transition-transform duration-500 ease-out"
+            href="#">
+            <span class="material-symbols-outlined mb-1">fastfood</span>
+            <span class="font-label text-[10px] font-bold uppercase tracking-widest">Food</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-500 hover:text-blue-300 scale-110 transition-transform duration-500 ease-out"
+            href="#">
+            <span class="material-symbols-outlined mb-1">account_circle</span>
+            <span class="font-label text-[10px] font-bold uppercase tracking-widest">Profile</span>
+        </a>
+    </nav>
+</body>
+
+</html>

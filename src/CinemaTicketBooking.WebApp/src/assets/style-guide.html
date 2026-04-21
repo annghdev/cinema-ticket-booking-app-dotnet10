@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Aether Cinema Style Guide</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#22262f",
+                        "error-dim": "#d7383b",
+                        "error": "#ff716c",
+                        "on-error-container": "#ffa8a3",
+                        "inverse-on-surface": "#52555c",
+                        "tertiary-fixed": "#a7a9ff",
+                        "on-secondary-fixed-variant": "#006266",
+                        "surface-tint": "#61b4fe",
+                        "on-secondary-container": "#dffdff",
+                        "inverse-primary": "#00639f",
+                        "primary-fixed": "#5eb1fc",
+                        "surface-variant": "#22262f",
+                        "on-tertiary-fixed": "#060061",
+                        "on-tertiary": "#090079",
+                        "surface": "#0b0e14",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "on-surface-variant": "#a9abb3",
+                        "on-primary-container": "#00243f",
+                        "surface-container-high": "#1c2028",
+                        "surface-container": "#161a21",
+                        "on-secondary-fixed": "#004346",
+                        "tertiary": "#9093ff",
+                        "outline-variant": "#45484f",
+                        "on-primary-fixed": "#001222",
+                        "secondary": "#00f4fe",
+                        "surface-container-lowest": "#000000",
+                        "primary": "#61b4fe",
+                        "on-secondary": "#00575b",
+                        "secondary-fixed": "#00f4fe",
+                        "on-tertiary-container": "#ffffff",
+                        "surface-bright": "#282c36",
+                        "secondary-container": "#00696e",
+                        "secondary-dim": "#00e5ee",
+                        "error-container": "#9f0519",
+                        "primary-dim": "#4fa3ed",
+                        "on-primary": "#003152",
+                        "on-error": "#490006",
+                        "on-background": "#ecedf6",
+                        "inverse-surface": "#f9f9ff",
+                        "outline": "#73757d",
+                        "on-surface": "#ecedf6",
+                        "on-primary-fixed-variant": "#00385d",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "tertiary-container": "#4949fc",
+                        "surface-dim": "#0b0e14",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "tertiary-dim": "#5c5eff",
+                        "background": "#0b0e14",
+                        "surface-container-low": "#10131a",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "primary-container": "#52a6f0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(34, 38, 47, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .neon-glow {
+            filter: drop-shadow(0 0 8px rgba(0, 244, 254, 0.5));
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body selection:bg-secondary selection:text-on-secondary-fixed">
+    <main class="pt-32 pb-24 px-8 max-w-[1400px] mx-auto space-y-24">
+        <!-- Header Section -->
+        <section class="space-y-4">
+            <h1 class="text-6xl md:text-8xl font-bold font-headline tracking-tighter uppercase">Style <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Guide</span></h1>
+            <p class="text-on-surface-variant max-w-2xl text-lg leading-relaxed">The visual language of Cinematic
+                Horizon focuses on depth, atmospheric lighting, and high-tech elegance. This document defines our core
+                identity elements.</p>
+        </section>
+        <!-- Color Palette: Bento Grid -->
+        <section class="space-y-8">
+            <div class="flex items-baseline space-x-4">
+                <h2 class="text-3xl font-bold font-headline tracking-tight">01. Color Palette</h2>
+                <div class="h-px flex-grow bg-outline-variant/30"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- Primary -->
+                <div class="glass-panel p-6 rounded-xl border border-outline-variant/20 space-y-4">
+                    <div class="w-full h-32 rounded-lg bg-primary neon-glow"></div>
+                    <div>
+                        <p class="font-bold font-headline">Ocean Blue (Primary)</p>
+                        <p class="text-sm font-mono text-primary">#61B4FE</p>
+                    </div>
+                </div>
+                <!-- Secondary -->
+                <div class="glass-panel p-6 rounded-xl border border-outline-variant/20 space-y-4">
+                    <div class="w-full h-32 rounded-lg bg-secondary neon-glow"></div>
+                    <div>
+                        <p class="font-bold font-headline">Neon Cyan (Secondary)</p>
+                        <p class="text-sm font-mono text-secondary">#00F4FE</p>
+                    </div>
+                </div>
+                <!-- Surface -->
+                <div class="glass-panel p-6 rounded-xl border border-outline-variant/20 space-y-4">
+                    <div class="w-full h-32 rounded-lg bg-surface-container-highest"></div>
+                    <div>
+                        <p class="font-bold font-headline">Surface Highest</p>
+                        <p class="text-sm font-mono text-on-surface-variant">#22262F</p>
+                    </div>
+                </div>
+                <!-- Background -->
+                <div class="glass-panel p-6 rounded-xl border border-outline-variant/20 space-y-4">
+                    <div class="w-full h-32 rounded-lg bg-background border border-outline-variant/10"></div>
+                    <div>
+                        <p class="font-bold font-headline">Background Void</p>
+                        <p class="text-sm font-mono text-on-surface-variant">#0B0E14</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Typography -->
+        <section class="space-y-8">
+            <div class="flex items-baseline space-x-4">
+                <h2 class="text-3xl font-bold font-headline tracking-tight">02. Typography</h2>
+                <div class="h-px flex-grow bg-outline-variant/30"></div>
+            </div>
+            <div class="glass-panel p-10 rounded-xl border border-outline-variant/20">
+                <div class="space-y-12">
+                    <div
+                        class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant/20 pb-8">
+                        <div class="space-y-2">
+                            <p class="text-xs font-mono uppercase text-secondary">Display Large / Space Grotesk</p>
+                            <h1 class="text-7xl font-bold font-headline tracking-tighter">THE PREMIERE</h1>
+                        </div>
+                        <p class="text-on-surface-variant text-sm font-mono">3.5rem / 700 / -0.02em</p>
+                    </div>
+                    <div
+                        class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant/20 pb-8">
+                        <div class="space-y-2">
+                            <p class="text-xs font-mono uppercase text-secondary">Heading Medium / Space Grotesk</p>
+                            <h2 class="text-4xl font-bold font-headline tracking-tight">Modern Digital Cinema</h2>
+                        </div>
+                        <p class="text-on-surface-variant text-sm font-mono">2.25rem / 700 / -0.01em</p>
+                    </div>
+                    <div
+                        class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant/20 pb-8">
+                        <div class="space-y-2">
+                            <p class="text-xs font-mono uppercase text-secondary">Body Regular / Manrope</p>
+                            <p class="text-lg text-on-surface max-w-xl leading-relaxed">Experience cinema like never
+                                before through the lens of a digital auteur. Our platform blends high-fidelity
+                                projection with cutting-edge interface design.</p>
+                        </div>
+                        <p class="text-on-surface-variant text-sm font-mono">1.125rem / 400 / 1.6</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div class="space-y-2">
+                            <p class="text-xs font-mono uppercase text-secondary">Label Small / Manrope</p>
+                            <p class="text-xs uppercase tracking-widest font-semibold text-on-surface-variant">IMAX
+                                EXPERIENCE • 7.1 SURROUND • DOLBY VISION</p>
+                        </div>
+                        <p class="text-on-surface-variant text-sm font-mono">0.75rem / 600 / 0.1em</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Buttons & UI Controls -->
+        <section class="space-y-8">
+            <div class="flex items-baseline space-x-4">
+                <h2 class="text-3xl font-bold font-headline tracking-tight">03. Interactive Components</h2>
+                <div class="h-px flex-grow bg-outline-variant/30"></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Buttons -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-bold font-headline uppercase tracking-wider text-secondary">Buttons</h3>
+                    <div class="flex flex-wrap gap-6 items-center">
+                        <div class="space-y-2 text-center">
+                            <button
+                                class="bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold px-8 py-3 hover:drop-shadow-[0_0_12px_rgba(97,180,254,0.6)] transition-all duration-300">Primary</button>
+                            <p class="text-[10px] uppercase font-mono text-on-surface-variant">Default</p>
+                        </div>
+                        <div class="space-y-2 text-center">
+                            <button
+                                class="bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold px-8 py-3 scale-105 shadow-xl shadow-primary/30">Primary</button>
+                            <p class="text-[10px] uppercase font-mono text-on-surface-variant">Hover</p>
+                        </div>
+                        <div class="space-y-2 text-center">
+                            <button
+                                class="bg-surface-dim text-on-surface-variant/40 font-bold px-8 py-3 cursor-not-allowed">Primary</button>
+                            <p class="text-[10px] uppercase font-mono text-on-surface-variant">Disabled</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-6 items-center">
+                        <div class="space-y-2 text-center">
+                            <button
+                                class="bg-secondary text-on-secondary font-bold px-8 py-3 hover:shadow-[0_0_20px_rgba(0,244,254,0.4)] transition-colors">Secondary</button>
+                            <p class="text-[10px] uppercase font-mono text-on-surface-variant">Secondary</p>
+                        </div>
+                        <div class="space-y-2 text-center">
+                            <button
+                                class="bg-transparent border border-secondary text-secondary font-bold px-8 py-3 hover:bg-secondary/10 transition-colors">Outline</button>
+                            <p class="text-[10px] uppercase font-mono text-on-surface-variant">Outline</p>
+                        </div>
+                        <div class="space-y-2 text-center">
+                            <button
+                                class="glass-panel border border-outline-variant/30 text-on-surface font-medium px-8 py-3 hover:bg-white/10 transition-colors">Ghost</button>
+                            <p class="text-[10px] uppercase font-mono text-on-surface-variant">Glass</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Input Fields -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-bold font-headline uppercase tracking-wider text-secondary">Form Controls
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="group">
+                            <label
+                                class="block text-xs uppercase font-bold text-on-surface-variant mb-2 font-mono">Email
+                                Address</label>
+                            <input
+                                class="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant py-3 px-2 focus:ring-0 focus:border-secondary transition-all text-on-surface"
+                                placeholder="digital.auteur@cinema.com" type="text" />
+                        </div>
+                        <div class="group">
+                            <label class="block text-xs uppercase font-bold text-secondary mb-2 font-mono">Active
+                                Search</label>
+                            <div class="relative">
+                                <input
+                                    class="w-full bg-surface-container-low border-0 border-b-2 border-secondary py-3 px-2 focus:ring-0 text-on-surface"
+                                    type="text" value="Interstellar" />
+                                <span class="material-symbols-outlined absolute right-0 top-3 text-secondary neon-glow"
+                                    data-icon="search">search</span>
+                                <div class="absolute bottom-0 left-0 w-full h-8 bg-secondary/5 blur-xl"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- UI Elements Showcase -->
+        <section class="space-y-8">
+            <div class="flex items-baseline space-x-4">
+                <h2 class="text-3xl font-bold font-headline tracking-tight">04. Visual Elements</h2>
+                <div class="h-px flex-grow bg-outline-variant/30"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Movie Card Example -->
+                <div class="space-y-4">
+                    <p class="text-xs font-mono uppercase text-secondary">Component: Movie Card</p>
+                    <div class="relative aspect-[2/3] rounded-xl overflow-hidden group">
+                        <img alt="Movie Poster"
+                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            data-alt="dramatic cinematic movie poster with glowing blue particles and high contrast silhouette in deep space setting"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBovmfENHBThsyVidrs-r6c-c5BStppQTrsqWr9YXVgwlU2SU1lLnF4lAs2AUc_gPOxJoyGCKlyDbgzco3ehPRw7irH_refQBS8lmVL2f39u6r9UwbTK97BqWzP0xxktDQVVVmuN7XwHgvrK3Ra_pOZk-w-AfkbPkzmr0b9DMStUe1V8ELW_9Bngd6fUfSi1vQGyw39_ybNCAzSad-Ok64RszucL_1zz143GKAck19hk7hvHKHUABhwgA_S9n2b83pFKEN9ibPXCio" />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent">
+                        </div>
+                        <div class="absolute top-4 right-4 glass-panel px-3 py-0 border border-white/10">
+                            <span class="text-[10px] font-bold text-secondary uppercase font-mono">Action</span>
+                        </div>
+                        <div class="absolute bottom-6 left-6 right-6">
+                            <h4 class="text-2xl font-bold font-headline">Nebula Rising</h4>
+                            <p class="text-sm text-on-surface-variant line-clamp-1">A journey beyond the event horizon.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Seat Grid Example -->
+                <div class="space-y-4">
+                    <p class="text-xs font-mono uppercase text-secondary">Component: Interactive Grid</p>
+                    <div
+                        class="glass-panel p-6 rounded-xl border border-outline-variant/20 h-full flex flex-col justify-center items-center">
+                        <div
+                            class="w-full h-2 bg-gradient-to-r from-transparent via-secondary to-transparent mb-12 blur-[1px]">
+                        </div>
+                        <div class="grid grid-cols-6 gap-3">
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                            <div class="w-8 h-8 rounded bg-secondary shadow-[0_0_15px_rgba(0,244,254,0.4)]"></div>
+                            <div class="w-8 h-8 rounded bg-surface-dim opacity-30"></div>
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                            <div class="w-8 h-8 rounded bg-secondary shadow-[0_0_15px_rgba(0,244,254,0.4)]"></div>
+                            <div class="w-8 h-8 rounded bg-surface-dim opacity-30"></div>
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                            <div class="w-8 h-8 rounded bg-surface-container-highest border border-outline-variant/20">
+                            </div>
+                        </div>
+                        <div class="mt-8 flex gap-4 text-[10px] font-mono uppercase">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded bg-secondary"></div> Selected
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded bg-surface-container-highest"></div> Available
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Iconography -->
+                <div class="space-y-4">
+                    <p class="text-xs font-mono uppercase text-secondary">Component: Iconography</p>
+                    <div
+                        class="glass-panel p-6 rounded-xl border border-outline-variant/20 h-full grid grid-cols-3 gap-6 place-items-center">
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-3xl"
+                                data-icon="confirmation_number">confirmation_number</span>
+                            <span class="text-[10px] font-mono opacity-50 uppercase">Ticket</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-3xl neon-glow"
+                                data-icon="movie_filter">movie_filter</span>
+                            <span class="text-[10px] font-mono opacity-50 uppercase">Visual</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-on-surface text-3xl"
+                                data-icon="stadium">stadium</span>
+                            <span class="text-[10px] font-mono opacity-50 uppercase">Theater</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-on-surface text-3xl"
+                                data-icon="notifications">notifications</span>
+                            <span class="text-[10px] font-mono opacity-50 uppercase">Alert</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-on-surface text-3xl"
+                                data-icon="settings">settings</span>
+                            <span class="text-[10px] font-mono opacity-50 uppercase">System</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-3xl"
+                                data-icon="qr_code_2">qr_code_2</span>
+                            <span class="text-[10px] font-mono opacity-50 uppercase">Entry</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-[#0b0e14] w-full py-12 border-t border-white/5">
+        <div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-[1920px] mx-auto gap-8">
+            <div class="text-lg font-bold text-slate-200 font-headline uppercase tracking-widest">
+                CINEMATIC HORIZON
+            </div>
+            <div class="flex flex-wrap justify-center gap-8 text-sm font-['Manrope'] text-slate-500">
+                <a class="hover:text-cyan-400 transition-colors" href="#">Privacy Policy</a>
+                <a class="hover:text-cyan-400 transition-colors" href="#">Terms of Service</a>
+                <a class="hover:text-cyan-400 transition-colors" href="#">Press Kit</a>
+                <a class="hover:text-cyan-400 transition-colors" href="#">Contact</a>
+            </div>
+            <div class="text-sm font-['Manrope'] text-slate-500 text-center md:text-right">
+                © 2024 Cinematic Horizon. Designed for the Digital Auteur.
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#45484f",
+                        "on-primary": "#003152",
+                        "on-secondary-fixed-variant": "#006266",
+                        "secondary-dim": "#00e5ee",
+                        "on-primary-container": "#00243f",
+                        "tertiary": "#9093ff",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary": "#090079",
+                        "inverse-surface": "#f9f9ff",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "on-secondary": "#00575b",
+                        "on-surface": "#ecedf6",
+                        "error-dim": "#d7383b",
+                        "surface-container": "#161a21",
+                        "inverse-primary": "#00639f",
+                        "tertiary-fixed": "#a7a9ff",
+                        "on-surface-variant": "#a9abb3",
+                        "inverse-on-surface": "#52555c",
+                        "tertiary-container": "#4949fc",
+                        "surface-container-high": "#1c2028",
+                        "surface-tint": "#61b4fe",
+                        "on-error-container": "#ffa8a3",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "secondary": "#00f4fe",
+                        "background": "#0b0e14",
+                        "surface-dim": "#0b0e14",
+                        "primary-container": "#52a6f0",
+                        "tertiary-dim": "#5c5eff",
+                        "on-secondary-fixed": "#004346",
+                        "secondary-fixed": "#00f4fe",
+                        "surface-container-highest": "#22262f",
+                        "primary-fixed": "#5eb1fc",
+                        "outline": "#73757d",
+                        "error": "#ff716c",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "error-container": "#9f0519",
+                        "surface-bright": "#282c36",
+                        "surface": "#0b0e14",
+                        "secondary-container": "#00696e",
+                        "on-tertiary": "#090079",
+                        "on-error": "#490006",
+                        "on-secondary-container": "#dffdff",
+                        "on-background": "#ecedf6",
+                        "surface-container-low": "#10131a",
+                        "primary": "#61b4fe",
+                        "on-primary-fixed-variant": "#00385d",
+                        "primary-dim": "#4fa3ed",
+                        "on-primary-fixed": "#001222",
+                        "surface-variant": "#22262f",
+                        "on-tertiary-fixed": "#060061"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 12px rgba(0, 244, 254, 0.4);
+        }
+
+        .tonal-shift-bg-gradient {
+            background: linear-gradient(to bottom, rgba(11, 14, 20, 0.9), rgba(11, 14, 20, 0.4));
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body selection:bg-secondary/30">
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-[#0b0e14]/40 backdrop-blur-md shadow-2xl shadow-black/50">
+        <div class="flex items-center justify-between px-8 py-4 w-full max-w-screen-2xl mx-auto">
+            <div class="text-2xl font-black text-[#61b4fe] tracking-tighter font-headline">ENDLESS HORIZON</div>
+            <nav class="hidden md:flex items-center space-x-8 font-headline font-bold tracking-tight">
+                <a class="text-[#00f4fe] drop-shadow-[0_0_8px_rgba(0,244,254,0.6)] border-b-2 border-[#00f4fe] pb-1 transition-all duration-300 ease-out active:scale-95"
+                    href="#">Trang chủ</a>
+                <a class="text-slate-400 hover:text-white px-2 py-1 transition-all hover:text-[#00f4fe] hover:drop-shadow-[0_0_5px_rgba(0,244,254,0.4)] active:scale-95"
+                    href="#">Lịch chiếu</a>
+                <a class="text-slate-400 hover:text-white px-2 py-1 transition-all hover:text-[#00f4fe] hover:drop-shadow-[0_0_5px_rgba(0,244,254,0.4)] active:scale-95"
+                    href="#">Chi nhánh</a>
+                <a class="text-slate-400 hover:text-white px-2 py-1 transition-all hover:text-[#00f4fe] hover:drop-shadow-[0_0_5px_rgba(0,244,254,0.4)] active:scale-95"
+                    href="#">Ưu đãi</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <button class="material-symbols-outlined text-slate-400 hover:text-[#00f4fe] transition-all"
+                    data-icon="search">search</button>
+                <button class="material-symbols-outlined text-[#61b4fe]"
+                    data-icon="account_circle">account_circle</button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <!-- Hero Section -->
+        <section class="relative h-screen w-full overflow-hidden flex items-center">
+            <div class="absolute inset-0 z-0">
+                <img class="w-full h-full object-cover grayscale-[20%] brightness-50"
+                    data-alt="Cinematic atmospheric wide shot of a futuristic neon city at night with blue and cyan lighting effects and deep shadows"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXFfKSlBIjWgJAXE2TSgP4bQr2F4Uw4bWNSF8ujCRXUkNKzCbCAR3zDdnq_7PRBiOtaIu_yZ3tVPyZZSf_t7yhF7McQ8FCetR3i0d-2hrlWjvCaFpVDa_kuGMPNnbe5ZUmE0izxS2Gbjhqn4pbytGwVCheCOx6NCMTpdH7fT5dxlHbTmWa0GXHAMoPOzbDNwuQBhFil2L4OgKBlOMZu1MH9-AeBpKh0sl7fvz92gPhzC44s_kANtNWI1myHc6X0X-as7Rsc3VHcow" />
+                <div class="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-background to-transparent h-1/2 bottom-0"></div>
+            </div>
+            <div class="relative z-10 px-8 md:px-24 max-w-5xl">
+                <span
+                    class="inline-block px-3 py-1 bg-secondary/10 border border-secondary/20 text-secondary font-headline text-sm tracking-[0.2em] mb-6 backdrop-blur-sm">PREMIERE
+                    PHIM MỚI</span>
+                <h1 class="text-6xl md:text-8xl font-black font-headline text-white leading-none tracking-tighter mb-6">
+                    CHÂN TRỜI <br /><span class="text-primary drop-shadow-[0_0_15px_rgba(97,180,254,0.4)]">VÔ TẬN</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed font-light">Trải nghiệm đỉnh
+                    cao của điện ảnh với hệ thống âm thanh vòm thế hệ mới và hình ảnh sắc nét đến từng chi tiết tại hệ
+                    thống rạp HORIZON.</p>
+                <div class="flex flex-wrap gap-4">
+                    <button
+                        class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-4 font-bold font-headline tracking-wide hover:shadow-[0_0_25px_rgba(97,180,254,0.6)] transition-all active:scale-95 flex items-center gap-2">
+                        <span>ĐẶT VÉ NGAY</span>
+                        <span class="material-symbols-outlined">confirmation_number</span>
+                    </button>
+                    <button
+                        class="bg-surface-variant/40 backdrop-blur-md border border-outline-variant/30 text-white px-8 py-4 font-bold font-headline tracking-wide hover:bg-surface-variant/60 transition-all active:scale-95">
+                        XEM TRAILER
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Now Showing Section (Sharp Aesthetic) -->
+        <section class="py-24 bg-surface">
+            <div class="px-8 max-w-screen-2xl mx-auto">
+                <div class="flex items-end justify-between mb-12 border-l-4 border-secondary pl-6">
+                    <div>
+                        <h2 class="text-4xl font-black font-headline text-white tracking-tighter uppercase">Phim Đang
+                            Chiếu</h2>
+                        <p class="text-slate-500 font-medium">Những siêu phẩm điện ảnh không thể bỏ lỡ tuần này</p>
+                    </div>
+                    <a class="text-secondary font-bold font-headline flex items-center gap-2 group" href="#">
+                        XEM TẤT CẢ <span
+                            class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0">
+                    <!-- Movie Card 1 -->
+                    <div
+                        class="group relative aspect-[2/3] overflow-hidden bg-surface-container border border-outline-variant/10">
+                        <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            data-alt="Moody cinematic movie poster of a silhouette walking through a misty dark forest with a single beam of light"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB441TQ4zaDFJaVwak7wkoqPlYKOO9HCCAbnxwIsXxRjDLSBMppuUIKptbYkswlfezxO0m0MGLvEv3Pnin31QegTK_QqhEUISfxgtNf6cD_pAAvfyAZpafp-QUBqUIJ-TTZgGUFeWFsVcbD9sv96Oid1VIAKbWbwFkGxoZH_dxcf8YZO2IwVZt6YZTKbR1_o_S2yhsJHo4qf5yPUfF0lBuM990VFQdIRASdo5Pa0wBE9N_I-v3gw3m-JBFGHMhz1yXZ6AsqC-SQeG8" />
+                        <div class="absolute top-4 right-4 z-20">
+                            <span
+                                class="bg-surface-variant/60 backdrop-blur-md px-3 py-1 text-xs font-bold font-headline text-secondary tracking-widest uppercase">IMAX
+                                2D</span>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <div class="absolute bottom-0 p-8 w-full">
+                            <p class="text-secondary font-bold text-xs tracking-widest mb-2">HÀNH ĐỘNG / SCI-FI</p>
+                            <h3 class="text-2xl font-black font-headline text-white mb-4 leading-none">BÓNG MA SỐ</h3>
+                            <button
+                                class="w-full bg-secondary text-on-secondary font-black py-3 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">ĐẶT
+                                VÉ</button>
+                        </div>
+                    </div>
+                    <!-- Movie Card 2 -->
+                    <div
+                        class="group relative aspect-[2/3] overflow-hidden bg-surface-container border border-outline-variant/10">
+                        <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            data-alt="Abstract cinematic art of a nebula explosion in space with vibrant blue and purple hues"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQu8WkkrvsAmbKuM3Hy78ae7t6EUjRQcOrSme3BjDUnqMrJC0Evtw-2pDoRE-sJSqJZ2PlTQm8b9FzzvLA-_azF0cHrcT8sirpwIWad3LeHnB7_IM4vTU-QeTVwH5DY5kd8-DkFCqsZAs2ZWrJDk31TXiXWAatcntjQFatbEwSWe_Dd6pswk8-9P9gx04R3UEa8E_1VCEoUXMQ8gQhJpfn-jQ0KXI6AXr_SL3cui8Yuj2qc3iIvpQtsYxgR-SljKv_XNObklvOpCE" />
+                        <div class="absolute top-4 right-4 z-20">
+                            <span
+                                class="bg-surface-variant/60 backdrop-blur-md px-3 py-1 text-xs font-bold font-headline text-secondary tracking-widest uppercase">3D
+                                SURROUND</span>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <div class="absolute bottom-0 p-8 w-full">
+                            <p class="text-secondary font-bold text-xs tracking-widest mb-2">PHIÊU LƯU / KỲ ẢO</p>
+                            <h3 class="text-2xl font-black font-headline text-white mb-4 leading-none">THIÊN HÀ RỰC CHÁY
+                            </h3>
+                            <button
+                                class="w-full bg-secondary text-on-secondary font-black py-3 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">ĐẶT
+                                VÉ</button>
+                        </div>
+                    </div>
+                    <!-- Movie Card 3 -->
+                    <div
+                        class="group relative aspect-[2/3] overflow-hidden bg-surface-container border border-outline-variant/10">
+                        <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            data-alt="Cinematic close up of a retro film projector lens with light dust particles floating in the air"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWeUkVRXpMKvJY4QjySG_Ma03jITEA8D7EVwlKw3ob7wa0YyfUl-5MLS_0r_WKQDo-3HN8Ll-BNtDzYekGBYOM58BVeLR65DL-FhG2lfDEA2BiWAd3cmKvoSaGX25669p__lXz5FQYi3BuijjBTmWbKvT8R4XoEYLRD8UZUxAwy0rEYTbc6YyGUWEIh2U-M0BigGZyxRahJVBV-IjdLqK3INFFVU1iEnBGOTAFwsntOopbT7q86yxHRecRuxEgFMsOyYJB-Yj7byI" />
+                        <div class="absolute top-4 right-4 z-20">
+                            <span
+                                class="bg-surface-variant/60 backdrop-blur-md px-3 py-1 text-xs font-bold font-headline text-secondary tracking-widest uppercase">HORIZON
+                                EXCLUSIVE</span>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <div class="absolute bottom-0 p-8 w-full">
+                            <p class="text-secondary font-bold text-xs tracking-widest mb-2">DRAMA / TÂM LÝ</p>
+                            <h3 class="text-2xl font-black font-headline text-white mb-4 leading-none">GIAI ĐIỆU CUỐI
+                            </h3>
+                            <button
+                                class="w-full bg-secondary text-on-secondary font-black py-3 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">ĐẶT
+                                VÉ</button>
+                        </div>
+                    </div>
+                    <!-- Movie Card 4 -->
+                    <div
+                        class="group relative aspect-[2/3] overflow-hidden bg-surface-container border border-outline-variant/10">
+                        <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            data-alt="Futuristic cyborg eye close-up with complex mechanical details and neon blue iris glow"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfZN0pSVYsdGxwrIHVKnehXbLkaXStGazsbOdCyCY-mvW3bqr15nB_lsHKPs2M23YWF8k1FvvHe2qm7edn-WUhW5GtQDU40euLrsQeqZHCHG8PmIago2hr7KmPOJDnOaZNfdwX1531aDD5gkPF2m01IxUZP5e54wqRJ9NFwZjysVffF8lh7ZyD7aNje1M4Bqxj9RHBM6XQ74K7BBnQPDXOObb7DooZcD-uGv6prNMF1GRVs8P-ja83GLQZ-XLn-F3vmuAxlis-Voc" />
+                        <div class="absolute top-4 right-4 z-20">
+                            <span
+                                class="bg-surface-variant/60 backdrop-blur-md px-3 py-1 text-xs font-bold font-headline text-secondary tracking-widest uppercase">PREMIUM</span>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <div class="absolute bottom-0 p-8 w-full">
+                            <p class="text-secondary font-bold text-xs tracking-widest mb-2">THRILLER / KINH DỊ</p>
+                            <h3 class="text-2xl font-black font-headline text-white mb-4 leading-none">TRÍ TUỆ NHÂN TẠO
+                            </h3>
+                            <button
+                                class="w-full bg-secondary text-on-secondary font-black py-3 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">ĐẶT
+                                VÉ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Upcoming Section -->
+        <section class="py-24 bg-background">
+            <div class="px-8 max-w-screen-2xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center justify-between mb-16 gap-4">
+                    <h2 class="text-5xl font-black font-headline text-white tracking-tighter">SẮP KHỞI CHIẾU</h2>
+                    <div
+                        class="h-[2px] flex-grow mx-8 bg-gradient-to-r from-secondary/50 to-transparent hidden md:block">
+                    </div>
+                    <div class="flex gap-2">
+                        <button
+                            class="p-2 border border-outline-variant/30 text-outline hover:text-secondary hover:border-secondary transition-all">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button
+                            class="p-2 border border-outline-variant/30 text-outline hover:text-secondary hover:border-secondary transition-all">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Upcoming 1 -->
+                    <div class="flex gap-6 group">
+                        <div class="w-1/3 aspect-[3/4] overflow-hidden flex-shrink-0">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                data-alt="Cinematic still of a lonely astronaut walking on a desert red planet under a massive moons in the sky"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFLlZMs4cmfZw9seSCEaSKYcRsOZ0VF-iWKDEAtJfPQmbX99dd-pqQUh_pKhFbMhpGsW-TfqraOLgHR8_EZXgM7UdymXibECEEY9n2CvXSoTazsXYtSzJqHNm-q_8mWYOeNV4T3gT8R9vNZuFoif8LvaSF4BteX4myOVvkHKMGTUzf12SJU1nFEM4pG6tNBDk7yqlKFdrDidYYP4sLZlCN8Nr31eR2rQlnM4Ilhe56SYUOrF_VuVBFlN0y280MGvVCavG_f6DkT7k" />
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <span
+                                class="text-primary font-black font-headline text-sm tracking-widest mb-1">15.12.2024</span>
+                            <h4
+                                class="text-xl font-bold font-headline text-white mb-3 group-hover:text-secondary transition-colors">
+                                SAO HOẢ: NGÀY CUỐI</h4>
+                            <p class="text-slate-500 text-sm mb-5 line-clamp-2">Nỗ lực sinh tồn cuối cùng của nhân loại
+                                trên hành tinh đỏ đầy khắc nghiệt.</p>
+                            <button
+                                class="flex items-center gap-2 text-white font-bold font-headline text-sm hover:text-secondary transition-all">
+                                <span class="material-symbols-outlined text-sm">notifications</span> NHẮC TÔI
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Upcoming 2 -->
+                    <div class="flex gap-6 group">
+                        <div class="w-1/3 aspect-[3/4] overflow-hidden flex-shrink-0">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                data-alt="Close up cinematic shot of neon lights reflecting on wet asphalt in a dark alley"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuChPcnpDT9D5r8ayBNHiBcGvHtN4mixoGqViVDxjNJwWgPgaa2y9NqNMo_w9DEz_8nzPq1RYg56OBGH2v3ALleNTx2zh57HTMkG2AIPLCPTcx4s8R9_838hIejqfUn0sMwfrTPgBIGUyTdwospGUe5l1YnvEil2hMYszoGxM9AjMdNf7Uf7NVlMKF-Or8ytthqliP-92N1VfngE8TFrGRU8XOlyB3BpYP9ZxO5KvhlU1VGw7pvqqZZ3KjMKbec9p0a_E39v0Wx7WWY" />
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <span
+                                class="text-primary font-black font-headline text-sm tracking-widest mb-1">20.12.2024</span>
+                            <h4
+                                class="text-xl font-bold font-headline text-white mb-3 group-hover:text-secondary transition-colors">
+                                THÀNH PHỐ KHÔNG NGỦ</h4>
+                            <p class="text-slate-500 text-sm mb-5 line-clamp-2">Cuộc truy đuổi nghẹt thở trong thế giới
+                                ngầm của những kẻ đứng ngoài vòng pháp luật.</p>
+                            <button
+                                class="flex items-center gap-2 text-white font-bold font-headline text-sm hover:text-secondary transition-all">
+                                <span class="material-symbols-outlined text-sm">notifications</span> NHẮC TÔI
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Upcoming 3 -->
+                    <div class="flex gap-6 group">
+                        <div class="w-1/3 aspect-[3/4] overflow-hidden flex-shrink-0">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                data-alt="Distant shot of a glowing mountain peak at night under stars with a cinematic lens flare"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCV3ne4VZCCEpHkgfwlLsyeQ5VtMl4wIPJ-Okss_UpyfPVL3YegJk7tx0iQRx1IQis3VsB5S8M036_RL3ljIF985F_OQqJK5loeaMNpkp8Y4zHSkoN48cBdor55pf-smuslXHiRW7BiDxfgy4Jnp2r5g3WUKm-aDQejnjFMf6GkvzwPIvRA2kDHkeJmTkmPLhg3JkeVfdg5w_0p1R-RWebdvsYTk4MofdqwP4c0CGzW04ANaXQUn_EPAvW9jx0I-FOu6e0W7vOVRpk" />
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <span
+                                class="text-primary font-black font-headline text-sm tracking-widest mb-1">01.01.2025</span>
+                            <h4
+                                class="text-xl font-bold font-headline text-white mb-3 group-hover:text-secondary transition-colors">
+                                ĐỈNH NÚI VÔ CỰC</h4>
+                            <p class="text-slate-500 text-sm mb-5 line-clamp-2">Hành trình khám phá bí ẩn vĩnh hằng ẩn
+                                sau những rặng núi tuyết trắng.</p>
+                            <button
+                                class="flex items-center gap-2 text-white font-bold font-headline text-sm hover:text-secondary transition-all">
+                                <span class="material-symbols-outlined text-sm">notifications</span> NHẮC TÔI
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Newsletter / Membership Glass Card -->
+        <section class="py-24 px-8 max-w-screen-2xl mx-auto">
+            <div
+                class="relative bg-surface-container-high border border-outline-variant/10 p-12 md:p-24 overflow-hidden">
+                <div class="absolute top-0 right-0 w-1/2 h-full opacity-30 pointer-events-none">
+                    <div class="absolute inset-0 bg-gradient-to-l from-secondary/20 to-transparent"></div>
+                </div>
+                <div class="relative z-10 max-w-2xl">
+                    <h2 class="text-4xl md:text-5xl font-black font-headline text-white tracking-tighter mb-6">TRỞ THÀNH
+                        HỘI VIÊN <span class="text-secondary">VIP</span></h2>
+                    <p class="text-slate-400 mb-10 text-lg leading-relaxed">Nhận ngay ưu đãi giảm giá 50% cho vé xem
+                        phim đầu tiên và tích điểm đổi quà không giới hạn.</p>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input
+                            class="flex-grow bg-surface-container-low border-0 border-b-2 border-outline-variant text-white py-4 px-2 focus:ring-0 focus:border-secondary transition-all placeholder:text-slate-600 font-medium"
+                            placeholder="Số điện thoại của bạn" type="tel" />
+                        <button
+                            class="bg-secondary text-on-secondary font-black font-headline px-10 py-4 hover:shadow-[0_0_20px_rgba(0,244,254,0.4)] transition-all">TƯ
+                            VẤN NGAY</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-[#0b0e14] border-t border-[#45484f]/20 w-full py-12 px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl mx-auto">
+            <div class="text-lg font-bold text-slate-200 font-headline uppercase tracking-widest">ENDLESS HORIZON
+                CINEMA</div>
+            <div class="flex gap-8 font-['Manrope'] text-xs uppercase tracking-widest text-slate-500">
+                <a class="hover:text-white transition-colors" href="#">Điều khoản</a>
+                <a class="hover:text-white transition-colors" href="#">Quyền riêng tư</a>
+                <a class="hover:text-white transition-colors" href="#">Tuyển dụng</a>
+                <a class="hover:text-white transition-colors" href="#">Hỗ trợ</a>
+            </div>
+            <div class="text-slate-500 text-[10px] tracking-[0.2em] font-medium">
+                © 2026 ENDLESS HORIZON CINEMA. ALL RIGHTS RESERVED.
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Showtimes - Cinematic Horizon</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-dim": "#5c5eff",
+                        "surface-variant": "#22262f",
+                        "primary-container": "#52a6f0",
+                        "on-primary-fixed-variant": "#00385d",
+                        "on-secondary-fixed": "#004346",
+                        "on-primary-fixed": "#001222",
+                        "inverse-surface": "#f9f9ff",
+                        "inverse-on-surface": "#52555c",
+                        "on-tertiary": "#090079",
+                        "on-secondary": "#00575b",
+                        "background": "#0b0e14",
+                        "secondary-dim": "#00e5ee",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "outline": "#73757d",
+                        "secondary-fixed": "#00f4fe",
+                        "surface-container": "#161a21",
+                        "inverse-primary": "#00639f",
+                        "surface-container-highest": "#22262f",
+                        "tertiary": "#9093ff",
+                        "on-error-container": "#ffa8a3",
+                        "secondary-container": "#00696e",
+                        "surface-container-high": "#1c2028",
+                        "on-primary": "#003152",
+                        "on-background": "#ecedf6",
+                        "tertiary-container": "#4949fc",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "secondary": "#00f4fe",
+                        "surface": "#0b0e14",
+                        "on-surface": "#ecedf6",
+                        "primary-fixed": "#5eb1fc",
+                        "primary-dim": "#4fa3ed",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "on-tertiary-container": "#ffffff",
+                        "error-dim": "#d7383b",
+                        "outline-variant": "#45484f",
+                        "on-secondary-container": "#dffdff",
+                        "surface-bright": "#282c36",
+                        "error": "#ff716c",
+                        "tertiary-fixed": "#a7a9ff",
+                        "on-error": "#490006",
+                        "surface-dim": "#0b0e14",
+                        "on-secondary-fixed-variant": "#006266",
+                        "surface-container-low": "#10131a",
+                        "on-primary-container": "#00243f",
+                        "error-container": "#9f0519",
+                        "on-surface-variant": "#a9abb3",
+                        "surface-tint": "#61b4fe",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "primary": "#61b4fe",
+                        "on-tertiary-fixed": "#060061"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": [
+                            "Space Grotesk"
+                        ],
+                        "body": [
+                            "Manrope"
+                        ],
+                        "label": [
+                            "Manrope"
+                        ]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(34, 38, 47, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(69, 72, 79, 0.2);
+        }
+
+        .neon-glow {
+            filter: drop-shadow(0 0 8px rgba(0, 244, 254, 0.5));
+        }
+
+        .ambient-shadow {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Hide scrollbar for horizontal scroll but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body antialiased min-h-screen flex flex-col">
+    <!-- Main Content -->
+    <main class="flex-grow pt-24 pb-12">
+        <!-- Hero / Movie Summary Section -->
+        <section class="relative w-full h-[614px] min-h-[500px] bg-surface-container-low overflow-hidden">
+            <!-- Background Image -->
+            <div class="absolute inset-0 w-full h-full">
+                <img alt="Movie background" class="w-full h-full object-cover opacity-30"
+                    data-alt="dramatic sci-fi landscape with towering monolithic structures under a twin sun sunset, deep reds and purples, cinematic lighting, epic scale"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSx01sT-iyNtkZNiRVTpcuOiJ6B1Ir-0f1vamO9K7_4bSjSFvHA_wBAzz8CAXTWzXdFV01PD3mkKiLv9F9ptoBYRDiDXyJ5Ftbdq9U9vyIcizblV6_j5xIBtewyG4g3xYVv82bbsGaL0liwYdf3VU_i7AAdQEMlWuHkIWYYuJ1jDe6OcsOFxAPKbFYL6Wfbrh8clWspc1JkRIw5bw4XRm1tuXYFBoKOuPQVHO2YxNaaxpTZPM144IapHAFazv4tnk_PUBtkV5jPtI" />
+                <!-- Gradient Overlay for smooth transition -->
+                <div class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
+            </div>
+            <div class="relative z-10 max-w-[1920px] mx-auto px-8 h-full flex flex-col justify-end pb-12">
+                <div class="max-w-3xl">
+                    <div
+                        class="glass-panel inline-flex items-center space-x-2 px-3 py-1 rounded-full mb-6 text-sm font-label text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[16px]">stars</span>
+                        <span>Sci-Fi / Action</span>
+                        <span class="px-2">•</span>
+                        <span>2h 45m</span>
+                        <span class="px-2">•</span>
+                        <span class="border border-outline-variant px-1.5 rounded text-xs">PG-13</span>
+                    </div>
+                    <h1
+                        class="text-5xl md:text-7xl font-headline font-bold text-on-background tracking-tighter mb-4 leading-tight">
+                        ECHOES OF ETERNITY
+                    </h1>
+                    <p class="text-lg font-body text-on-surface-variant mb-8 line-clamp-3 max-w-2xl">
+                        In the distant future, humanity's last hope rests on an experimental expedition into the heart
+                        of a dying star. A visually stunning journey that explores the limits of human endurance and the
+                        mysteries of the cosmos.
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <button
+                            class="bg-transparent border border-outline-variant/50 text-primary px-6 py-3 rounded-full font-headline font-medium hover:bg-primary/10 transition-colors flex items-center space-x-2 glass-panel">
+                            <span class="material-symbols-outlined"
+                                style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                            <span>Watch Trailer</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Booking Flow Container -->
+        <div class="max-w-[1920px] mx-auto px-8 -mt-8 relative z-20">
+            <!-- Filter Strip -->
+            <div
+                class="glass-panel rounded-xl p-4 mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6 ambient-shadow">
+                <!-- Date Picker (Horizontal Scroll) -->
+                <div class="flex-grow overflow-hidden">
+                    <h3 class="text-sm font-headline text-on-surface-variant mb-2">Select Date</h3>
+                    <div class="flex space-x-4 overflow-x-auto no-scrollbar pb-2">
+                        <!-- Active Date -->
+                        <button
+                            class="flex flex-col items-center justify-center min-w-[70px] h-[80px] rounded-lg bg-surface-container-highest border border-secondary/50 neon-glow text-secondary">
+                            <span class="text-xs font-label uppercase">Today</span>
+                            <span class="text-2xl font-headline font-bold">14</span>
+                            <span class="text-xs font-label">Oct</span>
+                        </button>
+                        <!-- Inactive Dates -->
+                        <button
+                            class="flex flex-col items-center justify-center min-w-[70px] h-[80px] rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/30 text-on-surface-variant">
+                            <span class="text-xs font-label uppercase">Tue</span>
+                            <span class="text-xl font-headline font-medium">15</span>
+                            <span class="text-xs font-label">Oct</span>
+                        </button>
+                        <button
+                            class="flex flex-col items-center justify-center min-w-[70px] h-[80px] rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/30 text-on-surface-variant">
+                            <span class="text-xs font-label uppercase">Wed</span>
+                            <span class="text-xl font-headline font-medium">16</span>
+                            <span class="text-xs font-label">Oct</span>
+                        </button>
+                        <button
+                            class="flex flex-col items-center justify-center min-w-[70px] h-[80px] rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/30 text-on-surface-variant">
+                            <span class="text-xs font-label uppercase">Thu</span>
+                            <span class="text-xl font-headline font-medium">17</span>
+                            <span class="text-xs font-label">Oct</span>
+                        </button>
+                        <button
+                            class="flex flex-col items-center justify-center min-w-[70px] h-[80px] rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/30 text-on-surface-variant">
+                            <span class="text-xs font-label uppercase">Fri</span>
+                            <span class="text-xl font-headline font-medium">18</span>
+                            <span class="text-xs font-label">Oct</span>
+                        </button>
+                        <button
+                            class="flex flex-col items-center justify-center min-w-[70px] h-[80px] rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/30 text-on-surface-variant">
+                            <span class="text-xs font-label uppercase">Sat</span>
+                            <span class="text-xl font-headline font-medium">19</span>
+                            <span class="text-xs font-label">Oct</span>
+                        </button>
+                        <button
+                            class="flex flex-col items-center justify-center min-w-[70px] h-[80px] rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/30 text-on-surface-variant">
+                            <span class="text-xs font-label uppercase">Sun</span>
+                            <span class="text-xl font-headline font-medium">20</span>
+                            <span class="text-xs font-label">Oct</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Location Selector -->
+                <div class="min-w-[250px] relative">
+                    <h3 class="text-sm font-headline text-on-surface-variant mb-2">Cinema Location</h3>
+                    <div
+                        class="relative bg-surface-container-low border-b-2 border-outline-variant hover:border-secondary focus-within:border-secondary transition-colors group">
+                        <select
+                            class="w-full bg-transparent text-on-background font-body py-3 pl-10 pr-8 appearance-none focus:outline-none focus:ring-0 border-none cursor-pointer">
+                            <option class="bg-surface-container text-on-surface" value="downtown">Horizon Nexus -
+                                Downtown</option>
+                            <option class="bg-surface-container text-on-surface" value="uptown">Horizon Zenith - Uptown
+                            </option>
+                            <option class="bg-surface-container text-on-surface" value="suburb">Horizon Echo - Suburbia
+                            </option>
+                        </select>
+                        <span
+                            class="material-symbols-outlined absolute left-2 top-3 text-on-surface-variant group-focus-within:text-secondary transition-colors"
+                            style="font-variation-settings: 'FILL' 0;">location_on</span>
+                        <span
+                            class="material-symbols-outlined absolute right-2 top-3 text-on-surface-variant pointer-events-none"
+                            style="font-variation-settings: 'FILL' 0;">arrow_drop_down</span>
+                        <!-- Subtle focus neon bleed -->
+                        <div
+                            class="absolute -bottom-[2px] left-0 w-full h-[2px] bg-secondary opacity-0 group-focus-within:opacity-100 neon-glow transition-opacity pointer-events-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Showtimes List -->
+            <div class="space-y-12">
+                <!-- Format Category: IMAX -->
+                <div>
+                    <div class="flex items-center space-x-4 mb-6">
+                        <h2 class="text-3xl font-headline font-bold text-on-background tracking-tight">IMAX 70mm</h2>
+                        <div class="h-px flex-grow bg-gradient-to-r from-surface-container-high to-transparent"></div>
+                    </div>
+                    <!-- Cinema Block -->
+                    <div class="bg-surface-container-low rounded-xl p-6 ambient-shadow relative overflow-hidden group">
+                        <!-- Decorative glow -->
+                        <div
+                            class="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none">
+                        </div>
+                        <h4 class="text-lg font-headline font-semibold text-primary mb-4 flex items-center">
+                            <span class="material-symbols-outlined mr-2"
+                                style="font-variation-settings: 'FILL' 1;">theaters</span>
+                            Horizon Nexus - Downtown
+                        </h4>
+                        <div class="flex flex-wrap gap-4">
+                            <!-- Time Button - Available -->
+                            <a class="relative glass-panel hover:bg-surface-container-highest border border-outline-variant/30 hover:border-primary/50 rounded-lg px-6 py-3 flex flex-col items-center justify-center transition-all min-w-[100px] group/btn"
+                                href="#">
+                                <span
+                                    class="text-xl font-headline font-medium text-on-background group-hover/btn:text-primary transition-colors">14:30</span>
+                                <span class="text-xs font-label text-on-surface-variant mt-1">Available</span>
+                            </a>
+                            <!-- Time Button - Selected/Active state (for demonstration) -->
+                            <a class="relative bg-surface-container-highest border border-secondary/80 rounded-lg px-6 py-3 flex flex-col items-center justify-center transition-all min-w-[100px] neon-glow"
+                                href="#">
+                                <span class="text-xl font-headline font-bold text-secondary">18:00</span>
+                                <span class="text-xs font-label text-secondary mt-1">Prime Time</span>
+                            </a>
+                            <!-- Time Button - Almost Full -->
+                            <a class="relative glass-panel hover:bg-surface-container-highest border border-outline-variant/30 hover:border-error-dim/50 rounded-lg px-6 py-3 flex flex-col items-center justify-center transition-all min-w-[100px] group/btn"
+                                href="#">
+                                <span
+                                    class="text-xl font-headline font-medium text-on-background group-hover/btn:text-error-dim transition-colors">21:15</span>
+                                <span class="text-xs font-label text-error-dim mt-1">Few Seats Left</span>
+                            </a>
+                            <!-- Time Button - Occupied -->
+                            <div
+                                class="relative bg-surface-dim opacity-40 border border-outline-variant/20 rounded-lg px-6 py-3 flex flex-col items-center justify-center min-w-[100px] cursor-not-allowed">
+                                <span
+                                    class="text-xl font-headline font-medium text-on-surface-variant line-through">23:45</span>
+                                <span class="text-xs font-label text-on-surface-variant mt-1">Sold Out</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Format Category: Standard -->
+                <div>
+                    <div class="flex items-center space-x-4 mb-6">
+                        <h2 class="text-3xl font-headline font-bold text-on-background tracking-tight">Standard Digital
+                        </h2>
+                        <div class="h-px flex-grow bg-gradient-to-r from-surface-container-high to-transparent"></div>
+                    </div>
+                    <!-- Cinema Block 1 -->
+                    <div class="bg-surface-container-low rounded-xl p-6 mb-4 relative overflow-hidden">
+                        <h4 class="text-lg font-headline font-semibold text-on-background mb-4">Horizon Nexus - Downtown
+                        </h4>
+                        <div class="flex flex-wrap gap-4">
+                            <a class="relative glass-panel hover:bg-surface-container-highest border border-outline-variant/30 hover:border-primary/50 rounded-lg px-6 py-3 flex flex-col items-center justify-center transition-all min-w-[100px] group/btn"
+                                href="#">
+                                <span
+                                    class="text-xl font-headline font-medium text-on-background group-hover/btn:text-primary transition-colors">10:00</span>
+                                <span class="text-xs font-label text-on-surface-variant mt-1">Available</span>
+                            </a>
+                            <a class="relative glass-panel hover:bg-surface-container-highest border border-outline-variant/30 hover:border-primary/50 rounded-lg px-6 py-3 flex flex-col items-center justify-center transition-all min-w-[100px] group/btn"
+                                href="#">
+                                <span
+                                    class="text-xl font-headline font-medium text-on-background group-hover/btn:text-primary transition-colors">13:15</span>
+                                <span class="text-xs font-label text-on-surface-variant mt-1">Available</span>
+                            </a>
+                            <a class="relative glass-panel hover:bg-surface-container-highest border border-outline-variant/30 hover:border-primary/50 rounded-lg px-6 py-3 flex flex-col items-center justify-center transition-all min-w-[100px] group/btn"
+                                href="#">
+                                <span
+                                    class="text-xl font-headline font-medium text-on-background group-hover/btn:text-primary transition-colors">16:45</span>
+                                <span class="text-xs font-label text-on-surface-variant mt-1">Available</span>
+                            </a>
+                            <a class="relative glass-panel hover:bg-surface-container-highest border border-outline-variant/30 hover:border-error-dim/50 rounded-lg px-6 py-3 flex flex-col items-center justify-center transition-all min-w-[100px] group/btn"
+                                href="#">
+                                <span
+                                    class="text-xl font-headline font-medium text-on-background group-hover/btn:text-error-dim transition-colors">20:30</span>
+                                <span class="text-xs font-label text-error-dim mt-1">Few Seats Left</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

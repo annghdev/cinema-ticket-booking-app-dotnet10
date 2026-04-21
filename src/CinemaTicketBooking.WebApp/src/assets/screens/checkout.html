@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Horizon Cinema - Checkout</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#090079",
+                        "tertiary-fixed": "#a7a9ff",
+                        "surface-container-lowest": "#000000",
+                        "surface-dim": "#0b0e14",
+                        "outline-variant": "#45484f",
+                        "on-tertiary-fixed": "#060061",
+                        "on-tertiary-container": "#ffffff",
+                        "on-error-container": "#ffa8a3",
+                        "on-secondary": "#00575b",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "on-surface": "#ecedf6",
+                        "inverse-surface": "#f9f9ff",
+                        "on-background": "#ecedf6",
+                        "background": "#0b0e14",
+                        "tertiary-container": "#4949fc",
+                        "secondary-fixed": "#00f4fe",
+                        "inverse-primary": "#00639f",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "surface-bright": "#282c36",
+                        "primary-dim": "#4fa3ed",
+                        "primary-container": "#52a6f0",
+                        "surface-container-highest": "#22262f",
+                        "on-primary-fixed": "#001222",
+                        "secondary": "#00f4fe",
+                        "surface-tint": "#61b4fe",
+                        "on-primary": "#003152",
+                        "surface-container-low": "#10131a",
+                        "outline": "#73757d",
+                        "on-error": "#490006",
+                        "on-surface-variant": "#a9abb3",
+                        "secondary-container": "#00696e",
+                        "on-secondary-fixed": "#004346",
+                        "error-dim": "#d7383b",
+                        "surface-variant": "#22262f",
+                        "primary-fixed": "#5eb1fc",
+                        "primary": "#61b4fe",
+                        "error": "#ff716c",
+                        "tertiary-dim": "#5c5eff",
+                        "error-container": "#9f0519",
+                        "on-primary-fixed-variant": "#00385d",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "on-primary-container": "#00243f",
+                        "surface": "#0b0e14",
+                        "tertiary": "#9093ff",
+                        "inverse-on-surface": "#52555c",
+                        "on-secondary-fixed-variant": "#006266",
+                        "surface-container-high": "#1c2028",
+                        "surface-container": "#161a21",
+                        "secondary-dim": "#00e5ee",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "on-secondary-container": "#dffdff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .font-headline {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Custom Scrollbar for inner elements */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #22262f;
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #45484f;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-on-background min-h-screen flex flex-col antialiased selection:bg-secondary selection:text-on-secondary">
+    <!-- Main Content Area -->
+    <main
+        class="flex-grow pt-8 md:pt-32 pb-24 md:pb-12 px-4 md:px-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        <!-- Left Column: Checkout Flow (Food, Payment, Discount) -->
+        <div class="lg:col-span-8 flex flex-col gap-12">
+            <!-- Header -->
+            <div>
+                <button
+                    class="flex items-center text-on-surface-variant hover:text-secondary transition-colors mb-4 text-sm font-label group">
+                    <span
+                        class="material-symbols-outlined mr-1 text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    Quay lại đặt ghế
+                </button>
+                <h1 class="text-4xl md:text-5xl font-headline font-bold tracking-tight mb-2">Thanh toán</h1>
+                <p class="text-on-surface-variant font-body">Hoàn tất đặt vé để có trải nghiệm điện ảnh khó quên.
+                </p>
+            </div>
+            <!-- 1. Food and Drink Options -->
+            <section class="bg-surface-container-low rounded-xl p-6 md:p-8">
+                <h2 class="text-2xl font-headline font-semibold mb-6 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-secondary">fastfood</span>
+                    Đồ ăn &amp; Nước uống
+                </h2>
+                <!-- Food Items Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Item 1 -->
+                    <div
+                        class="bg-surface-container-highest rounded-lg p-4 border border-outline-variant/20 flex gap-4 items-center">
+                        <div class="w-20 h-20 rounded-md bg-surface-dim flex-shrink-0 overflow-hidden relative">
+                            <img alt="Large Popcorn Bucket" class="w-full h-full object-cover"
+                                data-alt="close up of a large striped bucket overflowing with fresh buttery popcorn under cinematic lighting"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9F5G8LkcbZEcrDwrQvz-8S2Ue4bDPAWePouGn04QmSC8g2EdZZxHX3o0m2cKj93JBMbDLNdX2i81G7l39gCLJYLAQWmortJgS2ZirWgQcm3iL44ObLJaIxdMK170YWl9inG1ZoQAfPP--K-4tKoZzQK2g0PyH5Sd4Dlpv59FD2_KjtN8n39Y1mQlEO1vKeXAjAUKYh_A3phG8yUiAxGlfsU8YJpqyLAXNWOlCLXkEPx8-NfhNrCR51NiG-P757BJtqA_l0btWBN0" />
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-headline font-medium text-lg">Hộp bắp lớn</h3>
+                            <p class="text-secondary text-sm font-bold mb-2">79.000đ</p>
+                            <div class="flex items-center gap-3">
+                                <button
+                                    class="w-8 h-8 rounded-sm bg-surface-variant flex items-center justify-center text-on-surface hover:text-secondary transition-colors">
+                                    <span class="material-symbols-outlined text-sm">remove</span>
+                                </button>
+                                <span class="font-body font-semibold">1</span>
+                                <button
+                                    class="w-8 h-8 rounded-sm bg-surface-variant flex items-center justify-center text-on-surface hover:text-secondary transition-colors">
+                                    <span class="material-symbols-outlined text-sm">add</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Item 2 -->
+                    <div
+                        class="bg-surface-container-highest rounded-lg p-4 border border-outline-variant/20 flex gap-4 items-center">
+                        <div class="w-20 h-20 rounded-md bg-surface-dim flex-shrink-0 overflow-hidden relative">
+                            <img alt="Large Soda Cup" class="w-full h-full object-cover"
+                                data-alt="tall condensation covered glass of dark cola with ice cubes and a straw backlit by neon lights"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv1wGsCWx0lCWHSW7ljFTE1KtdNLwtlxmfkglrH4SUvj_OpsXwDbCZLWQYMbbKY0G9PRN1WHt77NPqkTsqnP4oFVZrNAeR6V95_1uZeJ5yEiF-6BzBX7rqJ5kTYHS6WpA7V496KZj7jujILPMX1YysKdPl9xhgKOsNQ2ijl7Sc3QcDKGwVnmTTx45N__sFJBo6FnbAB8201zsw20nGnLXJju_wzvl98CtJrBZTJ8JPMKal41LOyxSgSQGsvvmCg-zAseiUWNN4bQA" />
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-headline font-medium text-lg">Ly coca lớn</h3>
+                            <p class="text-secondary text-sm font-bold mb-2">35.000đ</p>
+                            <div class="flex items-center gap-3">
+                                <button
+                                    class="w-8 h-8 rounded-sm bg-surface-variant flex items-center justify-center text-on-surface hover:text-secondary transition-colors">
+                                    <span class="material-symbols-outlined text-sm">remove</span>
+                                </button>
+                                <span class="font-body font-semibold">2</span>
+                                <button
+                                    class="w-8 h-8 rounded-sm bg-surface-variant flex items-center justify-center text-on-surface hover:text-secondary transition-colors">
+                                    <span class="material-symbols-outlined text-sm">add</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button
+                    class="mt-6 w-full py-3 bg-surface-variant/40 border border-outline-variant/20 rounded-sm text-primary font-label font-semibold flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors backdrop-blur-md">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    Chọn thêm
+                </button>
+            </section>
+            <!-- 2. Payment Methods -->
+            <section class="bg-surface-container-low rounded-xl p-6 md:p-8">
+                <h2 class="text-2xl font-headline font-semibold mb-6 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-secondary">payment</span>
+                    Payment Method
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                    <!-- Credit Card Option (Selected) -->
+                    <div
+                        class="bg-surface-container-highest border border-secondary rounded-xl p-5 cursor-pointer relative overflow-hidden group shadow-[0_0_15px_rgba(0,244,254,0.1)]">
+                        <div class="absolute top-0 right-0 p-3">
+                            <span
+                                class="material-symbols-outlined text-secondary drop-shadow-[0_0_8px_rgba(0,244,254,0.5)]">check_circle</span>
+                        </div>
+                        <span class="material-symbols-outlined text-3xl mb-3 text-on-surface">credit_card</span>
+                        <h3 class="font-headline font-medium mb-1">Thẻ tín dụng</h3>
+                        <p class="text-xs text-on-surface-variant">Visa, Mastercard, Amex</p>
+                    </div>
+                    <!-- E-Wallet Option -->
+                    <div
+                        class="bg-surface-container-highest border border-outline-variant/20 rounded-xl p-5 cursor-pointer hover:border-outline-variant transition-colors group">
+                        <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-outline-variant">radio_button_unchecked</span>
+                        </div>
+                        <span
+                            class="material-symbols-outlined text-3xl mb-3 text-on-surface-variant group-hover:text-on-surface transition-colors">account_balance_wallet</span>
+                        <h3
+                            class="font-headline font-medium mb-1 text-on-surface-variant group-hover:text-on-surface transition-colors">
+                            Ví điện tử </h3>
+                        <p class="text-xs text-on-surface-variant">Momo, VnPay, ZaloPay</p>
+                    </div>
+                </div>
+                <!-- Card Details Form -->
+                <div class="space-y-6">
+                    <div class="relative">
+                        <input
+                            class="w-full bg-transparent border-0 border-b-2 border-outline-variant px-0 py-2 text-on-surface focus:ring-0 focus:border-secondary transition-colors peer"
+                            id="cardName" placeholder=" " type="text" />
+                        <label
+                            class="absolute left-0 top-2 text-on-surface-variant text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs font-label"
+                            for="cardName">Name on Card</label>
+                    </div>
+                    <div class="relative">
+                        <input
+                            class="w-full bg-transparent border-0 border-b-2 border-outline-variant px-0 py-2 text-on-surface focus:ring-0 focus:border-secondary transition-colors peer tracking-widest"
+                            id="cardNumber" placeholder=" " type="text" value="**** **** **** 4242" />
+                        <label
+                            class="absolute left-0 top-2 text-on-surface-variant text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs font-label"
+                            for="cardNumber">Card Number</label>
+                        <span
+                            class="material-symbols-outlined absolute right-0 top-2 text-on-surface-variant">credit_score</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="relative">
+                            <input
+                                class="w-full bg-transparent border-0 border-b-2 border-outline-variant px-0 py-2 text-on-surface focus:ring-0 focus:border-secondary transition-colors peer"
+                                id="expiry" placeholder=" " type="text" />
+                            <label
+                                class="absolute left-0 top-2 text-on-surface-variant text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs font-label"
+                                for="expiry">Expiry (MM/YY)</label>
+                        </div>
+                        <div class="relative">
+                            <input
+                                class="w-full bg-transparent border-0 border-b-2 border-outline-variant px-0 py-2 text-on-surface focus:ring-0 focus:border-secondary transition-colors peer"
+                                id="cvv" placeholder=" " type="text" />
+                            <label
+                                class="absolute left-0 top-2 text-on-surface-variant text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs font-label"
+                                for="cvv">CVV</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- Right Column: Summary Panel -->
+        <div class="lg:col-span-4 relative">
+            <div class="sticky top-32">
+                <!-- Movie Summary Card -->
+                <div
+                    class="bg-surface-container-highest rounded-sm overflow-hidden mb-6 shadow-[0_20px_40px_rgba(0,0,0,0.4)] border border-outline-variant/10">
+                    <div class="h-32 w-full relative">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-surface-container-highest to-transparent z-10">
+                        </div>
+                        <img alt="Movie Poster" class="w-full h-full object-cover"
+                            data-alt="cinematic wide shot of a futuristic neon lit city street in the rain from a sci fi movie"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0A0VdGf_oHv4oV4h8kuP2-xJH32HhbfVa-X9fR7GttMRvKR-9BbKgoQZIoDsw_yjnQS0RHNQe54rejGP3Nu3ZU_Cn1fOoHIVgD6VVMcwyQBfWJYzmOJMVY-ls_upynrKjIrLZRhm2sjVW0-cxW4ZHUdOrc4oifsg66Sun3ZCsDYw4Ie8v6mrZcEu55auKur5JxrXDAZUNymjUmrAVcM-ZZnnBHzdGkYoHVjhU3ZvbcswbPTTwxKGcUiNZIuCYjC3YdoLg7cjm5sE" />
+                    </div>
+                    <div class="p-6 relative z-20 -mt-12">
+                        <div
+                            class="bg-surface-variant/40 backdrop-blur-md rounded-lg px-3 py-1 inline-block mb-3 border border-outline-variant/20">
+                            <span class="text-xs font-label font-bold tracking-wider uppercase text-on-surface">Sci-Fi /
+                                Thriller</span>
+                        </div>
+                        <h3 class="text-2xl font-headline font-bold mb-1 tracking-tight">Neon Genesis</h3>
+                        <p class="text-on-surface-variant text-sm mb-4 font-body">Hôm nay, 8:30 PM • Phòng 4 - EHC Gò
+                            Vấp
+                        </p>
+                        <div class="flex items-center gap-2 text-sm font-label mb-6">
+                            <span class="material-symbols-outlined text-secondary text-base">chair</span>
+                            <span class="text-on-surface">Ghế: <span class="font-bold text-secondary"> F12,
+                                    F13</span></span>
+                        </div>
+                        <!-- Price Breakdown -->
+                        <div class="space-y-3 pt-6 border-t border-outline-variant/20 font-body text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">Vé (2x)</span>
+                                <span>290.000 đ</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">Hộp bắp lớn (1x)</span>
+                                <span>79.000 đ</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-on-surface-variant">Ly coca lớn (2x)</span>
+                                <span>70.000 đ</span>
+                            </div>
+                        </div>
+                        <!-- Discount Code -->
+                        <div class="mt-6 pt-6 border-t border-outline-variant/20">
+                            <div class="relative flex items-center">
+                                <input
+                                    class="w-full bg-surface-dim border border-outline-variant/30 rounded-sm py-2 pl-4 pr-24 text-sm focus:border-secondary focus:ring-0 transition-colors"
+                                    placeholder="Mã giảm giá" type="text" />
+                                <button
+                                    class="absolute right-1 top-1 bottom-1 px-4 bg-surface-variant text-on-surface rounded-sm text-xs font-bold hover:text-secondary transition-colors">Apply</button>
+                            </div>
+                        </div>
+                        <!-- Total -->
+                        <div class="mt-6 pt-6 border-t border-outline-variant/20 flex justify-between items-end">
+                            <span class="text-lg font-headline font-medium text-on-surface-variant">Tổng cộng</span>
+                            <span
+                                class="text-3xl font-headline font-bold text-secondary drop-shadow-[0_0_8px_rgba(0,244,254,0.3)]">439.000
+                                đ</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pay Button -->
+                <button
+                    class="w-full py-4 rounded-sm bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold text-lg hover:shadow-[0_0_20px_rgba(0,244,254,0.6)] transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">lock</span>
+                    Thanh toán 439.000 đ
+                </button>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Navigation Bar (Hidden on Desktop, Visible on Mobile) -->
+    <!-- Suppressed on Checkout Flow as per Semantic Shell Mandate (Transactional Screen) -->
+    <!-- Leaving structural comment to indicate purposeful omission based on rules -->
+    <!-- The user is in a focused checkout journey, global nav is suppressed -->
+</body>
+
+</html>

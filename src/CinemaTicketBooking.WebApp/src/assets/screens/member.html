@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Member Privileges | HORIZON</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error-container": "#ffa8a3",
+                      "primary-dim": "#4fa3ed",
+                      "tertiary": "#9093ff",
+                      "primary-container": "#52a6f0",
+                      "surface-container-lowest": "#000000",
+                      "on-secondary-container": "#dffdff",
+                      "outline": "#73757d",
+                      "surface-tint": "#61b4fe",
+                      "on-tertiary-container": "#ffffff",
+                      "tertiary-fixed-dim": "#9799ff",
+                      "primary": "#61b4fe",
+                      "surface-bright": "#282c36",
+                      "on-primary": "#003152",
+                      "error": "#ff716c",
+                      "primary-fixed-dim": "#4fa3ed",
+                      "on-tertiary-fixed-variant": "#1600c3",
+                      "on-background": "#ecedf6",
+                      "secondary": "#00f4fe",
+                      "surface-dim": "#0b0e14",
+                      "on-surface-variant": "#a9abb3",
+                      "on-secondary-fixed": "#004346",
+                      "on-tertiary": "#090079",
+                      "on-primary-fixed": "#001222",
+                      "on-secondary": "#00575b",
+                      "inverse-surface": "#f9f9ff",
+                      "on-primary-fixed-variant": "#00385d",
+                      "tertiary-fixed": "#a7a9ff",
+                      "primary-fixed": "#5eb1fc",
+                      "on-primary-container": "#00243f",
+                      "secondary-dim": "#00e5ee",
+                      "error-container": "#9f0519",
+                      "surface": "#0b0e14",
+                      "on-surface": "#ecedf6",
+                      "secondary-fixed-dim": "#00e5ee",
+                      "on-secondary-fixed-variant": "#006266",
+                      "inverse-on-surface": "#52555c",
+                      "surface-variant": "#22262f",
+                      "tertiary-container": "#4949fc",
+                      "outline-variant": "#45484f",
+                      "surface-container-high": "#1c2028",
+                      "inverse-primary": "#00639f",
+                      "background": "#0b0e14",
+                      "error-dim": "#d7383b",
+                      "tertiary-dim": "#5c5eff",
+                      "on-tertiary-fixed": "#060061",
+                      "on-error": "#490006",
+                      "surface-container-low": "#10131a",
+                      "surface-container-highest": "#22262f",
+                      "secondary-container": "#00696e",
+                      "surface-container": "#161a21",
+                      "secondary-fixed": "#00f4fe"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Space Grotesk"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(34, 38, 47, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(69, 72, 79, 0.2);
+        }
+        .neon-glow {
+            text-shadow: 0 0 8px rgba(0, 244, 254, 0.5);
+        }
+        .neon-button-shadow {
+            box-shadow: 0 0 20px rgba(0, 244, 254, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-secondary/30">
+<!-- TopAppBar Component -->
+<header class="bg-[#0b0e14]/60 backdrop-blur-lg border-b border-[#45484f]/20 shadow-2xl shadow-black/50 docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center px-8 py-4 w-full z-50">
+<div class="flex items-center gap-12">
+<span class="text-2xl font-black text-[#00f4fe] drop-shadow-[0_0_8px_rgba(0,244,254,0.5)] font-headline uppercase tracking-widest">HORIZON</span>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-slate-400 hover:text-[#61b4fe] transition-colors font-headline uppercase tracking-widest text-sm" href="#">Movies</a>
+<a class="text-slate-400 hover:text-[#61b4fe] transition-colors font-headline uppercase tracking-widest text-sm" href="#">Cinemas</a>
+<a class="text-slate-400 hover:text-[#61b4fe] transition-colors font-headline uppercase tracking-widest text-sm" href="#">Offers</a>
+<a class="text-[#00f4fe] font-bold border-b-2 border-[#00f4fe] pb-1 font-headline uppercase tracking-widest text-sm" href="#">Member</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant/30">
+<span class="material-symbols-outlined text-slate-500 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm text-on-surface w-48" placeholder="Search films..." type="text"/>
+</div>
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-slate-400 hover:text-secondary transition-all">notifications</button>
+<button class="material-symbols-outlined text-slate-400 hover:text-secondary transition-all">account_circle</button>
+</div>
+</div>
+</div>
+</header>
+<main class="min-h-screen">
+<!-- Hero Section: Member Privileges -->
+<section class="relative min-h-[614px] flex items-center justify-center pt-20 pb-32 overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-30" data-alt="Cinematic wide shot of a futuristic theater hall with deep blue neon ambient lighting and floating digital projections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlQFh-Hbn82aRRABfusv0qZB3ma6gDt6wJVS6MM2kHtrSNGyvOD-pn0zN0kZ_TQSpR1-MQh8W8eULFNtDSXp4kZUqpc_VMr3QpPb2brGDN6jcvV44MX25Ew-i92UZR-WKeyb4a49wrYor74Ewj3_9ue6HnDkthpmx7xqnUfPI0gcy4ekLpFL0m4O1QJOgtjw433DFXEBwKHhE5xvzLRW9_8iWAeoLveQt8kmcdgnmNxJRHQvFHlPNY1OtaUx-g-R42oBcjx__f3lQ"/>
+<div class="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
+</div>
+<div class="relative z-10 max-w-7xl mx-auto px-8 w-full flex flex-col md:flex-row items-center justify-between gap-12">
+<div class="max-w-2xl">
+<h1 class="font-headline text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+                        Elevate Your <br/>
+<span class="text-secondary neon-glow">Cinema Journey</span>
+</h1>
+<p class="text-lg text-on-surface-variant max-w-lg mb-8 leading-relaxed">
+                        Access a world of exclusive screenings, premium comfort, and digital rewards designed for the true auteur of cinema.
+                    </p>
+<div class="flex gap-4">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold py-4 px-8 rounded-full neon-button-shadow hover:scale-105 transition-transform">
+                            Upgrade to Platinum
+                        </button>
+<button class="glass-panel text-primary font-bold py-4 px-8 rounded-full border border-outline-variant hover:bg-primary/10 transition-colors">
+                            View Tier Benefits
+                        </button>
+</div>
+</div>
+<!-- Digital Member Card -->
+<div class="w-full max-w-md">
+<div class="glass-panel p-1 rounded-[2.5rem] relative group cursor-pointer transition-transform duration-500 hover:scale-105">
+<div class="bg-gradient-to-br from-surface-container-highest to-surface-container-low rounded-[2rem] p-8 aspect-[1.6/1] flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 blur-3xl -mr-16 -mt-16"></div>
+<div class="flex justify-between items-start relative z-10">
+<div>
+<p class="font-headline text-xs tracking-widest text-secondary uppercase font-bold mb-1">Current Tier</p>
+<h2 class="font-headline text-3xl font-black text-on-surface">GOLD MEMBER</h2>
+</div>
+<span class="material-symbols-outlined text-4xl text-secondary" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<div class="relative z-10">
+<p class="font-body text-xs text-on-surface-variant mb-1">Card Holder</p>
+<p class="font-headline text-lg tracking-wider">ALEXANDER VANCE</p>
+<div class="mt-4 flex justify-between items-end">
+<div class="text-2xl font-black font-headline tracking-widest">**** 8842</div>
+<div class="text-right">
+<p class="text-[10px] text-slate-500 uppercase tracking-widest">Expires</p>
+<p class="text-xs font-bold">12 / 2025</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Loyalty Points & Progress -->
+<section class="max-w-7xl mx-auto px-8 mb-32">
+<div class="grid lg:grid-cols-3 gap-8 items-stretch">
+<!-- Points Card -->
+<div class="lg:col-span-2 glass-panel rounded-3xl p-10 flex flex-col justify-between">
+<div>
+<h3 class="font-headline text-2xl font-bold mb-2">Points Momentum</h3>
+<p class="text-on-surface-variant text-sm mb-12">Every 1,000 VND spent brings you closer to cinematic luxury.</p>
+<div class="relative pt-1">
+<div class="flex mb-4 items-center justify-between">
+<div>
+<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-secondary bg-secondary/10">
+                                        Level Progress
+                                    </span>
+</div>
+<div class="text-right">
+<span class="text-sm font-bold inline-block text-secondary">
+                                        8,450 / 10,000 pts
+                                    </span>
+</div>
+</div>
+<div class="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-surface-container-high border border-outline-variant/20">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-primary to-secondary relative" style="width:84.5%">
+<div class="absolute right-0 top-0 bottom-0 w-4 bg-white/20 blur-sm"></div>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant italic">1,550 points remaining until your next free Premium Ticket.</p>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+<div class="bg-surface-container-low p-4 rounded-2xl border border-outline-variant/10 text-center">
+<span class="material-symbols-outlined text-primary mb-2">confirmation_number</span>
+<p class="text-[10px] uppercase text-on-surface-variant">Tickets</p>
+<p class="font-bold text-lg">1 pt</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-2xl border border-outline-variant/10 text-center">
+<span class="material-symbols-outlined text-primary mb-2">fastfood</span>
+<p class="text-[10px] uppercase text-on-surface-variant">Snacks</p>
+<p class="font-bold text-lg">1.5 pts</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-2xl border border-outline-variant/10 text-center">
+<span class="material-symbols-outlined text-primary mb-2">event_seat</span>
+<p class="text-[10px] uppercase text-on-surface-variant">VIP</p>
+<p class="font-bold text-lg">2 pts</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-2xl border border-outline-variant/10 text-center">
+<span class="material-symbols-outlined text-primary mb-2">shopping_bag</span>
+<p class="text-[10px] uppercase text-on-surface-variant">Retail</p>
+<p class="font-bold text-lg">1 pt</p>
+</div>
+</div>
+</div>
+<!-- Reward Highlight -->
+<div class="bg-primary/5 rounded-3xl p-8 border border-primary/20 relative overflow-hidden group">
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors"></div>
+<h3 class="font-headline text-xl font-bold mb-6">Active Redemption</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-background/50 rounded-2xl border border-outline-variant/20">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">local_cafe</span>
+</div>
+<span class="text-sm font-medium">Free Large Combo</span>
+</div>
+<span class="text-xs font-bold text-primary">500 PTS</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-background/50 rounded-2xl border border-outline-variant/20">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">local_activity</span>
+</div>
+<span class="text-sm font-medium">30% Ticket Discount</span>
+</div>
+<span class="text-xs font-bold text-primary">300 PTS</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-background/50 rounded-2xl border border-outline-variant/20">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">redeem</span>
+</div>
+<span class="text-sm font-medium">Bday Surprise Gift</span>
+</div>
+<span class="text-xs font-bold text-secondary">CLAIM</span>
+</div>
+</div>
+<button class="w-full mt-10 py-3 text-sm font-bold text-on-surface uppercase tracking-widest border-b border-primary hover:text-primary transition-colors">
+                        View All Rewards
+                    </button>
+</div>
+</div>
+</section>
+<!-- Student Offers Section -->
+<section class="bg-surface-container-low py-24 mb-32">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex flex-col md:flex-row items-center gap-16">
+<div class="flex-1">
+<span class="text-secondary font-headline text-sm font-bold tracking-[0.3em] uppercase mb-4 block">Future Auteurs</span>
+<h2 class="text-4xl md:text-5xl font-headline font-bold mb-6">Next-Gen <br/>Student Pricing</h2>
+<p class="text-on-surface-variant mb-8 leading-relaxed text-lg">
+                            We believe great cinema should be accessible to those shaping the future. Students get exclusive flat-rate pricing every day of the week.
+                        </p>
+<div class="space-y-6 mb-10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">verified</span>
+</div>
+<div>
+<p class="font-bold">Flat Price 50k</p>
+<p class="text-sm text-on-surface-variant">All 2D films, any day, any time.</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">id_card</span>
+</div>
+<div>
+<p class="font-bold">Instant Verification</p>
+<p class="text-sm text-on-surface-variant">Show your physical ID or digital student pass at the counter.</p>
+</div>
+</div>
+</div>
+<button class="bg-secondary text-on-secondary font-black py-4 px-10 rounded-full hover:shadow-[0_0_25px_rgba(0,244,254,0.4)] transition-all uppercase tracking-widest text-sm">
+                            Verify Student ID
+                        </button>
+</div>
+<div class="flex-1 relative">
+<div class="absolute -inset-4 bg-gradient-to-tr from-secondary/20 to-transparent blur-2xl rounded-full"></div>
+<img class="relative z-10 w-full h-[500px] object-cover rounded-[3rem] shadow-2xl" data-alt="A cool close-up of Gen-Z students wearing high-tech fashion, eating popcorn in a cinema lobby with vibrant teal and magenta lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRg5o8-EIqBFBihGPa-o2xVDZROH4Yeu8N7nHXuGY76xI2QaY6Y93lxvf3k_GIV64oEBFUONKBZMsfefitDMm52xBh1thmeOas1M8KW1K6x4_PKXiBnlKUuSwUkhQiTeT0OrXELmxYq447bZBkSHfkwLmP0k8bBOQNdcQn9VyFR4jysiwheFgeaC2b_TFxDrPRAloRPEi8cxHAmUDRu-RKsHfKincxymtT1Q7s4KzSTNi2fBbzz1ZPSHRYy_rYyXxxRVHFtePRBqY"/>
+<div class="absolute bottom-10 -right-8 glass-panel p-6 rounded-2xl z-20 border-secondary/30">
+<div class="text-3xl font-headline font-black text-secondary">50,000 VND</div>
+<div class="text-xs uppercase tracking-widest text-on-surface-variant">Member Exclusive Price</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- VIP Benefits Bento Grid -->
+<section class="max-w-7xl mx-auto px-8 mb-32">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-headline font-bold mb-4">Ultimate Privileges</h2>
+<div class="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[280px]">
+<!-- Private Lounge -->
+<div class="md:col-span-8 group relative overflow-hidden rounded-3xl">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Ultra-luxury cinema private lounge with velvet seating, dimmed warm lighting, and a private bar with crystal glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmeQHOPgv-dG7U9GYrBtUcLglFS3VcF-MWT1vCsx7-FPRI4LWVMV5xv3UGC-PcQtypCQcMFDDz-BboSdpT0W9Wed973pyK5uKbPY3peUGebZwCnubx_BiCvM-RTjFcUPgg1TIbrUIKFPLS9ROGMIWzPX5Lv8gViSeY1BtRNkX89nrc2bxj8psiSHF4BttOklN1CC5KiA63ZgW2D8Vq6YrbaUk0yuwRiIjMg8Qa0XSl0_NmI6lNwjgvnJFNj-R0M1MO1Q9EPkovhqY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-8 left-8">
+<h4 class="text-2xl font-headline font-bold text-white mb-2">The Emerald Suite</h4>
+<p class="text-slate-300 text-sm max-w-sm">Exclusive lounge access with complimentary hors d'oeuvres before your screening.</p>
+</div>
+</div>
+<!-- Advanced Booking -->
+<div class="md:col-span-4 glass-panel p-8 rounded-3xl flex flex-col justify-center border-primary/20">
+<span class="material-symbols-outlined text-5xl text-primary mb-6" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<h4 class="text-xl font-headline font-bold mb-3">48h Early Access</h4>
+<p class="text-sm text-on-surface-variant">Secure the best seats for blockbuster premieres 2 days before the general public.</p>
+</div>
+<!-- Birthday Gift -->
+<div class="md:col-span-4 bg-gradient-to-br from-surface-container-highest to-surface-container-low p-8 rounded-3xl border border-outline-variant/30 flex flex-col items-center text-center justify-center group">
+<div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-secondary">cake</span>
+</div>
+<h4 class="text-xl font-headline font-bold mb-3">Birthday Auteur Box</h4>
+<p class="text-sm text-on-surface-variant italic">A curated gift box and free tickets on your special day.</p>
+</div>
+<!-- Concierge -->
+<div class="md:col-span-8 group relative overflow-hidden rounded-3xl">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A gloved hand serving a sophisticated cocktail and gourmet popcorn in a dark, high-end theater setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo4aQL2U4QnhIcobZGer9lZohzxR1HjID3EVuuowy9C3Qk_J_RiUNR-FJ4YqsmLCG1YiOeg44dD9pdkqGRRvNXoRNi9h4nDWzOT26nNbJEDYz2VOoIaoD0F9a6MjNmNZ0FCl3pWPrn45YMtEu40WXWkThE9xsQz2Zmi-6kra2UIL6IC3Wd2f5OkaDKfugg8i8zI9OHCMp7JapGUfgPRRZeo4RiyTOws-m7JGf-__hRJ6ZM_Eo2ihFv6A2ZgRtzzccUobsIgIGLhkc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-8 left-8">
+<h4 class="text-2xl font-headline font-bold text-white mb-2">At-Seat Concierge</h4>
+<p class="text-slate-300 text-sm max-w-sm">Never miss a frame. Order gourmet dining directly to your recliner via our app.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="max-w-5xl mx-auto px-8 mb-32">
+<div class="bg-gradient-to-r from-[#0b0e14] to-surface-container-highest rounded-[3rem] p-12 text-center border border-outline-variant/20 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+<div class="absolute top-10 left-10 w-64 h-64 bg-secondary rounded-full blur-[100px]"></div>
+<div class="absolute bottom-10 right-10 w-64 h-64 bg-primary rounded-full blur-[100px]"></div>
+</div>
+<h2 class="text-4xl font-headline font-bold mb-6 relative z-10">Ready to Redefine Your Reality?</h2>
+<p class="text-on-surface-variant max-w-xl mx-auto mb-10 relative z-10">
+                    Join the ranks of cinematic enthusiasts and start earning your way toward unparalleled viewing experiences today.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+<button class="bg-gradient-to-r from-secondary to-primary-container text-on-primary font-black py-5 px-12 rounded-full text-lg hover:scale-105 transition-transform shadow-[0_10px_30px_rgba(0,244,254,0.3)]">
+                        Become a Member
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="bg-[#0b0e14] border-t border-outline-variant/10 py-12">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-['Space_Grotesk'] font-bold text-[#00f4fe] text-xl tracking-widest">HORIZON</span>
+<p class="font-['Manrope'] text-xs tracking-tight text-slate-500">© 2024 THE CINEMATIC HORIZON. THE DIGITAL AUTEUR.</p>
+</div>
+<nav class="flex gap-8">
+<a class="text-slate-500 hover:text-[#61b4fe] transition-colors font-['Manrope'] text-xs tracking-tight" href="#">Privacy</a>
+<a class="text-slate-500 hover:text-[#61b4fe] transition-colors font-['Manrope'] text-xs tracking-tight" href="#">Terms</a>
+<a class="text-slate-500 hover:text-[#61b4fe] transition-colors font-['Manrope'] text-xs tracking-tight" href="#">Support</a>
+<a class="text-slate-500 hover:text-[#61b4fe] transition-colors font-['Manrope'] text-xs tracking-tight" href="#">Careers</a>
+</nav>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-slate-500 hover:text-secondary cursor-pointer">public</span>
+<span class="material-symbols-outlined text-slate-500 hover:text-secondary cursor-pointer">share</span>
+</div>
+</div>
+</footer>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#10131a]/80 backdrop-blur-2xl border-t border-[#45484f]/30 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.6)]">
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-70 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold uppercase mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-70 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">movie</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold uppercase mt-1">Films</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#00f4fe] bg-[#61b4fe]/10 rounded-2xl px-6 py-2 shadow-[0_0_15px_rgba(0,244,254,0.2)] active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold uppercase mt-1">Rewards</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-70 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-bold uppercase mt-1">Profile</span>
+</a>
+</nav>
+</body></html>
