@@ -1,8 +1,9 @@
 import type { HubConnection } from "@microsoft/signalr"
-import { type ReactElement, useEffect, useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { connectTicketStatusHub } from "../apis/ticketRealtime"
-import { getShowTimeById, lockTicket, releaseTicket } from "../apis/showtimeApi"
+import { getShowTimeById, lockTicket, releaseTicket, validateSeatSelection } from "../apis/showtimeApi"
+import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
 import type { ShowTimeDetailDto } from "../types/contracts"
 
 type SeatCellType = 0 | 1 | 2 | 3
@@ -137,16 +138,25 @@ function ShowtimeSeatSelection() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
-  const clientSessionId = useMemo(() => `web-${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`, [])
+  const [checkoutNavigating, setCheckoutNavigating] = useState(false)
+  const [clientSessionId] = useState(() => getOrCreateCustomerSessionId())
+  const navigate = useNavigate()
+  /** Synchronous lock so rapid double-clicks cannot queue two requests before React re-renders. */
+  const seatRequestLockRef = useRef<string | null>(null)
 
   useEffect(() => {
     async function loadShowtimeDetail(targetShowtimeId: string) {
       try {
         setLoading(true)
         const data = await getShowTimeById(targetShowtimeId)
+        const session = getOrCreateCustomerSessionId()
         setShowtime(data)
         setTickets(data.tickets)
-        setSelectedSeatCodes([])
+        setSelectedSeatCodes(
+          data.tickets
+            .filter((t) => t.status === "Locking" && t.lockingBy != null && t.lockingBy === session)
+            .map((t) => t.code),
+        )
         setActionError(null)
         setError(null)
       } catch {
@@ -178,12 +188,22 @@ function ShowtimeSeatSelection() {
       try {
         connection = await connectTicketStatusHub(targetShowtimeId, (event) => {
           setTickets((currentTickets) =>
-            currentTickets.map((ticket) =>
-              ticket.id === event.ticketId || ticket.code === event.ticketCode ? { ...ticket, status: event.status } : ticket,
-            ),
+            currentTickets.map((ticket) => {
+              if (ticket.id !== event.ticketId && ticket.code !== event.ticketCode) {
+                return ticket
+              }
+              const nextLockingBy = event.status === "Locking" ? event.lockingBy : null
+              return { ...ticket, status: event.status, lockingBy: nextLockingBy }
+            }),
           )
 
-          if (event.status === "Sold" || event.status === "PendingPayment" || event.status === "Available") {
+          const session = getOrCreateCustomerSessionId()
+          if (
+            event.status === "Sold" ||
+            event.status === "PendingPayment" ||
+            event.status === "Available" ||
+            (event.status === "Locking" && event.lockingBy != null && event.lockingBy !== session)
+          ) {
             setSelectedSeatCodes((current) => current.filter((code) => code !== event.ticketCode))
           }
 
@@ -250,6 +270,8 @@ function ShowtimeSeatSelection() {
     return selectedTickets.reduce((sum, ticket) => sum + ticket.price, 0)
   }, [selectedTickets])
 
+  const isSeatRequestInFlight = pendingSeatCodes.length > 0
+
   const toggleSeat = async (seatCode: string) => {
     if (!showtime) {
       return
@@ -262,11 +284,22 @@ function ShowtimeSeatSelection() {
 
     const isSelected = selectedSeatCodes.includes(seatCode)
     const isPending = pendingSeatCodes.includes(seatCode)
-    const isUnavailable = ticket.status === "Sold" || ticket.status === "PendingPayment" || ticket.status === "Locking"
+    const lockHeldBySomeoneElse =
+      ticket.status === "Locking" && (ticket.lockingBy == null || ticket.lockingBy !== clientSessionId)
+    const isUnavailable = ticket.status === "Sold" || ticket.status === "PendingPayment" || lockHeldBySomeoneElse
 
     if (isPending || (!isSelected && isUnavailable)) {
       return
     }
+
+    if (pendingSeatCodes.length > 0 && !pendingSeatCodes.includes(seatCode)) {
+      return
+    }
+
+    if (seatRequestLockRef.current !== null) {
+      return
+    }
+    seatRequestLockRef.current = seatCode
 
     try {
       setPendingSeatCodes((current) => [...current, seatCode])
@@ -282,6 +315,7 @@ function ShowtimeSeatSelection() {
     } catch {
       setActionError("Không thể cập nhật trạng thái ghế. Vui lòng thử lại.")
     } finally {
+      seatRequestLockRef.current = null
       setPendingSeatCodes((current) => current.filter((code) => code !== seatCode))
     }
   }
@@ -305,6 +339,8 @@ function ShowtimeSeatSelection() {
       </main>
     )
   }
+
+  const canContinueCheckout = selectedTickets.length > 0 && !isSeatRequestInFlight && !checkoutNavigating
 
   return (
     <main className="min-h-screen bg-background text-on-background">
@@ -349,8 +385,13 @@ function ShowtimeSeatSelection() {
                 const status = ticket?.status ?? "Available"
                 const isPending = pendingSeatCodes.includes(seat.code)
                 const isSelected = selectedSeatCodes.includes(seat.code)
+                const lockOwner = ticket?.lockingBy ?? null
+                const lockIsOurs = status === "Locking" && lockOwner === clientSessionId
                 const isUnavailable =
-                  status === "Sold" || status === "PendingPayment" || (status === "Locking" && !isSelected) || isPending
+                  status === "Sold" ||
+                  status === "PendingPayment" ||
+                  (status === "Locking" && !lockIsOurs && !isSelected) ||
+                  isPending
                 const baseClass =
                   seat.type === 1
                     ? "border-outline-variant/20 bg-surface-container-highest"
@@ -440,13 +481,48 @@ function ShowtimeSeatSelection() {
               <p className="font-headline text-3xl font-bold">{formatCurrency(totalAmount)}</p>
             </div>
           </div>
-          <Link
-            to={`/checkout?showtimeId=${showtime.id}`}
-            className="flex w-full items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container py-4 font-headline font-bold text-on-primary transition-all hover:shadow-[0_0_20px_rgba(0,244,254,0.4)]"
+          {actionError && (
+            <div className="mb-3 rounded border border-red-400/30 bg-red-500/10 p-2 text-sm text-red-200 md:hidden" role="alert">
+              {actionError}
+            </div>
+          )}
+          <button
+            type="button"
+            disabled={!canContinueCheckout}
+            onClick={async () => {
+              if (!canContinueCheckout) {
+                return
+              }
+              setActionError(null)
+              setCheckoutNavigating(true)
+              try {
+                await validateSeatSelection(showtime.id, {
+                  selectedTicketIds: selectedTickets.map((t) => t.id),
+                  customerSessionId: getOrCreateCustomerSessionId(),
+                })
+                navigate(`/checkout?showtimeId=${showtime.id}`)
+              } catch (err) {
+                setCheckoutNavigating(false)
+                setActionError(err instanceof Error ? err.message : "Không thể xác nhận lựa chọn ghế.")
+              }
+            }}
+            className="flex w-full items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container py-4 font-headline font-bold text-on-primary transition-all hover:shadow-[0_0_20px_rgba(0,244,254,0.4)] enabled:hover:brightness-105 enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Tiếp tục thanh toán
-            <span className="material-symbols-outlined">arrow_forward</span>
-          </Link>
+            {checkoutNavigating ? (
+              <>
+                <span
+                  className="inline-block h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-on-primary border-t-transparent"
+                  aria-hidden
+                />
+                Đang xác nhận…
+              </>
+            ) : (
+              <>
+                Tiếp tục thanh toán
+                <span className="material-symbols-outlined text-[1.25rem]">arrow_forward</span>
+              </>
+            )}
+          </button>
         </aside>
       </div>
     </main>

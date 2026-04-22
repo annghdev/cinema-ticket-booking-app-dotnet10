@@ -19,4 +19,5 @@ public sealed record TicketStatusChangedRealtimeEvent(
     Guid TicketId,
     string TicketCode,
     TicketStatus Status,
-    DateTimeOffset OccurredAtUtc);
+    DateTimeOffset OccurredAtUtc,
+    string? LockingBy = null);

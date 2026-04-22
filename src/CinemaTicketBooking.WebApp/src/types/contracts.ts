@@ -62,10 +62,13 @@ export type ShowTimeTicketDtoRaw = {
   code: string
   price: number
   status: TicketStatusValue
+  /** Opaque id when status is Locking (server stores client session id). */
+  lockingBy?: string | null
 }
 
 export type ShowTimeTicketDto = Omit<ShowTimeTicketDtoRaw, "status"> & {
   status: ApiTicketStatus
+  lockingBy: string | null
 }
 
 export type ShowTimeDetailDtoRaw = {
@@ -169,6 +172,7 @@ export function normalizeShowTimeTicketDto(raw: ShowTimeTicketDtoRaw): ShowTimeT
     ...raw,
     code: extractSeatCodeFromTicketCode(raw.code),
     status: normalizeTicketStatus(raw.status),
+    lockingBy: raw.lockingBy ?? null,
   }
 }
 

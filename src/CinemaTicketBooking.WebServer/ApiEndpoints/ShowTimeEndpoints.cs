@@ -33,7 +33,7 @@ public static class ShowTimeEndpoints
         group.MapPost("/{id:guid}/tickets/{ticketId:guid}/lock", LockTicketAsync);
         group.MapPost("/{id:guid}/tickets/{ticketId:guid}/release", ReleaseTicketAsync);
 
-        group.MapPost("/{id:guid}/tickets/{ticketId:guid}/validate", ValidateSeatSelectionAsync);
+        group.MapPost("/{id:guid}/validate-seat-selection", ValidateSeatSelectionAsync);
     }
 
     private static async Task<IResult> GetShowTimesAsync(
@@ -174,12 +174,24 @@ public static class ShowTimeEndpoints
 
     private static async Task<IResult> ValidateSeatSelectionAsync(
         Guid id,
-        ValidateSeatSelectionCommand command,
+        [FromBody] ValidateSeatSelectionRequest request,
         IMessageBus bus,
         CancellationToken ct)
     {
-        await bus.InvokeAsync(command, ct);
-        return Results.Ok();
+        var command = new ValidateSeatSelectionCommand
+        {
+            ShowTimeId = id,
+            SelectedTicketIds = request.SelectedTicketIds,
+            CustomerSessionId = request.CustomerSessionId,
+            CorrelationId = string.Empty
+        };
+        var result = await bus.InvokeAsync<ValidateSeatSelectionResponse>(command, ct);
+        if (!result.CanProceed)
+        {
+            return Results.BadRequest(result);
+        }
+
+        return Results.Ok(result);
     }
 }
 
@@ -216,3 +228,9 @@ public sealed class GetShowTimeDropdownRequest
 
 public sealed record LockTicketRequest(string LockBy);
 public sealed record ReleaseTicketRequest(string ReleaseBy);
+
+public sealed class ValidateSeatSelectionRequest
+{
+    public List<Guid> SelectedTicketIds { get; set; } = [];
+    public string CustomerSessionId { get; set; } = string.Empty;
+}

@@ -7,10 +7,12 @@ type TicketStatusChangedRealtimeEventRaw = {
   ticketCode: string
   status: ApiTicketStatus | number
   occurredAtUtc: string
+  lockingBy?: string | null
 }
 
 export type TicketStatusChangedRealtimeEvent = Omit<TicketStatusChangedRealtimeEventRaw, "status"> & {
   status: ApiTicketStatus
+  lockingBy: string | null
 }
 
 const TICKET_STATUS_CHANGED_EVENT = "ticket-status-changed"
@@ -56,6 +58,7 @@ export async function connectTicketStatusHub(
       ...payload,
       ticketCode: extractSeatCodeFromTicketCode(payload.ticketCode),
       status: normalizeTicketStatus(payload.status),
+      lockingBy: payload.lockingBy ?? null,
     })
   })
 
