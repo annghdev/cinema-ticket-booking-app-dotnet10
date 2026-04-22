@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cinematic Horizon - Cinemas</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-dim": "#5c5eff",
+                        "surface-variant": "#22262f",
+                        "primary-container": "#52a6f0",
+                        "on-primary-fixed-variant": "#00385d",
+                        "on-secondary-fixed": "#004346",
+                        "on-primary-fixed": "#001222",
+                        "inverse-surface": "#f9f9ff",
+                        "inverse-on-surface": "#52555c",
+                        "on-tertiary": "#090079",
+                        "on-secondary": "#00575b",
+                        "background": "#0b0e14",
+                        "secondary-dim": "#00e5ee",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "outline": "#73757d",
+                        "secondary-fixed": "#00f4fe",
+                        "surface-container": "#161a21",
+                        "inverse-primary": "#00639f",
+                        "surface-container-highest": "#22262f",
+                        "tertiary": "#9093ff",
+                        "on-error-container": "#ffa8a3",
+                        "secondary-container": "#00696e",
+                        "surface-container-high": "#1c2028",
+                        "on-primary": "#003152",
+                        "on-background": "#ecedf6",
+                        "tertiary-container": "#4949fc",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "secondary": "#00f4fe",
+                        "surface": "#0b0e14",
+                        "on-surface": "#ecedf6",
+                        "primary-fixed": "#5eb1fc",
+                        "primary-dim": "#4fa3ed",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "on-tertiary-container": "#ffffff",
+                        "error-dim": "#d7383b",
+                        "outline-variant": "#45484f",
+                        "on-secondary-container": "#dffdff",
+                        "surface-bright": "#282c36",
+                        "error": "#ff716c",
+                        "tertiary-fixed": "#a7a9ff",
+                        "on-error": "#490006",
+                        "surface-dim": "#0b0e14",
+                        "on-secondary-fixed-variant": "#006266",
+                        "surface-container-low": "#10131a",
+                        "on-primary-container": "#00243f",
+                        "error-container": "#9f0519",
+                        "on-surface-variant": "#a9abb3",
+                        "surface-tint": "#61b4fe",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "primary": "#61b4fe",
+                        "on-tertiary-fixed": "#060061"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": [
+                            "Space Grotesk"
+                        ],
+                        "body": [
+                            "Manrope"
+                        ],
+                        "label": [
+                            "Manrope"
+                        ]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: theme('colors.background');
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: theme('borderRadius.full');
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline-variant');
+        }
+    </style>
+</head>
+<body
+    class="bg-background text-on-background font-body antialiased min-h-screen flex flex-col pt-24 selection:bg-primary-container selection:text-on-primary-container">
+  
+    <!-- Main Content Canvas -->
+    <main
+        class="flex-grow flex flex-col gap-12 px-6 md:px-12 lg:px-24 py-12 max-w-[1920px] mx-auto w-full relative z-10">
+        <!-- Header & Search/Filter Section -->
+        <section
+            class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-surface-container-low p-8 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl border border-outline-variant/20 relative overflow-hidden">
+            <!-- Decorative Glow -->
+            <div class="absolute -top-24 -left-24 w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none">
+            </div>
+            <div class="flex flex-col gap-2 relative z-10">
+                <h1 class="font-headline text-5xl md:text-6xl font-bold tracking-tighter text-on-background">
+                    Discover <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-[0_0_8px_rgba(0,244,254,0.3)]">Cinemas</span>
+                </h1>
+                <p class="text-on-surface-variant font-body text-lg">Find the ultimate viewing experience near you.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-4 relative z-10">
+                <div class="relative w-full sm:w-72">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                    <input
+                        class="w-full bg-surface-container-highest border-b-2 border-outline-variant focus:border-secondary focus:ring-0 text-on-background font-body pl-12 pr-4 py-3 rounded-t-lg transition-colors focus:shadow-[0_10px_20px_-10px_rgba(0,244,254,0.2)] placeholder:text-on-surface-variant/50 outline-none"
+                        placeholder="Search by name or location..." type="text" />
+                </div>
+                <button
+                    class="bg-transparent border border-outline-variant/40 text-primary font-body font-semibold py-3 px-6 rounded-lg hover:bg-primary/10 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+                    <span class="material-symbols-outlined text-sm">filter_list</span>
+                    Filters
+                </button>
+            </div>
+        </section>
+        <!-- Cinemas Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            <!-- Cinema Card 1 -->
+            <article
+                class="group relative bg-surface-container-low rounded-xl overflow-hidden flex flex-col border border-outline-variant/20 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-2">
+                <!-- Image Container -->
+                <div class="h-56 w-full relative overflow-hidden bg-surface-container-highest">
+                    <img class="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
+                        data-alt="futuristic modern cinema exterior at night with neon blue lights and sleek architecture"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOBuHcOdupL2kGWw-i_CXftcqV5dvdbTL9-5Us9Ke_oSnW9dKNkdjLoYZTsbtGiubCWkw2HU9fin3DcLXhKs-AowvykIol8n53YMZK9XYYyWt3alqQA_RmRUFmEeiF7I_hKAXIa1HKSbHJehuUIO_wO6fnwO8JOrOqlWCqBQt67manCCvfVFOksjm6JRvll2lQqnaK7eh-sV8_YyukBjSzrv_1D0W9CmTV3hI2Nza3O1L2cWOv_uTOcrjuH_I0RKQr6oMnLwjrj_8" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+                    <!-- Badges -->
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        <span
+                            class="bg-surface-variant/60 backdrop-blur-md text-on-background font-label text-xs font-semibold px-3 py-1 rounded-full border border-outline-variant/30 flex items-center gap-1 shadow-lg">
+                            <span class="material-symbols-outlined text-[14px] text-secondary">view_in_ar</span> IMAX
+                        </span>
+                        <span
+                            class="bg-surface-variant/60 backdrop-blur-md text-on-background font-label text-xs font-semibold px-3 py-1 rounded-full border border-outline-variant/30 shadow-lg">
+                            4DX
+                        </span>
+                    </div>
+                </div>
+                <!-- Content Container -->
+                <div
+                    class="p-6 flex flex-col gap-4 relative z-10 -mt-6 bg-surface-container-low/95 backdrop-blur-sm rounded-t-xl">
+                    <div class="flex justify-between items-start gap-4">
+                        <h2
+                            class="font-headline text-2xl font-bold text-on-background tracking-tight group-hover:text-secondary transition-colors">
+                            Horizon Grand Theater</h2>
+                        <span
+                            class="flex items-center gap-1 text-secondary font-body font-bold bg-secondary/10 px-2 py-1 rounded">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span> 2.4 mi
+                        </span>
+                    </div>
+                    <p class="text-on-surface-variant font-body text-sm flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[18px] opacity-70 shrink-0">map</span>
+                        1010 Cyber Avenue, Neon District
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Dolby
+                            Atmos</span>
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Recliners</span>
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Dine-in</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-outline-variant/20 flex gap-4">
+                        <button
+                            class="flex-1 bg-transparent border border-outline-variant/40 text-primary font-body font-semibold py-2 rounded hover:bg-primary/10 transition-colors text-center">
+                            Info
+                        </button>
+                        <button
+                            class="flex-1 bg-gradient-to-r from-primary to-primary-container text-on-primary font-body font-bold py-2 rounded hover:shadow-[0_0_12px_rgba(0,244,254,0.5)] transition-all flex justify-center items-center gap-2">
+                            Showtimes <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+            <!-- Cinema Card 2 -->
+            <article
+                class="group relative bg-surface-container-low rounded-xl overflow-hidden flex flex-col border border-outline-variant/20 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-2">
+                <div class="h-56 w-full relative overflow-hidden bg-surface-container-highest">
+                    <img class="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
+                        data-alt="interior of a luxury cinema lobby with dramatic lighting and dark walls"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBzFzp9TSxT8fj-Bj_t96w6z9tw1fPoN7gQR3FMYoppXjf2CxpuUqHy9lgZlwJ-l0V-5KBP0fS75_WT3jlhr0OCZrLZeusR2rH98VlnyETNkQP9iC4wcUsN4wpC4HyD3JtekJIicRQwfR98sTzwcj_i6ax-MqNmpJ3RZ9q6IjNbS4qkRbMDxpmM3r-1g8QrOXmHJ9Qd6ZlIHPGsEUgmN_JFJO9tT5B96kT4FSvGPlJU-jm6hnlf_oyKo2EtupABhjMEV0UWP4nLGs" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        <span
+                            class="bg-surface-variant/60 backdrop-blur-md text-on-background font-label text-xs font-semibold px-3 py-1 rounded-full border border-outline-variant/30 flex items-center gap-1 shadow-lg">
+                            <span class="material-symbols-outlined text-[14px] text-secondary">view_in_ar</span> IMAX
+                        </span>
+                    </div>
+                </div>
+                <div
+                    class="p-6 flex flex-col gap-4 relative z-10 -mt-6 bg-surface-container-low/95 backdrop-blur-sm rounded-t-xl">
+                    <div class="flex justify-between items-start gap-4">
+                        <h2
+                            class="font-headline text-2xl font-bold text-on-background tracking-tight group-hover:text-secondary transition-colors">
+                            Auteur Multiplex</h2>
+                        <span
+                            class="flex items-center gap-1 text-secondary font-body font-bold bg-secondary/10 px-2 py-1 rounded">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span> 5.1 mi
+                        </span>
+                    </div>
+                    <p class="text-on-surface-variant font-body text-sm flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[18px] opacity-70 shrink-0">map</span>
+                        444 Director's Cut Blvd, Uptown
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Laser
+                            Projection</span>
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Bar</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-outline-variant/20 flex gap-4">
+                        <button
+                            class="flex-1 bg-transparent border border-outline-variant/40 text-primary font-body font-semibold py-2 rounded hover:bg-primary/10 transition-colors text-center">
+                            Info
+                        </button>
+                        <button
+                            class="flex-1 bg-gradient-to-r from-primary to-primary-container text-on-primary font-body font-bold py-2 rounded hover:shadow-[0_0_12px_rgba(0,244,254,0.5)] transition-all flex justify-center items-center gap-2">
+                            Showtimes <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+            <!-- Cinema Card 3 -->
+            <article
+                class="group relative bg-surface-container-low rounded-xl overflow-hidden flex flex-col border border-outline-variant/20 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-2">
+                <div class="h-56 w-full relative overflow-hidden bg-surface-container-highest">
+                    <img class="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
+                        data-alt="dark atmospheric movie theater seats in shadows with subtle blue glowing aisle lights"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZUTYUJ2nfo0THwyAMUon0MOUbrLbXJG2hCT1Fsly9-4aRvOmP1UiJPXtzY9wR7Fi_kVIb7TIK35fzNVs_FjkiMeYyKC20lE7GP_BnDtciM847VH45BBdNzIpP4yyeYVTgGyuQArjdU2EYWfh5hq_QMz8ba6lLKHFp7DtRJiIcTjoqS8plIygMS31iO2Tb8jCDwbPDgatcyY4hiqFOeF0g19SMVqscy3nhBRbvT-DOmSyrdYZ62YbT3Q12yCvMZsk6Dn0Du1p3B1w" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        <span
+                            class="bg-surface-variant/60 backdrop-blur-md text-on-background font-label text-xs font-semibold px-3 py-1 rounded-full border border-outline-variant/30 shadow-lg">
+                            VIP
+                        </span>
+                    </div>
+                </div>
+                <div
+                    class="p-6 flex flex-col gap-4 relative z-10 -mt-6 bg-surface-container-low/95 backdrop-blur-sm rounded-t-xl">
+                    <div class="flex justify-between items-start gap-4">
+                        <h2
+                            class="font-headline text-2xl font-bold text-on-background tracking-tight group-hover:text-secondary transition-colors">
+                            Starlight Boutique</h2>
+                        <span
+                            class="flex items-center gap-1 text-secondary font-body font-bold bg-secondary/10 px-2 py-1 rounded">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span> 8.7 mi
+                        </span>
+                    </div>
+                    <p class="text-on-surface-variant font-body text-sm flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[18px] opacity-70 shrink-0">map</span>
+                        77 Indie Lane, Arts District
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Indie
+                            Films</span>
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Cafe</span>
+                        <span
+                            class="text-xs font-label text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20">Recliners</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-outline-variant/20 flex gap-4">
+                        <button
+                            class="flex-1 bg-transparent border border-outline-variant/40 text-primary font-body font-semibold py-2 rounded hover:bg-primary/10 transition-colors text-center">
+                            Info
+                        </button>
+                        <button
+                            class="flex-1 bg-gradient-to-r from-primary to-primary-container text-on-primary font-body font-bold py-2 rounded hover:shadow-[0_0_12px_rgba(0,244,254,0.5)] transition-all flex justify-center items-center gap-2">
+                            Showtimes <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+
+</html>

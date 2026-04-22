@@ -12,3 +12,59 @@
     "GRAD" 0,
     "opsz" 24;
 }
+
+@keyframes authOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes authOverlayOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes authDialogIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes authDialogOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+}
+
+.auth-modal-overlay[data-state="open"] {
+  animation: authOverlayIn 260ms ease-out;
+}
+
+.auth-modal-overlay[data-state="closed"] {
+  animation: authOverlayOut 220ms ease-in;
+}
+
+.auth-modal-content[data-state="open"] {
+  animation: authDialogIn 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-modal-content[data-state="closed"] {
+  animation: authDialogOut 220ms ease-in;
+}

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Aether Cinema | Login &amp; Signup</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#61b4fe",
+                        "secondary-fixed": "#00f4fe",
+                        "error-dim": "#d7383b",
+                        "surface-container-low": "#10131a",
+                        "surface-container-high": "#1c2028",
+                        "error": "#ff716c",
+                        "primary-fixed": "#5eb1fc",
+                        "surface-container-highest": "#22262f",
+                        "on-error-container": "#ffa8a3",
+                        "on-primary": "#003152",
+                        "secondary-dim": "#00e5ee",
+                        "on-tertiary": "#090079",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "outline": "#73757d",
+                        "on-secondary": "#00575b",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "surface-bright": "#282c36",
+                        "on-tertiary-fixed": "#060061",
+                        "secondary-container": "#00696e",
+                        "on-primary-fixed-variant": "#00385d",
+                        "outline-variant": "#45484f",
+                        "error-container": "#9f0519",
+                        "tertiary": "#9093ff",
+                        "background": "#0b0e14",
+                        "primary-container": "#52a6f0",
+                        "on-primary-fixed": "#001222",
+                        "on-secondary-fixed-variant": "#006266",
+                        "secondary": "#00f4fe",
+                        "on-primary-container": "#00243f",
+                        "on-surface": "#ecedf6",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "surface-tint": "#61b4fe",
+                        "inverse-primary": "#00639f",
+                        "surface": "#0b0e14",
+                        "tertiary-dim": "#5c5eff",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "on-tertiary-container": "#ffffff",
+                        "surface-variant": "#22262f",
+                        "on-error": "#490006",
+                        "surface-dim": "#0b0e14",
+                        "on-secondary-container": "#dffdff",
+                        "inverse-on-surface": "#52555c",
+                        "surface-container": "#161a21",
+                        "on-background": "#ecedf6",
+                        "primary-dim": "#4fa3ed",
+                        "surface-container-lowest": "#000000",
+                        "tertiary-fixed": "#a7a9ff",
+                        "on-secondary-fixed": "#004346",
+                        "inverse-surface": "#f9f9ff",
+                        "tertiary-container": "#4949fc",
+                        "on-surface-variant": "#a9abb3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .neon-glow {
+            text-shadow: 0 0 8px rgba(0, 244, 254, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(34, 38, 47, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .input-focus-neon:focus {
+            outline: none;
+            border-bottom-color: #00f4fe;
+            box-shadow: 0 4px 12px -2px rgba(0, 244, 254, 0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body selection:bg-secondary/30">
+    <!-- Background Layer with Cinematic Depth -->
+    <div class="fixed inset-0 z-0 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-tr from-background via-surface-container-low to-background"></div>
+        <!-- Light Leaks -->
+        <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]"></div>
+        <div class="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-secondary/5 rounded-full blur-[120px]"></div>
+        <!-- Subtle Cinematic Grid or Texture -->
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style="background-image: radial-gradient(#61b4fe 1px, transparent 1px); background-size: 40px 40px;"></div>
+        <!-- Background Image (Cinematic Poster Feel) -->
+        <img class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
+            data-alt="atmospheric wide shot of a dark empty movie theater with faint blue projection light hitting the seats and atmospheric dust"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdV1cGX_HUseL-SsFZmDALUq8osFP9J0x9PQndTcy7R4strCzceY_ATVM8pWVi3cUcZwOfZQ-aprnM07cQr5sw9sxK3NxpfiBRVXwsnPSj4h9oFfAI7iaI-pv53X6BNB283gRZWcXgjpSG9oG0LSP-52Bm_uckSuGpl4QwsnGxM-ifQH0ZK4gDfG11c7JYytUM26sIpHmjpKuzStW_WAdHRwyjiUw4LkSgf--Q4uVerCABdF6f3JK_eGDglmTBiBH6So8r5T4Q97M" />
+    </div>
+    <!-- Main Content Canvas -->
+    <main class="relative z-10 min-h-screen flex items-center justify-center p-6 md:p-12">
+        <!-- Auth Container -->
+        <div
+            class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-low shadow-2xl overflow-hidden relative border border-outline-variant/10">
+            <!-- Left Side: Visual Brand Anchor -->
+            <div
+                class="hidden lg:flex flex-col justify-between p-12 bg-surface-container-highest relative overflow-hidden">
+                <div class="relative z-20">
+                    <h1 class="font-headline font-black text-4xl tracking-widest text-primary neon-glow mb-2 uppercase">
+                        AETHER CINEMA</h1>
+                    <p class="font-label text-on-surface-variant text-sm tracking-[0.2em] uppercase">The Digital Auteur
+                        Experience</p>
+                </div>
+                <div class="relative z-20">
+                    <blockquote class="mb-8">
+                        <span class="material-symbols-outlined text-secondary text-4xl mb-4"
+                            data-icon="format_quote">format_quote</span>
+                        <p class="font-headline text-3xl font-light leading-snug text-on-surface italic">
+                            "Cinema is a matter of what's in the frame and what's out."
+                        </p>
+                        <footer class="mt-4 font-label text-xs uppercase tracking-widest text-outline">Martin Scorsese
+                        </footer>
+                    </blockquote>
+                    <div class="flex items-center gap-4">
+                        <div class="flex -space-x-3">
+                            <img class="w-10 h-10 rounded-full border-2 border-surface-container-highest object-cover"
+                                data-alt="portrait of a young woman with neon lighting on her face looking professional"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5xX78E0MD3DRK8HjHyBtqhlAX-scioB7Ia6X5XBuJZz_lhnWisBaGB1LsGVBCwCpXn79IvshZ24dIFI7CCbJ8USHflI8gM_j2yFQXG5UGLYwsVxXVQuJW-v06ami5H8mvEfyvEzWzLURN26EydqNz7lo-YIcNj7Yfed8Ua_P2sGceYf1oqMXF0KoI9BDHS2U6L4tetGtldSYw4GUGc95P3IiQnGiYqIqPl72piG954gwECUjKz14jBPLgZ9-eA9bj040q7mnivDo" />
+                            <img class="w-10 h-10 rounded-full border-2 border-surface-container-highest object-cover"
+                                data-alt="portrait of a middle aged man with glasses looking thoughtfully at the camera"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG-t034e8QSz8yX803SqcDk03KoqtiiW3QCum8ZZfcIGatHxyCmdBb_UAZNFGzP7HSQpdCub5dFEINfEQXGPBn3b84K-mFR-behQYGtv_61Dr3pojpNm0lUw7XnqWJDZVxL4cmvPDy7EJS1LIk9QNacQ6Od4JMdLXHDUj0nvQC4OPMbjXakJFSpGgnhF0_Ajeh8XYsA-17Iz5wJcxV3H2qSU_KVYjEqhjKUyQqDEKRjzGYw4PTTFJIICe5JP96zH_FhWdEGJsJZ2Q" />
+                            <div
+                                class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container border-2 border-surface-container-highest">
+                                +2k</div>
+                        </div>
+                        <p class="text-xs text-on-surface-variant">Join our global community of cinephiles</p>
+                    </div>
+                </div>
+                <!-- Abstract Visual Decor -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] -mr-32 -mt-32"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary/10 blur-[80px] -ml-24 -mb-24"></div>
+            </div>
+            <!-- Right Side: Interaction Hub -->
+            <div class="p-8 md:p-12 lg:p-16 glass-panel flex flex-col justify-center">
+                <!-- Toggle Header -->
+                <div class="flex items-center justify-between mb-12">
+                    <div class="flex flex-col">
+                        <h2 class="font-headline text-2xl font-bold tracking-tight text-on-surface">Welcome Back</h2>
+                        <p class="text-on-surface-variant text-sm mt-1">Access your cinematic universe</p>
+                    </div>
+                    <!-- Mode Switcher -->
+                    <div class="bg-surface-container-highest p-1 flex relative">
+                        <button
+                            class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-on-surface z-10 transition-colors duration-300">Login</button>
+                        <button
+                            class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant z-10 transition-colors duration-300">Signup</button>
+                        <!-- Selector Slide -->
+                        <div
+                            class="absolute inset-y-1 left-1 w-[calc(50%-4px)] bg-surface-bright shadow-lg transition-transform duration-300 transform translate-x-0">
+                        </div>
+                    </div>
+                </div>
+                <!-- Auth Form -->
+                <form class="space-y-6">
+                    <div class="space-y-4">
+                        <!-- Input Group -->
+                        <div class="group">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-widest text-outline mb-2 group-focus-within:text-secondary transition-colors">Email
+                                Address</label>
+                            <input
+                                class="w-full bg-surface-container-low border-b-2 border-outline-variant text-on-surface py-3 px-0 font-body placeholder:text-outline/40 input-focus-neon transition-all"
+                                placeholder="cinephile@aether.com" type="email" />
+                        </div>
+                        <!-- Input Group -->
+                        <div class="group">
+                            <div class="flex justify-between items-end mb-2">
+                                <label
+                                    class="text-[10px] font-bold uppercase tracking-widest text-outline group-focus-within:text-secondary transition-colors">Password</label>
+                                <a class="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-secondary transition-colors"
+                                    href="#">Forgot?</a>
+                            </div>
+                            <div class="relative">
+                                <input
+                                    class="w-full bg-surface-container-low border-b-2 border-outline-variant text-on-surface py-3 px-0 font-body placeholder:text-outline/40 input-focus-neon transition-all"
+                                    placeholder="••••••••" type="password" />
+                                <button
+                                    class="absolute right-0 top-1/2 -translate-y-1/2 text-outline-variant hover:text-on-surface"
+                                    type="button">
+                                    <span class="material-symbols-outlined text-sm"
+                                        data-icon="visibility">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="pt-4 space-y-4">
+                        <button
+                            class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-4 font-headline font-bold uppercase tracking-widest text-sm hover:shadow-[0_0_20px_rgba(97,180,254,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
+                            type="submit">
+                            Enter the Theater
+                            <span
+                                class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform"
+                                data-icon="arrow_forward">arrow_forward</span>
+                        </button>
+                        <div class="flex items-center gap-4 py-2">
+                            <div class="h-[1px] flex-1 bg-outline-variant/30"></div>
+                            <span class="text-[10px] font-bold text-outline uppercase tracking-[0.2em]">or continue
+                                with</span>
+                            <div class="h-[1px] flex-1 bg-outline-variant/30"></div>
+                        </div>
+                        <!-- Social Login -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <button
+                                class="flex items-center justify-center gap-3 border border-outline-variant/30 py-3 px-4 hover:bg-surface-container-highest transition-colors active:scale-95"
+                                type="button">
+                                <svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+                                    <path
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                        fill="#4285F4"></path>
+                                    <path
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                        fill="#34A853"></path>
+                                    <path
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                        fill="#FBBC05"></path>
+                                    <path
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
+                                        fill="#EA4335"></path>
+                                </svg>
+                                <span
+                                    class="text-[10px] font-bold uppercase tracking-widest text-on-surface">Google</span>
+                            </button>
+                            <button
+                                class="flex items-center justify-center gap-3 border border-outline-variant/30 py-3 px-4 hover:bg-surface-container-highest transition-colors active:scale-95"
+                                type="button">
+                                <svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+                                    <path
+                                        d="M17.05 20.28c-.98.95-2.05 1.78-3.32 1.78-1.25 0-1.63-.78-3.12-.78-1.49 0-1.93.75-3.11.78-1.24.03-2.45-.98-3.48-2.03-2.1-2.13-3.61-6.03-1.46-9.72 1.07-1.83 2.94-2.99 4.64-3.02 1.29-.02 2.5.87 3.29.87.79 0 2.26-1.07 3.81-.92 1.66.07 2.95.67 3.86 1.97-3.14 1.84-2.64 5.92.51 7.55-1.12 1.68-2.64 3.34-4.62 4.52zM13.2 4.22c-.74.91-1.97 1.54-3.1 1.46-.15-1.17.43-2.39 1.14-3.23.75-.9 2.05-1.58 3.12-1.45.14 1.25-.42 2.31-1.16 3.22z">
+                                    </path>
+                                </svg>
+                                <span
+                                    class="text-[10px] font-bold uppercase tracking-widest text-on-surface">Facebook</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!-- Footer Links -->
+                <div class="mt-12 text-center">
+                    <p class="text-xs text-outline tracking-wide">
+                        By continuing, you agree to Aether Cinema's
+                        <a class="text-primary hover:underline underline-offset-4" href="#">Terms of Service</a>
+                        and
+                        <a class="text-primary hover:underline underline-offset-4" href="#">Privacy Policy</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- Abstract Decorative Glows on Canvas -->
+        <div class="fixed top-1/4 -left-20 w-96 h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+        <div class="fixed bottom-1/4 -right-20 w-96 h-96 bg-secondary/5 blur-[120px] rounded-full pointer-events-none">
+        </div>
+    </main>
+    <!-- Navigation Shell Support (Suppressed for focused login task as per rules) -->
+    <!-- However, providing a minimal logo anchor for brand continuity -->
+    <div class="fixed top-8 left-8 z-50 md:hidden">
+        <span class="font-headline font-black text-lg text-primary tracking-tighter uppercase">AETHER</span>
+    </div>
+</body>
+
+</html>

@@ -1,11 +1,15 @@
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 
 function Checkout() {
+  const [searchParams] = useSearchParams()
+  const showtimeId = searchParams.get("showtimeId")
+  const backToSeatSelectionPath = showtimeId ? `/showtimes/${showtimeId}/seats` : "/showtimes"
+
   return (
-    <main className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-4 pb-12 pt-8 md:px-8 lg:grid-cols-12 lg:gap-12 lg:pt-24">
+    <main className="mx-auto grid w-full max-w-screen-2xl grid-cols-1 gap-8 px-8 pb-12 pt-24 md:pt-28 lg:grid-cols-12 lg:gap-12">
       <section className="flex flex-col gap-10 lg:col-span-8">
         <div>
-          <Link to="/seat-selection" className="group mb-4 flex items-center text-sm text-on-surface-variant transition-colors hover:text-secondary">
+          <Link to={backToSeatSelectionPath} className="group mb-4 flex items-center text-sm text-on-surface-variant transition-colors hover:text-secondary">
             <span className="material-symbols-outlined mr-1 text-lg transition-transform group-hover:-translate-x-1">arrow_back</span>
             Quay lại đặt ghế
           </Link>

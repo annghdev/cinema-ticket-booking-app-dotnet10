@@ -11,7 +11,7 @@ function Member() {
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
         </div>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 px-8 md:flex-row">
+        <div className="relative z-10 mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-between gap-12 px-8 md:flex-row">
           <div className="max-w-2xl">
             <h1 className="mb-6 font-headline text-5xl font-bold leading-tight tracking-tight md:text-7xl">
               Elevate Your <br />
@@ -64,7 +64,7 @@ function Member() {
         </div>
       </section>
 
-      <section className="mx-auto mb-32 max-w-7xl px-8">
+      <section className="mx-auto mb-32 max-w-screen-2xl px-8">
         <div className="grid items-stretch gap-8 lg:grid-cols-3">
           <div className="rounded-3xl border border-outline-variant/20 bg-surface-variant/40 p-10 backdrop-blur-xl lg:col-span-2">
             <h3 className="mb-2 font-headline text-2xl font-bold">Points Momentum</h3>
@@ -98,7 +98,7 @@ function Member() {
       </section>
 
       <section className="mb-32 bg-surface-container-low py-24">
-        <div className="mx-auto max-w-7xl px-8">
+        <div className="mx-auto max-w-screen-2xl px-8">
           <div className="flex flex-col items-center gap-16 md:flex-row">
             <div className="flex-1">
               <span className="mb-4 block font-headline text-sm font-bold uppercase tracking-[0.3em] text-secondary">Future Auteurs</span>

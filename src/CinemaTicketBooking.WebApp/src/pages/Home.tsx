@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"
+
 function Home() {
   return (
     <main>
@@ -12,7 +14,8 @@ function Home() {
           <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-background to-transparent" />
         </div>
 
-        <div className="relative z-10 max-w-5xl px-8 md:px-24">
+        <div className="relative z-10 mx-auto w-full max-w-screen-2xl px-8">
+          <div className="max-w-3xl">
           <span className="mb-6 inline-block border border-secondary/20 bg-secondary/10 px-3 py-1 font-headline text-sm tracking-[0.2em] text-secondary backdrop-blur-sm">
             PREMIERE PHIM MỚI
           </span>
@@ -22,22 +25,23 @@ function Home() {
           </h1>
           <p className="mb-10 max-w-2xl text-lg font-light leading-relaxed text-slate-400 md:text-xl">
             Trải nghiệm đỉnh cao của điện ảnh với hệ thống âm thanh vòm thế hệ mới và hình ảnh sắc nét đến từng chi tiết tại hệ
-            thống rạp HORIZON.
+            thống rạp Andromeda.
           </p>
           <div className="flex flex-wrap gap-4">
-            <button
-              type="button"
+            <Link
+              to="/movies/echoes-of-eternity/showtimes"
               className="flex items-center gap-2 bg-gradient-to-br from-primary to-primary-container px-8 py-4 font-headline font-bold tracking-wide text-on-primary transition-all hover:shadow-[0_0_25px_rgba(97,180,254,0.6)] active:scale-95"
             >
               <span>ĐẶT VÉ NGAY</span>
               <span className="material-symbols-outlined">confirmation_number</span>
-            </button>
+            </Link>
             <button
               type="button"
               className="border border-outline-variant/30 bg-surface-variant/40 px-8 py-4 font-headline font-bold tracking-wide text-white backdrop-blur-md transition-all hover:bg-surface-variant/60 active:scale-95"
             >
               XEM TRAILER
             </button>
+          </div>
           </div>
         </div>
       </section>
@@ -49,10 +53,10 @@ function Home() {
               <h2 className="font-headline text-4xl font-black uppercase tracking-tighter text-white">Phim Đang Chiếu</h2>
               <p className="font-medium text-slate-500">Những siêu phẩm điện ảnh không thể bỏ lỡ tuần này</p>
             </div>
-            <a className="group flex items-center gap-2 font-headline font-bold text-secondary" href="#">
+            <Link className="group flex items-center gap-2 font-headline font-bold text-secondary" to="/movies/echoes-of-eternity/showtimes">
               XEM TẤT CẢ
               <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
-            </a>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 gap-0 md:grid-cols-2 lg:grid-cols-4">
@@ -104,12 +108,12 @@ function Home() {
                 <div className="absolute bottom-0 w-full p-8">
                   <p className="mb-2 text-xs font-bold tracking-widest text-secondary">{movie.genre}</p>
                   <h3 className="mb-4 font-headline text-2xl font-black leading-none text-white">{movie.title}</h3>
-                  <button
-                    type="button"
-                    className="w-full translate-y-12 bg-secondary py-3 font-black text-on-secondary opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+                  <Link
+                    to="/movies/echoes-of-eternity/showtimes"
+                    className="block w-full translate-y-12 bg-secondary py-3 text-center font-black text-on-secondary opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
                   >
                     ĐẶT VÉ
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -175,6 +179,132 @@ function Home() {
                   </button>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-background py-24">
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-12 px-8">
+          <div className="relative overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-low p-8 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
+            <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+            <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="font-headline text-5xl font-bold tracking-tighter text-on-background md:text-6xl">
+                  Khám Phá <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Rạp Chiếu</span>
+                </h2>
+                <p className="mt-2 text-lg text-on-surface-variant">Tìm không gian điện ảnh đỉnh cao gần bạn nhất.</p>
+              </div>
+              <div className="flex w-full flex-col gap-4 sm:flex-row md:w-auto">
+                <div className="relative w-full sm:w-72">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                  <input
+                    type="text"
+                    placeholder="Tìm theo tên hoặc khu vực..."
+                    className="w-full rounded-t-lg border-b-2 border-outline-variant bg-surface-container-highest py-3 pl-12 pr-4 text-on-background placeholder:text-on-surface-variant/50 outline-none transition-colors focus:border-secondary focus:ring-0"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-outline-variant/40 bg-transparent px-6 py-3 font-semibold text-primary transition-colors hover:bg-primary/10"
+                >
+                  <span className="material-symbols-outlined text-sm">filter_list</span>
+                  Bộ lọc
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {[
+              {
+                name: "Horizon Grand Theater",
+                distance: "2.4 km",
+                address: "1010 Cyber Avenue, Neon District",
+                tags: ["Dolby Atmos", "Ghế Recliner", "Dine-in"],
+                badges: ["IMAX", "4DX"],
+                image:
+                  "https://lh3.googleusercontent.com/aida-public/AB6AXuDOBuHcOdupL2kGWw-i_CXftcqV5dvdbTL9-5Us9Ke_oSnW9dKNkdjLoYZTsbtGiubCWkw2HU9fin3DcLXhKs-AowvykIol8n53YMZK9XYYyWt3alqQA_RmRUFmEeiF7I_hKAXIa1HKSbHJehuUIO_wO6fnwO8JOrOqlWCqBQt67manCCvfVFOksjm6JRvll2lQqnaK7eh-sV8_YyukBjSzrv_1D0W9CmTV3hI2Nza3O1L2cWOv_uTOcrjuH_I0RKQr6oMnLwjrj_8",
+              },
+              {
+                name: "Auteur Multiplex",
+                distance: "5.1 km",
+                address: "444 Director's Cut Blvd, Uptown",
+                tags: ["Laser Projection", "Bar"],
+                badges: ["IMAX"],
+                image:
+                  "https://lh3.googleusercontent.com/aida-public/AB6AXuBBzFzp9TSxT8fj-Bj_t96w6z9tw1fPoN7gQR3FMYoppXjf2CxpuUqHy9lgZlwJ-l0V-5KBP0fS75_WT3jlhr0OCZrLZeusR2rH98VlnyETNkQP9iC4wcUsN4wpC4HyD3JtekJIicRQwfR98sTzwcj_i6ax-MqNmpJ3RZ9q6IjNbS4qkRbMDxpmM3r-1g8QrOXmHJ9Qd6ZlIHPGsEUgmN_JFJO9tT5B96kT4FSvGPlJU-jm6hnlf_oyKo2EtupABhjMEV0UWP4nLGs",
+              },
+              {
+                name: "Starlight Boutique",
+                distance: "8.7 km",
+                address: "77 Indie Lane, Arts District",
+                tags: ["Phim Indie", "Cafe", "Recliners"],
+                badges: ["VIP"],
+                image:
+                  "https://lh3.googleusercontent.com/aida-public/AB6AXuAZUTYUJ2nfo0THwyAMUon0MOUbrLbXJG2hCT1Fsly9-4aRvOmP1UiJPXtzY9wR7Fi_kVIb7TIK35fzNVs_FjkiMeYyKC20lE7GP_BnDtciM847VH45BBdNzIpP4yyeYVTgGyuQArjdU2EYWfh5hq_QMz8ba6lLKHFp7DtRJiIcTjoqS8plIygMS31iO2Tb8jCDwbPDgatcyY4hiqFOeF0g19SMVqscy3nhBRbvT-DOmSyrdYZ62YbT3Q12yCvMZsk6Dn0Du1p3B1w",
+              },
+            ].map((cinema) => (
+              <article
+                key={cinema.name}
+                className="group relative flex flex-col overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-low shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+              >
+                <div className="relative h-56 w-full overflow-hidden bg-surface-container-highest">
+                  <img
+                    alt={cinema.name}
+                    src={cinema.image}
+                    className="h-full w-full object-cover opacity-80 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent" />
+                  <div className="absolute right-4 top-4 flex gap-2">
+                    {cinema.badges.map((badge) => (
+                      <span
+                        key={badge}
+                        className="rounded-full border border-outline-variant/30 bg-surface-variant/60 px-3 py-1 text-xs font-semibold text-on-background shadow-lg backdrop-blur-md"
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="relative z-10 -mt-6 flex flex-col gap-4 rounded-t-xl bg-surface-container-low/95 p-6 backdrop-blur-sm">
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="font-headline text-2xl font-bold tracking-tight text-on-background transition-colors group-hover:text-secondary">
+                      {cinema.name}
+                    </h3>
+                    <span className="flex items-center gap-1 rounded bg-secondary/10 px-2 py-1 font-bold text-secondary">
+                      <span className="material-symbols-outlined text-[16px]">location_on</span>
+                      {cinema.distance}
+                    </span>
+                  </div>
+
+                  <p className="flex items-start gap-2 text-sm text-on-surface-variant">
+                    <span className="material-symbols-outlined shrink-0 text-[18px] opacity-70">map</span>
+                    {cinema.address}
+                  </p>
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {cinema.tags.map((tag) => (
+                      <span key={tag} className="rounded border border-primary/20 bg-primary/5 px-2 py-1 text-xs text-primary">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex gap-4 border-t border-outline-variant/20 pt-4">
+                    <button type="button" className="flex-1 rounded border border-outline-variant/40 py-2 text-center font-semibold text-primary transition-colors hover:bg-primary/10">
+                      Chi tiết
+                    </button>
+                    <Link
+                      to="/movies/echoes-of-eternity/showtimes"
+                      className="flex flex-1 items-center justify-center gap-2 rounded bg-gradient-to-r from-primary to-primary-container py-2 font-bold text-on-primary transition-all hover:shadow-[0_0_12px_rgba(0,244,254,0.5)]"
+                    >
+                      Lịch chiếu <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    </Link>
+                  </div>
+                </div>
+              </article>
             ))}
           </div>
         </div>
