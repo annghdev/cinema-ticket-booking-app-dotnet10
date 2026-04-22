@@ -3,7 +3,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// <summary>
 /// Validates selected tickets against seat-layout policy before checkout can proceed.
 /// </summary>
-public class ValidatePreCheckoutSeatSelectionCommand : ICommand
+public class ValidateSeatSelectionCommand : ICommand
 {
     public Guid ShowTimeId { get; set; }
     public List<Guid> SelectedTicketIds { get; set; } = [];
@@ -14,15 +14,15 @@ public class ValidatePreCheckoutSeatSelectionCommand : ICommand
 /// <summary>
 /// Handles pre-checkout seat-layout validation.
 /// </summary>
-public class ValidatePreCheckoutSeatSelectionHandler(
+public class ValidateSeatSelectionHandler(
     IUnitOfWork uow,
     IPaymentServiceFactory paymentServiceFactory)
 {
     /// <summary>
     /// Loads seat-layout context and returns warning/error details for checkout UI.
     /// </summary>
-    public async Task<PreCheckoutValidationResponse> Handle(
-        ValidatePreCheckoutSeatSelectionCommand command,
+    public async Task<ValidateSeatSelectionResponse> Handle(
+        ValidateSeatSelectionCommand command,
         CancellationToken ct)
     {
         // 1. Load full showtime aggregate for seat-layout evaluation.
@@ -42,7 +42,7 @@ public class ValidatePreCheckoutSeatSelectionHandler(
             command.CustomerSessionId);
 
         // 4. Map domain result to API-facing DTO, include payment options when checkout can proceed.
-        return new PreCheckoutValidationResponse(
+        return new ValidateSeatSelectionResponse(
             CanProceed: validationResult.CanProceed,
             Warnings: validationResult.Warnings.Select(ToViolationDto).ToList(),
             Errors: validationResult.Errors.Select(ToViolationDto).ToList(),
@@ -52,9 +52,9 @@ public class ValidatePreCheckoutSeatSelectionHandler(
                 : null);
     }
 
-    private static PreCheckoutViolationDto ToViolationDto(SeatSelectionViolation violation)
+    private static SeatSelectionViolationDto ToViolationDto(SeatSelectionViolation violation)
     {
-        return new PreCheckoutViolationDto(
+        return new SeatSelectionViolationDto(
             Type: ToSnakeUpper(violation.Type.ToString()),
             Severity: violation.BlockCheckout ? "error" : "warning",
             Message: violation.Message,
@@ -88,9 +88,9 @@ public class ValidatePreCheckoutSeatSelectionHandler(
 /// <summary>
 /// Validates pre-checkout command payload.
 /// </summary>
-public class ValidatePreCheckoutSeatSelectionValidator : AbstractValidator<ValidatePreCheckoutSeatSelectionCommand>
+public class ValidateSeatSelectionValidator : AbstractValidator<ValidateSeatSelectionCommand>
 {
-    public ValidatePreCheckoutSeatSelectionValidator()
+    public ValidateSeatSelectionValidator()
     {
         RuleFor(x => x.ShowTimeId)
             .NotEmpty()

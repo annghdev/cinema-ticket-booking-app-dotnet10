@@ -32,6 +32,8 @@ public static class ShowTimeEndpoints
 
         group.MapPost("/{id:guid}/tickets/{ticketId:guid}/lock", LockTicketAsync);
         group.MapPost("/{id:guid}/tickets/{ticketId:guid}/release", ReleaseTicketAsync);
+
+        group.MapPost("/{id:guid}/tickets/{ticketId:guid}/validate", ValidateSeatSelectionAsync);
     }
 
     private static async Task<IResult> GetShowTimesAsync(
@@ -168,6 +170,16 @@ public static class ShowTimeEndpoints
             CorrelationId = string.Empty 
         }, ct);
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> ValidateSeatSelectionAsync(
+        Guid id,
+        ValidateSeatSelectionCommand command,
+        IMessageBus bus,
+        CancellationToken ct)
+    {
+        await bus.InvokeAsync(command, ct);
+        return Results.Ok();
     }
 }
 

@@ -18,7 +18,7 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
         await ResetDatabaseAsync();
         var seed = await SeedCheckoutGraphAsync();
 
-        var response = await InvokeAsync<PreCheckoutValidationResponse>(new ValidatePreCheckoutSeatSelectionCommand
+        var response = await InvokeAsync<ValidateSeatSelectionResponse>(new ValidateSeatSelectionCommand
         {
             ShowTimeId = seed.ShowTimeId,
             CustomerSessionId = seed.SessionId,
@@ -42,7 +42,7 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
         await ResetDatabaseAsync();
         var seed = await SeedCheckoutGraphAsync();
 
-        var response = await InvokeAsync<PreCheckoutValidationResponse>(new ValidatePreCheckoutSeatSelectionCommand
+        var response = await InvokeAsync<ValidateSeatSelectionResponse>(new ValidateSeatSelectionCommand
         {
             ShowTimeId = seed.ShowTimeId,
             CustomerSessionId = seed.SessionId,

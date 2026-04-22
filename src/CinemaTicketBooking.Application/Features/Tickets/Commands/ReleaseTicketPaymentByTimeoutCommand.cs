@@ -13,7 +13,10 @@ public class ReleaseTicketPaymentByTimeoutCommand : ICommand
 /// <summary>
 /// Handles delayed auto-release for timed-out pending payment stage.
 /// </summary>
-public class ReleaseTicketPaymentByTimeoutHandler(IUnitOfWork uow)
+public class ReleaseTicketPaymentByTimeoutHandler(
+    IUnitOfWork uow,
+    ITicketRealtimePublisher realtimePublisher,
+    IMessageBus bus)
 {
     /// <summary>
     /// Performs idempotent release only when ticket is still pending payment for the same booking.
@@ -25,10 +28,14 @@ public class ReleaseTicketPaymentByTimeoutHandler(IUnitOfWork uow)
         if (ticket is null
             || ticket.Status != TicketStatus.PendingPayment
             || ticket.BookingId != cmd.BookingId
-            || !ticket.PaymentExpiresAt.HasValue
-            || ticket.PaymentExpiresAt > now)
+            || !ticket.PaymentExpiresAt.HasValue)
         {
             return;
+        }
+
+        if (ticket.PaymentExpiresAt > now)
+        {
+            await bus.ScheduleAsync(cmd, ticket.PaymentExpiresAt.Value);
         }
 
         ticket.Release();
