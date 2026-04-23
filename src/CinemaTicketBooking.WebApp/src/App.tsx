@@ -6,6 +6,7 @@ import Member from "./pages/Member"
 import MovieList from "./pages/MovieList"
 import MovieWithShowTimes from "./pages/MovieWithShowtimes"
 import ShowtimeSeatSelection from "./pages/ShowtimeSeatSelection"
+import PaymentResult from "./pages/PaymentResult"
 import Showtimes from "./pages/Showtimes"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/showtimes" element={<Showtimes />} />
           <Route path="/showtimes/:showtimeId/seats" element={<ShowtimeSeatSelection />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/payment-result" element={<PaymentResult />} />
           <Route path="/member" element={<Member />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

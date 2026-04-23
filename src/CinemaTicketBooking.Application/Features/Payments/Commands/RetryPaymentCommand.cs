@@ -128,7 +128,8 @@ public class RetryPaymentHandler(
             PaymentStatus: "pending_payment",
             PaymentUrl: paymentResult.PaymentUrl,
             RedirectBehavior: paymentResult.RedirectBehavior,
-            PaymentTransactionId: transaction.Id);
+            PaymentTransactionId: transaction.Id,
+            GatewayTransactionId: paymentResult.GatewayTransactionId);
     }
 }
 

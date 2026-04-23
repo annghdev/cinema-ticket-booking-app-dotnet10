@@ -60,8 +60,8 @@ public class CreateBookingHandler(
         }
 
         // 3. Resolve customer context used by Booking.AddTicket lock ownership check.
-        var customer = await uow.Customers.GetQueryFilter()
-            .FirstOrDefaultAsync(x => x.SessionId == command.CustomerSessionId, ct);
+        // Must be tracked: GetQueryFilter() is AsNoTracking; a detached existing Customer is re-inserted and violates PK.
+        var customer = await uow.Customers.GetTrackedBySessionIdAsync(command.CustomerSessionId, ct);
         customer ??= BuildGuestCustomer(command);
 
         var booking = Booking.Create(
@@ -159,7 +159,8 @@ public class CreateBookingHandler(
             PaymentStatus: "pending_payment",
             PaymentUrl: paymentResult.PaymentUrl,
             RedirectBehavior: paymentResult.RedirectBehavior,
-            PaymentTransactionId: transaction.Id);
+            PaymentTransactionId: transaction.Id,
+            GatewayTransactionId: paymentResult.GatewayTransactionId);
     }
 
     private static Customer BuildGuestCustomer(CreateBookingCommand command)

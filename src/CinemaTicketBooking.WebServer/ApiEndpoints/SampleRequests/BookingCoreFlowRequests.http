@@ -73,3 +73,7 @@ Content-Type: application/json
     "returnUrl": "http://localhost:3000/payment-result-retry",
     "ipAddress": "127.0.0.1"
 }
+
+
+### Get all payment gateway
+GET {{baseUrl}}/api/payments/gateways

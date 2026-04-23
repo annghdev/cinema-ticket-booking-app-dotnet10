@@ -8,4 +8,5 @@ public record CreateBookingResponse(
     string PaymentStatus,
     string? PaymentUrl = null,
     PaymentRedirectBehavior? RedirectBehavior = null,
-    Guid? PaymentTransactionId = null);
+    Guid? PaymentTransactionId = null,
+    string? GatewayTransactionId = null);

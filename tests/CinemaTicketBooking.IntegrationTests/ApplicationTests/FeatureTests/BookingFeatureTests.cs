@@ -136,8 +136,8 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
         verifyResponse.Status.Should().Be("confirmed");
         verifyResponse.PaymentTransactionId.Should().Be(paymentTxId);
         verifyResponse.CheckinQrCode.Should().NotBeNullOrEmpty();
-        verifyResponse.CheckinQrCode!.Should().StartWith("data:image/png;base64,");
-        verifyResponse.CheckinQrCode.Length.Should().BeLessOrEqualTo(MaxLengthConsts.QrCode);
+        verifyResponse.CheckinQrCode!.Should().Be(bookingId.ToString());
+        verifyResponse.CheckinQrCode!.Length.Should().BeLessOrEqualTo(MaxLengthConsts.QrCode);
         verifyResponse.CanRetry.Should().BeFalse();
 
         await using var db = CreateDbContext();

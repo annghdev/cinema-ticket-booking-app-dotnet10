@@ -6,4 +6,10 @@ namespace CinemaTicketBooking.Domain;
 /// </summary>
 public interface ICustomerRepository : IRepository<Customer>
 {
+    /// <summary>
+    /// Loads a customer by session id with change tracking. Required before linking the entity to a new
+    /// booking: the default query filter uses no-tracking, which would make EF try to insert a duplicate
+    /// customer row on save.
+    /// </summary>
+    Task<Customer?> GetTrackedBySessionIdAsync(string sessionId, CancellationToken cancellationToken = default);
 }

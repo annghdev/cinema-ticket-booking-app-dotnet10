@@ -3,6 +3,7 @@ import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { connectTicketStatusHub } from "../apis/ticketRealtime"
 import { getShowTimeById, lockTicket, releaseTicket, validateSeatSelection } from "../apis/showtimeApi"
+import { saveCheckoutDraft } from "../lib/checkoutDraft"
 import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
 import type { ShowTimeDetailDto } from "../types/contracts"
 
@@ -500,7 +501,11 @@ function ShowtimeSeatSelection() {
                   selectedTicketIds: selectedTickets.map((t) => t.id),
                   customerSessionId: getOrCreateCustomerSessionId(),
                 })
-                navigate(`/checkout?showtimeId=${showtime.id}`)
+                const selectedTicketIds = selectedTickets.map((t) => t.id)
+                saveCheckoutDraft(showtime.id, { selectedTicketIds })
+                navigate(`/checkout?showtimeId=${showtime.id}`, {
+                  state: { showtimeId: showtime.id, selectedTicketIds },
+                })
               } catch (err) {
                 setCheckoutNavigating(false)
                 setActionError(err instanceof Error ? err.message : "Không thể xác nhận lựa chọn ghế.")

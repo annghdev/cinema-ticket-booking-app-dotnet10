@@ -1,0 +1,49 @@
+@baseUrl = http://localhost:5000
+@concessionId = 00000000-0000-0000-0000-000000040001
+
+### Get all concessions
+GET {{baseUrl}}/api/concessions
+
+### Get paged concessions
+GET {{baseUrl}}/api/concessions/paged?pageNumber=1&pageSize=10&sortBy=price&sortDirection=asc
+
+### Get paged concessions with filters
+GET {{baseUrl}}/api/concessions/paged?pageNumber=1&pageSize=10&searchTerm=Popcorn&isAvailable=true&sortBy=name&sortDirection=asc
+
+### Get concession dropdown
+GET {{baseUrl}}/api/concessions/dropdown?isAvailable=true&maxItems=20
+
+### Get concession by id
+GET {{baseUrl}}/api/concessions/{{concessionId}}
+
+### Create concession
+POST {{baseUrl}}/api/concessions
+Content-Type: application/json
+
+{
+  "name": "Jumbo Popcorn",
+  "price": 12.5,
+  "imageUrl": "https://images.unsplash.com/photo-1585647347483-22b66260dfff",
+  "isAvailable": true,
+  "correlationId": "sample-create-concession"
+}
+
+### Update concession
+PUT {{baseUrl}}/api/concessions/{{concessionId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Popcorn Name",
+  "price": 13.0,
+  "imageUrl": "https://images.unsplash.com/photo-1513106580661-8d2549299741",
+  "correlationId": "sample-update-concession"
+}
+
+### Set concession available
+PUT {{baseUrl}}/api/concessions/{{concessionId}}/available
+
+### Set concession unavailable
+PUT {{baseUrl}}/api/concessions/{{concessionId}}/unavailable
+
+### Delete concession
+DELETE {{baseUrl}}/api/concessions/{{concessionId}}
