@@ -17,4 +17,16 @@ public class PaymentTransactionRepository(AppDbContext db)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(ct);
     }
+
+    /// <summary>
+    /// Returns the most recent transaction by gateway transaction id.
+    /// </summary>
+    public async Task<PaymentTransaction?> GetByGatewayTransactionIdAsync(
+        string gatewayTransactionId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(x => x.GatewayTransactionId == gatewayTransactionId)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(ct);
+    }
 }

@@ -11,4 +11,10 @@ public interface IPaymentTransactionRepository : IRepository<PaymentTransaction>
     /// Returns null if no pending transaction exists.
     /// </summary>
     Task<PaymentTransaction?> GetPendingByBookingIdAsync(Guid bookingId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns the most recent transaction by gateway transaction id.
+    /// Returns null if transaction does not exist.
+    /// </summary>
+    Task<PaymentTransaction?> GetByGatewayTransactionIdAsync(string gatewayTransactionId, CancellationToken ct = default);
 }

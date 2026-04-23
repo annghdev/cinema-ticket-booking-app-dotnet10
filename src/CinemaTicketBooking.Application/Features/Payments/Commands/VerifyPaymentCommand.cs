@@ -36,19 +36,46 @@ public class VerifyPaymentHandler(
         VerifyPaymentCommand command,
         CancellationToken ct)
     {
-        // 1. Load the pending payment transaction for this booking.
-        var transaction = await uow.PaymentTransactions.GetPendingByBookingIdAsync(command.BookingId, ct)
+        // 1. Load transaction by gateway transaction id for deterministic callback/IPN handling.
+        var transaction = await uow.PaymentTransactions.GetByGatewayTransactionIdAsync(command.GatewayTransactionId, ct)
             ?? throw new InvalidOperationException(
-                $"No pending payment transaction found for booking '{command.BookingId}'.");
+                $"Payment transaction '{command.GatewayTransactionId}' was not found.");
 
-        // 2. Guard: ensure the gateway transaction ID matches.
-        if (transaction.GatewayTransactionId != command.GatewayTransactionId)
+        // 2. Guard: ensure this callback belongs to the requested booking.
+        if (transaction.BookingId != command.BookingId)
         {
             throw new InvalidOperationException(
-                "Gateway transaction ID mismatch. Possible replay or tampered callback.");
+                "Payment transaction does not belong to the provided booking.");
         }
 
-        // 3. Resolve the payment service and verify the signature + result.
+        // 3. Idempotency for duplicate callback/IPN.
+        if (transaction.Status == PaymentTransactionStatus.Success)
+        {
+            var booking = await uow.Bookings.GetByIdAsync(command.BookingId, ct)
+                ?? throw new InvalidOperationException($"Booking '{command.BookingId}' was not found.");
+
+            return new VerifyPaymentResponse(
+                BookingId: booking.Id,
+                PaymentTransactionId: transaction.Id,
+                IsSuccess: true,
+                CheckinQrCode: booking.QrCode,
+                Status: "confirmed");
+        }
+
+        if (transaction.Status != PaymentTransactionStatus.Pending)
+        {
+            return new VerifyPaymentResponse(
+                BookingId: transaction.BookingId,
+                PaymentTransactionId: transaction.Id,
+                IsSuccess: false,
+                CheckinQrCode: null,
+                Status: "payment_failed",
+                ErrorMessage: "Payment transaction has been processed already.",
+                CanRetry: true,
+                AvailableGateways: paymentServiceFactory.GetAvailableOptions());
+        }
+
+        // 4. Resolve the payment service and verify the signature + result.
         var method = Enum.Parse<PaymentMethod>(command.PaymentMethod, ignoreCase: true);
         var paymentService = paymentServiceFactory.GetService(method);
 
@@ -58,7 +85,7 @@ public class VerifyPaymentHandler(
                 GatewayTransactionId: command.GatewayTransactionId,
                 GatewayResponseParams: command.GatewayResponseParams), ct);
 
-        // 4. Branch: success → confirm booking; failure → mark failed and signal retry.
+        // 5. Branch: success → confirm booking; failure → mark failed and signal retry.
         if (confirmResult.IsSuccess)
         {
             return await HandleSuccessAsync(transaction, ct);

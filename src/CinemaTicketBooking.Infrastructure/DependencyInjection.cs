@@ -3,6 +3,7 @@ using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure.Cache;
 using CinemaTicketBooking.Infrastructure.Payments;
+using CinemaTicketBooking.Infrastructure.Payments.Vnpay;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using CinemaTicketBooking.Infrastructure.QrCodes;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -58,7 +59,9 @@ public static class DependencyInjection
         services.AddScoped<DataSeeder>();
 
         // Payment services
+        services.Configure<VnpayOptions>(configuration.GetSection(VnpayOptions.SectionName));
         services.AddScoped<IPaymentService, NoPaymentGatewayService>();
+        services.AddScoped<IPaymentService, VnpayPaymentService>();
         services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
 
         services.AddSingleton<IQrCodeGenerator, QrCodeGenerator>();

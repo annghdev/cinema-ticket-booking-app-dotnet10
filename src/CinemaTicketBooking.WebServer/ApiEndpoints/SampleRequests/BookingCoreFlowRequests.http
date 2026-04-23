@@ -1,8 +1,16 @@
 @HostAddress = http://localhost:5000
+@PublicHost = https://your-ngrok-domain.ngrok-free.app
+@FrontendResultUrl = http://localhost:3000/payment-result
 
 ### Môi trường
 # - Để test các file http này, cần trỏ tới database đã được seed dữ liệu.
 # - Luồng đặt vé yêu cầu khóa vé trước khi đặt.
+# - VNPay IPN cần URL public (HTTPS). Khi test local, chạy ngrok:
+#   ngrok http 5000
+# - Cấu hình app trước khi test VNPay:
+#   VnPay__TmnCode=...
+#   VnPay__HashSecret=...
+#   VnPay__FrontendResultUrl={{FrontendResultUrl}}
 @showTimeId = 00000000-0000-0000-0000-000000040001
 @ticketId = 00000000-0000-0000-0000-000000050001
 @sessionId = test-session-http-request-01
@@ -76,4 +84,43 @@ Content-Type: application/json
 
 
 ### Get all payment gateway
-GET {{baseUrl}}/api/payments/gateways
+GET {{HostAddress}}/api/payments/gateways
+
+###
+
+### 6. Create Booking qua VNPay
+# Dùng paymentMethod = VnPay để backend trả paymentUrl redirect sang VNPay sandbox
+POST {{HostAddress}}/api/bookings
+Content-Type: application/json
+
+{
+    "showTimeId": "{{showTimeId}}",
+    "customerSessionId": "{{sessionId}}",
+    "customerName": "Test VNPay Customer",
+    "customerEmail": "vnpay-test@example.com",
+    "customerPhoneNumber": "0901234567",
+    "selectedTicketIds": [
+        "{{ticketId}}"
+    ],
+    "concessions": [],
+    "paymentMethod": "VnPay",
+    "returnUrl": "{{PublicHost}}/api/payments/vnpay-return",
+    "ipAddress": "127.0.0.1"
+}
+
+###
+
+# Gán lại transaction id từ response create booking VNPay
+@vnpTxnRef = REPLACE_WITH_VNPAY_TXN_REF
+@vnpAmount = 10000000
+@vnpSecureHash = REPLACE_WITH_CALCULATED_HMAC_SHA512
+
+### 7. VNPay IPN callback mẫu (sandbox -> backend)
+# Backend sẽ trả JSON {RspCode, Message}
+GET {{PublicHost}}/api/payments/vnpay-ipn?vnp_TxnRef={{vnpTxnRef}}&vnp_Amount={{vnpAmount}}&vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_SecureHash={{vnpSecureHash}}
+
+###
+
+### 8. VNPay return URL callback mẫu (browser -> frontend)
+# Endpoint backend sẽ redirect về FrontendResultUrl kèm status/bookingId
+GET {{PublicHost}}/api/payments/vnpay-return?vnp_TxnRef={{vnpTxnRef}}&vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_SecureHash={{vnpSecureHash}}

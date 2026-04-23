@@ -9,6 +9,7 @@ using CinemaTicketBooking.WebServer.Hubs;
 using CinemaTicketBooking.WebServer.Middlewares;
 using JasperFx;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -103,6 +104,11 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.MapDefaultEndpoints();
 
