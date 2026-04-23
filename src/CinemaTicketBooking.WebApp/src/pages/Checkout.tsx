@@ -44,6 +44,18 @@ function parseGatewayIdFromPaymentUrl(paymentUrl: string | null | undefined, fal
   return m?.[1] ?? null
 }
 
+function resolveApiOrigin(): string {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined
+  if (!configuredBaseUrl) {
+    return window.location.origin
+  }
+  try {
+    return new URL(configuredBaseUrl, window.location.origin).origin
+  } catch {
+    return window.location.origin
+  }
+}
+
 function Checkout() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -202,7 +214,10 @@ function Checkout() {
     setSubmitting(true)
     setPostBooking(null)
     try {
-      const returnUrl = `${window.location.origin}/payment-result`
+      const isVnpay = selectedPaymentMethod.toLowerCase() === "vnpay"
+      const returnUrl = isVnpay
+        ? `${resolveApiOrigin()}/api/payments/vnpay-return`
+        : `${window.location.origin}/payment-result`
       const res = await createBooking({
         showTimeId: showtimeId,
         customerSessionId: getOrCreateCustomerSessionId(),

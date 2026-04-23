@@ -1,4 +1,5 @@
 import { httpClient } from "./httpClient"
+import { type BookingDetailsDto } from "./bookingApi"
 
 /** Matches CinemaTicketBooking.Domain.PaymentRedirectBehavior */
 export type PaymentRedirectBehavior = "Redirect" | "QrCode" | 0 | 1
@@ -48,6 +49,16 @@ export type VerifyPaymentResponse = {
   canRetry: boolean
 }
 
+export type PaymentResultLookupResponse = {
+  bookingId: string
+  isSuccess: boolean
+  status: string
+  checkinQrCode: string | null
+  booking: BookingDetailsDto | null
+  errorMessage: string | null
+  canRetry: boolean
+}
+
 /**
  * Dev / fake gateway callback (see BookingCoreFlowRequests.http). Uses gateway transaction id.
  */
@@ -61,6 +72,19 @@ export async function getFakePaymentSuccess(
       transactionId: gatewayTransactionId,
       vnp_ResponseCode: "00",
     },
+  })
+  return res.data
+}
+
+/**
+ * Reads backend payment result for real gateway redirects (VNPay, etc).
+ */
+export async function getPaymentResultByTxn(
+  bookingId: string | null,
+  txnRef: string,
+): Promise<PaymentResultLookupResponse> {
+  const res = await httpClient.get<PaymentResultLookupResponse>("/api/payments/result", {
+    params: bookingId ? { bookingId, txnRef } : { txnRef },
   })
   return res.data
 }

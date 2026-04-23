@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useLocation, useSearchParams } from "react-router-dom"
 import QRCode from "qrcode"
 import { getBookingById, type BookingDetailsDto } from "../apis/bookingApi"
+import { getPaymentResultByTxn } from "../apis/paymentApi"
 import { downloadCheckinPassPdf, type CheckinTicketPdfInfo, type ConcessionLine } from "../lib/checkinPdf"
 import { getCheckinQrPayload } from "../lib/checkinQrPayload"
 
@@ -53,19 +54,20 @@ function PaymentResult() {
   const navState = location.state as PaymentResultLocationState | null
 
   const status = searchParams.get("status")
+  const txnRef = searchParams.get("txnRef")
   const bookingIdParam = searchParams.get("bookingId")
-  const bookingId = (bookingIdParam ?? navState?.bookingId) ?? null
-
-  const ok = status === "success" || Boolean(navState?.checkinQrCode)
+  const [resolvedBookingId, setResolvedBookingId] = useState<string | null>(bookingIdParam ?? navState?.bookingId ?? null)
 
   const [checkinQrDataUrl, setCheckinQrDataUrl] = useState<string | null>(null)
   const [fetched, setFetched] = useState<BookingDetailsDto | null>(null)
   const [loadDetailError, setLoadDetailError] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [gatewayCheckinCode, setGatewayCheckinCode] = useState<string | null>(null)
 
-  const checkinText = navState?.checkinQrCode ?? fetched?.checkinQrCode ?? ""
-  const qrPayload = useMemo(() => getCheckinQrPayload(bookingId, checkinText), [bookingId, checkinText])
+  const checkinText = navState?.checkinQrCode ?? fetched?.checkinQrCode ?? gatewayCheckinCode ?? ""
+  const qrPayload = useMemo(() => getCheckinQrPayload(resolvedBookingId, checkinText), [resolvedBookingId, checkinText])
   const hasQrPayload = Boolean(qrPayload)
+  const ok = status === "success" || hasQrPayload
 
   const movie = navState?.movieName ?? fetched?.showTimeInfo?.movie
   const screen = navState?.screenCode ?? fetched?.showTimeInfo?.screen
@@ -90,12 +92,12 @@ function PaymentResult() {
   }, [navState?.concessions, fetched?.concessions])
 
   const ticketRefDisplay = useMemo(() => {
-    if (!bookingId) {
+    if (!resolvedBookingId) {
       return "—"
     }
-    const u = bookingId.replace(/-/g, "").toUpperCase()
+    const u = resolvedBookingId.replace(/-/g, "").toUpperCase()
     return `TKT-${u.slice(0, 4)}-${u.slice(4, 8)}`
-  }, [bookingId])
+  }, [resolvedBookingId])
 
   useEffect(() => {
     if (!qrPayload) {
@@ -120,7 +122,7 @@ function PaymentResult() {
   }, [qrPayload])
 
   useEffect(() => {
-    if (!bookingId) {
+    if (!resolvedBookingId && !txnRef) {
       return
     }
     if (navState?.checkinQrCode) {
@@ -129,9 +131,54 @@ function PaymentResult() {
     let cancelled = false
     void (async () => {
       try {
-        const b = await getBookingById(bookingId)
         if (!cancelled) {
-          setFetched(b)
+          setLoadDetailError(false)
+        }
+
+        // Real gateway flow: use bookingId + txnRef to read payment result without auth context.
+        if (txnRef) {
+          let hasResolvedResult = false
+          for (let attempt = 0; attempt < 4; attempt++) {
+            const result = await getPaymentResultByTxn(resolvedBookingId, txnRef)
+            if (cancelled) {
+              return
+            }
+            if (result.bookingId) {
+              setResolvedBookingId(result.bookingId)
+            }
+
+            if (result.booking) {
+              setFetched(result.booking)
+            }
+            if (result.checkinQrCode) {
+              setGatewayCheckinCode(result.checkinQrCode)
+            }
+
+            // Booking may still be pending when return URL hits before IPN processing.
+            if (result.isSuccess || result.status !== "pending_payment") {
+              hasResolvedResult = true
+              return
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1500))
+          }
+
+          if (!cancelled && !hasResolvedResult) {
+            setLoadDetailError(true)
+          }
+          return
+        }
+
+        // Fake payment / legacy flow.
+        if (!resolvedBookingId) {
+          if (!cancelled) {
+            setLoadDetailError(true)
+          }
+          return
+        }
+        const booking = await getBookingById(resolvedBookingId)
+        if (!cancelled) {
+          setFetched(booking)
         }
       } catch (e) {
         if (isAxiosError(e) && (e.response?.status === 401 || e.response?.status === 403)) {
@@ -146,17 +193,17 @@ function PaymentResult() {
     return () => {
       cancelled = true
     }
-  }, [bookingId, navState?.checkinQrCode])
+  }, [resolvedBookingId, navState?.checkinQrCode, txnRef])
 
   const onDownloadPdf = useCallback(async () => {
-    if (!bookingId || !qrPayload) {
+    if (!resolvedBookingId || !qrPayload) {
       return
     }
     setDownloading(true)
     try {
       const when = startAt ? splitDateTimeFromIso(startAt) : null
       const info: CheckinTicketPdfInfo = {
-        bookingId,
+        bookingId: resolvedBookingId,
         movie: movie ?? "—",
         screen: screen ?? "—",
         cinema: cinema ?? "—",
@@ -169,9 +216,9 @@ function PaymentResult() {
     } finally {
       setDownloading(false)
     }
-  }, [bookingId, qrPayload, movie, screen, cinema, startAt, seats, finalAmount, concessions])
+  }, [resolvedBookingId, qrPayload, movie, screen, cinema, startAt, seats, finalAmount, concessions])
 
-  const canDownload = Boolean(bookingId && qrPayload)
+  const canDownload = Boolean(resolvedBookingId && qrPayload)
   const showSuccessGrid = ok && (hasQrPayload || movie || startAt)
 
   return (
@@ -197,7 +244,6 @@ function PaymentResult() {
           <p className="font-body text-lg text-on-surface-variant">
             {ok ? "Vé của bạn đã sẵn sàng." : "Kiểm tra lại thông tin hoặc tài khoản của bạn."}
           </p>
-          {bookingId && <p className="mt-2 font-mono text-sm text-on-surface-variant/80">Mã đặt: {bookingId}</p>}
         </div>
 
         {!ok && (
@@ -345,7 +391,7 @@ function PaymentResult() {
                       <div className="pt-1 pb-1 text-center sm:pt-2">
                         <p className="font-label mb-2 text-xs uppercase tracking-widest text-on-surface-variant">Quét tại cổng vào</p>
                         <p className="font-headline text-lg font-bold tracking-widest text-on-surface sm:text-xl">{ticketRefDisplay}</p>
-                        {bookingId && (
+                        {resolvedBookingId && (
                           <p className="mt-2 break-all font-mono text-xs leading-snug text-on-surface/90">{qrPayload}</p>
                         )}
                       </div>
