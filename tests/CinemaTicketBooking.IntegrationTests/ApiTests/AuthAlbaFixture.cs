@@ -54,6 +54,10 @@ public sealed class AuthAlbaFixture : IAsyncLifetime
             builder.UseSetting($"RefreshToken:{nameof(RefreshTokenOptions.CookieSameSite)}", "Lax");
             builder.UseSetting($"RefreshToken:{nameof(RefreshTokenOptions.DaysValid)}", "14");
             builder.UseSetting($"TestAuth:{nameof(TestAuthOptions.ExposeRefreshTokenInJson)}", "true");
+            builder.UseSetting("VnPay:TmnCode", "TEST12345");
+            builder.UseSetting("VnPay:HashSecret", "TEST_VNPAY_SECRET_KEY");
+            builder.UseSetting("VnPay:PaymentBaseUrl", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
+            builder.UseSetting("VnPay:FrontendResultUrl", "http://localhost:3000/payment-result");
             builder.UseSetting(WebHostDefaults.EnvironmentKey, Environments.Development);
         });
     }

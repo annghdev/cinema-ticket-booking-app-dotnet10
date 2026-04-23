@@ -1,10 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Features.Bookings.Commands;
 using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using CinemaTicketBooking.IntegrationTests.Shared.DataSeeders;
+using CinemaTicketBooking.WebServer.ApiEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -235,5 +238,176 @@ public sealed class PaymentEndpointsTests(AuthAlbaFixture fixture)
         var pendingTx = transactions.Single(x => x.Status == PaymentTransactionStatus.Pending);
         pendingTx.Method.Should().Be(PaymentMethod.None);
         pendingTx.Amount.Should().Be(100_000m);
+    }
+
+    [Fact]
+    public async Task VnpayIpn_Should_Return_01_When_Order_NotFound()
+    {
+        var client = fixture.CreateClient();
+        var response = await client.GetAsync("/api/payments/vnpay-ipn?vnp_TxnRef=NOT-FOUND&vnp_Amount=10000000");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<VnpayIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.RspCode.Should().Be("01");
+    }
+
+    [Fact]
+    public async Task VnpayIpn_Should_Return_04_When_Amount_Mismatch()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingVnpayTransactionAsync(db, amount: 100_000m);
+
+        var client = fixture.CreateClient();
+        var url = $"/api/payments/vnpay-ipn?vnp_TxnRef={transaction.GatewayTransactionId}&vnp_Amount=999";
+        var response = await client.GetAsync(url);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<VnpayIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.RspCode.Should().Be("04");
+    }
+
+    [Fact]
+    public async Task VnpayIpn_Should_Return_02_When_Transaction_Already_Processed()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingVnpayTransactionAsync(db, amount: 100_000m);
+        transaction.Status = PaymentTransactionStatus.Success;
+        db.PaymentTransactions.Update(transaction);
+        await db.SaveChangesAsync();
+
+        var client = fixture.CreateClient();
+        var url = $"/api/payments/vnpay-ipn?vnp_TxnRef={transaction.GatewayTransactionId}&vnp_Amount=10000000";
+        var response = await client.GetAsync(url);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<VnpayIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.RspCode.Should().Be("02");
+    }
+
+    [Fact]
+    public async Task VnpayIpn_Should_Return_97_When_Signature_Invalid()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingVnpayTransactionAsync(db, amount: 100_000m);
+
+        var url = "/api/payments/vnpay-ipn"
+                  + $"?vnp_TxnRef={transaction.GatewayTransactionId}"
+                  + "&vnp_Amount=10000000"
+                  + "&vnp_ResponseCode=00"
+                  + "&vnp_TransactionStatus=00"
+                  + "&vnp_SecureHash=invalid-signature";
+
+        var client = fixture.CreateClient();
+        var response = await client.GetAsync(url);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<VnpayIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.RspCode.Should().Be("97");
+    }
+
+    [Fact]
+    public async Task VnpayIpn_Should_Return_00_And_Confirm_Booking_When_Valid()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingVnpayTransactionAsync(db, amount: 100_000m);
+
+        var rawParams = new Dictionary<string, string>
+        {
+            ["vnp_Amount"] = "10000000",
+            ["vnp_ResponseCode"] = "00",
+            ["vnp_TransactionStatus"] = "00",
+            ["vnp_TxnRef"] = transaction.GatewayTransactionId
+        };
+        var signature = ComputeVnpaySignature(rawParams, "TEST_VNPAY_SECRET_KEY");
+        var url = "/api/payments/vnpay-ipn"
+                  + $"?vnp_TxnRef={transaction.GatewayTransactionId}"
+                  + "&vnp_Amount=10000000"
+                  + "&vnp_ResponseCode=00"
+                  + "&vnp_TransactionStatus=00"
+                  + $"&vnp_SecureHash={signature}";
+
+        var client = fixture.CreateClient();
+        var response = await client.GetAsync(url);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<VnpayIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.RspCode.Should().Be("00");
+
+        var db2 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var txAfter = await db2.PaymentTransactions.AsNoTracking().SingleAsync(x => x.Id == transaction.Id);
+        txAfter.Status.Should().Be(PaymentTransactionStatus.Success);
+        var bookingAfter = await db2.Bookings.AsNoTracking().SingleAsync(x => x.Id == transaction.BookingId);
+        bookingAfter.Status.Should().Be(BookingStatus.Confirmed);
+    }
+
+    [Fact]
+    public async Task VnpayIpn_Should_Return_99_When_TxnRef_Missing()
+    {
+        var client = fixture.CreateClient();
+        var response = await client.GetAsync("/api/payments/vnpay-ipn?vnp_Amount=10000000");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<VnpayIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.RspCode.Should().Be("99");
+    }
+
+    private static string ComputeVnpaySignature(
+        Dictionary<string, string> parameters,
+        string secret)
+    {
+        var canonical = string.Join("&", parameters
+            .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+            .OrderBy(x => x.Key, StringComparer.Ordinal)
+            .Select(x => $"{WebUtility.UrlEncode(x.Key)}={WebUtility.UrlEncode(x.Value)}"));
+
+        var keyBytes = Encoding.UTF8.GetBytes(secret);
+        var dataBytes = Encoding.UTF8.GetBytes(canonical);
+        return Convert.ToHexStringLower(HMACSHA512.HashData(keyBytes, dataBytes));
+    }
+
+    private static async Task<PaymentTransaction> SeedPendingVnpayTransactionAsync(AppDbContext db, decimal amount)
+    {
+        var cinema = IntegrationEntityBuilder.Cinema($"API VNPay Cinema {Guid.CreateVersion7():N}");
+        var movie = IntegrationEntityBuilder.Movie($"API VNPay Movie {Guid.CreateVersion7():N}", MovieStatus.NowShowing);
+        var screen = IntegrationEntityBuilder.Screen(cinema.Id, $"API-VNP-{Guid.CreateVersion7():N}", "[[1,1,1]]");
+        var showTime = IntegrationEntityBuilder.ShowTime(movie.Id, screen.Id);
+        var customer = IntegrationEntityBuilder.Customer($"session-{Guid.CreateVersion7():N}");
+        var booking = IntegrationEntityBuilder.Booking(showTime.Id, customer.Id, "VNPay IPN Tester");
+        booking.OriginAmount = amount;
+        booking.FinalAmount = amount;
+        booking.Status = BookingStatus.Pending;
+
+        var transaction = new PaymentTransaction
+        {
+            Id = Guid.CreateVersion7(),
+            BookingId = booking.Id,
+            Method = PaymentMethod.VnPay,
+            Amount = amount,
+            GatewayTransactionId = $"VNP-{Guid.CreateVersion7():N}",
+            PaymentUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
+            Status = PaymentTransactionStatus.Pending,
+            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
+        };
+
+        db.Cinemas.Add(cinema);
+        db.Movies.Add(movie);
+        db.Screens.Add(screen);
+        db.ShowTimes.Add(showTime);
+        db.Customers.Add(customer);
+        db.Bookings.Add(booking);
+        db.PaymentTransactions.Add(transaction);
+        await db.SaveChangesAsync();
+
+        return transaction;
     }
 }
