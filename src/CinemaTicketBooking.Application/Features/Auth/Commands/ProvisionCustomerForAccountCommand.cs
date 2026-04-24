@@ -13,6 +13,7 @@ public class ProvisionCustomerForAccountCommand : ICommand
     public string Email { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
+    public string? SessionId { get; set; }
     public string CorrelationId { get; set; } = string.Empty;
 }
 
@@ -22,20 +23,38 @@ public class ProvisionCustomerForAccountCommand : ICommand
 public class ProvisionCustomerForAccountHandler(IUnitOfWork uow, IAccountCustomerLinker accountLinker)
 {
     /// <summary>
-    /// Creates customer, marks registered, persists, and sets Account.CustomerId.
+    /// Creates or upgrades customer, persists, and sets Account.CustomerId.
     /// </summary>
     public async Task<Guid> Handle(ProvisionCustomerForAccountCommand command, CancellationToken ct)
     {
-        // 1. Build registered customer (session id empty for account-based users).
-        var customer = Customer.Create(
-            name: command.Name,
-            sessionId: string.Empty,
-            phoneNumber: command.PhoneNumber,
-            email: command.Email,
-            isRegistered: false);
-        customer.Register();
+        // 1. Reuse guest customer by session id when available; otherwise create a new registered profile.
+        var customer = string.IsNullOrWhiteSpace(command.SessionId)
+            ? null
+            : await uow.Customers.GetTrackedBySessionIdAsync(command.SessionId, ct);
 
-        uow.Customers.Add(customer);
+        if (customer is null)
+        {
+            customer = Customer.Create(
+                name: command.Name,
+                sessionId: string.Empty,
+                phoneNumber: command.PhoneNumber,
+                email: command.Email,
+                isRegistered: false);
+            customer.Register();
+            uow.Customers.Add(customer);
+        }
+        else
+        {
+            customer.Name = command.Name;
+            customer.Email = command.Email;
+            customer.PhoneNumber = command.PhoneNumber;
+            customer.SessionId = string.Empty;
+            if (!customer.IsRegistered)
+            {
+                customer.Register();
+            }
+            // Customer is loaded as tracked entity; explicit Update() can break xmin concurrency snapshot.
+        }
 
         // 2. Link Identity account to customer profile.
         await accountLinker.SetCustomerIdAsync(command.AccountId, customer.Id, ct);
@@ -57,5 +76,8 @@ public class ProvisionCustomerForAccountValidator : AbstractValidator<ProvisionC
         RuleFor(x => x.Email).NotEmpty().MaximumLength(MaxLengthConsts.Email);
         RuleFor(x => x.Name).NotEmpty().MaximumLength(MaxLengthConsts.Name);
         RuleFor(x => x.PhoneNumber).NotEmpty().MaximumLength(MaxLengthConsts.PhoneNumber);
+        RuleFor(x => x.SessionId)
+            .MaximumLength(MaxLengthConsts.SessionId)
+            .When(x => !string.IsNullOrWhiteSpace(x.SessionId));
     }
 }

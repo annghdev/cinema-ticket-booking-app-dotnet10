@@ -1,5 +1,6 @@
 import Footer from "./components/Footer"
 import Header from "./components/Header"
+import BookingHistory from "./pages/BookingHistory"
 import Checkout from "./pages/Checkout"
 import Home from "./pages/Home"
 import Member from "./pages/Member"
@@ -23,6 +24,7 @@ function App() {
           <Route path="/showtimes/:showtimeId/seats" element={<ShowtimeSeatSelection />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment-result" element={<PaymentResult />} />
+          <Route path="/booking-history" element={<BookingHistory />} />
           <Route path="/member" element={<Member />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

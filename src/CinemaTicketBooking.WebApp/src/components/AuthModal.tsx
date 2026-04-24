@@ -1,14 +1,164 @@
 import * as Dialog from "@radix-ui/react-dialog"
-import { useState } from "react"
+import { isAxiosError } from "axios"
+import { useEffect, useState } from "react"
+import { forgotPassword, login, register } from "../apis/authApi"
+import { useAuth } from "../contexts/AuthContext"
+import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
 
 type AuthModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+type AuthFormValues = {
+  name: string
+  email: string
+  phoneNumber: string
+  password: string
+}
+
+function emptyForm(): AuthFormValues {
+  return {
+    name: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+  }
+}
+
+function parseErrorMessage(error: unknown): string | null {
+  if (!isAxiosError(error) || !error.response?.data) {
+    return null
+  }
+
+  const payload = error.response.data as {
+    title?: string
+    detail?: string
+    message?: string
+    errors?: string[] | Record<string, string[]>
+  }
+
+  if (payload.detail) {
+    return payload.detail
+  }
+  if (payload.title) {
+    return payload.title
+  }
+  if (payload.message) {
+    return payload.message
+  }
+  if (Array.isArray(payload.errors) && payload.errors.length > 0) {
+    return payload.errors[0] ?? null
+  }
+  if (payload.errors && typeof payload.errors === "object") {
+    const firstFieldErrors = Object.values(payload.errors).find((messages) => messages.length > 0)
+    return firstFieldErrors?.[0] ?? null
+  }
+  return null
+}
+
+function resolveBackendUrl(path: string): string {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? window.location.origin
+  return new URL(path, baseUrl).toString()
+}
+
 function AuthModal({ open, onOpenChange }: AuthModalProps) {
+  const { setAuthFromTokens } = useAuth()
   const [isSignup, setIsSignup] = useState(false)
   const [isForgotPassword, setIsForgotPassword] = useState(false)
+  const [authForm, setAuthForm] = useState<AuthFormValues>(emptyForm)
+  const [forgotEmail, setForgotEmail] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSendingReset, setIsSendingReset] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open) {
+      setIsSignup(false)
+      setIsForgotPassword(false)
+      setAuthForm(emptyForm())
+      setForgotEmail("")
+      setSubmitError(null)
+      setSubmitSuccess(null)
+      setIsSubmitting(false)
+      setIsSendingReset(false)
+    }
+  }, [open])
+
+  const onAuthInputChange = (field: keyof AuthFormValues, value: string) => {
+    setAuthForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const onSubmitAuthForm = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setSubmitError(null)
+    setSubmitSuccess(null)
+
+    if (!authForm.email.trim() || !authForm.password.trim()) {
+      setSubmitError("Vui lòng nhập email và mật khẩu.")
+      return
+    }
+    if (isSignup && (!authForm.name.trim() || !authForm.phoneNumber.trim())) {
+      setSubmitError("Vui lòng nhập đầy đủ họ tên và số điện thoại.")
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const authResponse = isSignup
+        ? await register({
+            email: authForm.email.trim(),
+            password: authForm.password,
+            name: authForm.name.trim(),
+            phoneNumber: authForm.phoneNumber.trim(),
+            sessionId: getOrCreateCustomerSessionId(),
+          })
+        : await login({
+            email: authForm.email.trim(),
+            password: authForm.password,
+          })
+
+      await setAuthFromTokens(authResponse, {
+        displayName: isSignup ? authForm.name.trim() : null,
+        email: authForm.email.trim(),
+      })
+      setSubmitSuccess(isSignup ? "Đăng ký thành công." : "Đăng nhập thành công.")
+      onOpenChange(false)
+    } catch (error) {
+      setSubmitError(parseErrorMessage(error) ?? "Không thể xác thực tài khoản. Vui lòng thử lại.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const onSubmitForgotPassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setSubmitError(null)
+    setSubmitSuccess(null)
+
+    if (!forgotEmail.trim()) {
+      setSubmitError("Vui lòng nhập email để nhận liên kết đặt lại mật khẩu.")
+      return
+    }
+
+    setIsSendingReset(true)
+    try {
+      await forgotPassword({ email: forgotEmail.trim() })
+      setSubmitSuccess("Đã gửi hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra email.")
+    } catch (error) {
+      setSubmitError(parseErrorMessage(error) ?? "Không thể gửi yêu cầu đặt lại mật khẩu.")
+    } finally {
+      setIsSendingReset(false)
+    }
+  }
+
+  const onToggleSignup = () => {
+    setIsForgotPassword(false)
+    setSubmitError(null)
+    setSubmitSuccess(null)
+    setIsSignup((prev) => !prev)
+  }
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -72,7 +222,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     </Dialog.Description>
                   </div>
 
-                  <form className="space-y-6">
+                  <form className="space-y-6" onSubmit={(event) => void onSubmitAuthForm(event)}>
                     <div className="space-y-4">
                       {isSignup && (
                         <div>
@@ -81,6 +231,9 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                             className="w-full border-b-2 border-outline-variant bg-surface-container-low px-0 py-2 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
                             placeholder="Nguyễn Văn A"
                             type="text"
+                            autoComplete="name"
+                            value={authForm.name}
+                            onChange={(event) => onAuthInputChange("name", event.target.value)}
                           />
                         </div>
                       )}
@@ -90,8 +243,24 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           className={`w-full border-b-2 border-outline-variant bg-surface-container-low px-0 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none ${isSignup ? "py-2" : "py-3"}`}
                           placeholder="ban@email.com"
                           type="email"
+                          autoComplete="email"
+                          value={authForm.email}
+                          onChange={(event) => onAuthInputChange("email", event.target.value)}
                         />
                       </div>
+                      {isSignup && (
+                        <div>
+                          <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-outline">Số điện thoại</label>
+                          <input
+                            className="w-full border-b-2 border-outline-variant bg-surface-container-low px-0 py-2 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
+                            placeholder="09xxxxxxxx"
+                            type="tel"
+                            autoComplete="tel"
+                            value={authForm.phoneNumber}
+                            onChange={(event) => onAuthInputChange("phoneNumber", event.target.value)}
+                          />
+                        </div>
+                      )}
                       <div>
                         <div className="mb-2 flex items-end justify-between">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-outline">Mật khẩu</label>
@@ -109,17 +278,27 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           className={`w-full border-b-2 border-outline-variant bg-surface-container-low px-0 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none ${isSignup ? "py-2" : "py-3"}`}
                           placeholder="••••••••"
                           type="password"
+                          autoComplete={isSignup ? "new-password" : "current-password"}
+                          value={authForm.password}
+                          onChange={(event) => onAuthInputChange("password", event.target.value)}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-4 pt-4">
+                      {submitError && (
+                        <p className="rounded border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">{submitError}</p>
+                      )}
+                      {submitSuccess && (
+                        <p className="rounded border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">{submitSuccess}</p>
+                      )}
                       <button
                         type="submit"
+                        disabled={isSubmitting}
                         className={`flex w-full items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-container font-headline text-sm font-bold uppercase tracking-widest text-on-primary transition-all hover:shadow-[0_0_20px_rgba(97,180,254,0.4)] active:scale-[0.98] ${isSignup ? "py-3" : "py-4"}`}
                       >
-                        {isSignup ? "Tạo tài khoản" : "Đăng nhập"}
-                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                        {isSubmitting ? "Đang xử lý..." : isSignup ? "Tạo tài khoản" : "Đăng nhập"}
+                        <span className="material-symbols-outlined text-lg">{isSubmitting ? "progress_activity" : "arrow_forward"}</span>
                       </button>
                       <div className="flex items-center gap-4 py-2">
                         <div className="h-px flex-1 bg-outline-variant/30" />
@@ -129,6 +308,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       <div className="grid grid-cols-2 gap-4">
                         <button
                           type="button"
+                          onClick={() => window.location.assign(resolveBackendUrl("/api/auth/external/google"))}
                           className="flex items-center justify-center gap-2 border border-outline-variant/30 px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-surface-container-highest"
                         >
                           <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -153,6 +333,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         </button>
                         <button
                           type="button"
+                          onClick={() => window.location.assign(resolveBackendUrl("/api/auth/external/facebook"))}
                           className="flex items-center justify-center gap-2 border border-outline-variant/30 px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-surface-container-highest"
                         >
                           <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -165,10 +346,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         {isSignup ? "Đã có tài khoản?" : "Chưa có tài khoản?"}{" "}
                         <button
                           type="button"
-                          onClick={() => {
-                            setIsForgotPassword(false)
-                            setIsSignup((prev) => !prev)
-                          }}
+                          onClick={onToggleSignup}
                           className="font-bold uppercase tracking-wider text-primary transition-colors hover:text-secondary"
                         >
                           {isSignup ? "Đăng nhập" : "Đăng ký"}
@@ -188,28 +366,42 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     Nhập email bạn đã đăng ký. Chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.
                   </p>
 
-                  <form className="mt-8 space-y-6">
+                  <form className="mt-8 space-y-6" onSubmit={(event) => void onSubmitForgotPassword(event)}>
                     <div>
                       <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-outline">Địa chỉ email</label>
                       <input
                         className="w-full border-b-2 border-outline-variant bg-surface-container-low px-0 py-2 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
                         placeholder="ban@email.com"
                         type="email"
+                        autoComplete="email"
+                        value={forgotEmail}
+                        onChange={(event) => setForgotEmail(event.target.value)}
                       />
                     </div>
+                    {submitError && (
+                      <p className="rounded border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">{submitError}</p>
+                    )}
+                    {submitSuccess && (
+                      <p className="rounded border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">{submitSuccess}</p>
+                    )}
 
                     <button
                       type="submit"
+                      disabled={isSendingReset}
                       className="flex w-full items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-container py-3 font-headline text-sm font-bold uppercase tracking-widest text-on-primary transition-all hover:shadow-[0_0_20px_rgba(97,180,254,0.4)] active:scale-[0.98]"
                     >
-                      Gửi liên kết đặt lại
-                      <span className="material-symbols-outlined text-lg">mail</span>
+                      {isSendingReset ? "Đang gửi..." : "Gửi liên kết đặt lại"}
+                      <span className="material-symbols-outlined text-lg">{isSendingReset ? "progress_activity" : "mail"}</span>
                     </button>
                   </form>
 
                   <button
                     type="button"
-                    onClick={() => setIsForgotPassword(false)}
+                    onClick={() => {
+                      setIsForgotPassword(false)
+                      setSubmitError(null)
+                      setSubmitSuccess(null)
+                    }}
                     className="mt-6 inline-flex items-center gap-2 self-start text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:text-secondary"
                   >
                     <span className="material-symbols-outlined text-base">arrow_back</span>

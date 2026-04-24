@@ -39,6 +39,11 @@ public sealed class IdentityAuthService(
         var accessToken = await CreateAccessTokenAsync(user, cancellationToken);
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(_jwt.AccessTokenMinutes);
 
+        // Register/login flows may leave unrelated tracked entities in this scoped DbContext.
+        // Persisting refresh token should not flush those entities, which can trigger false
+        // optimistic concurrency failures on unrelated rows.
+        db.ChangeTracker.Clear();
+
         var rawRefresh = GenerateRefreshTokenRaw();
         var hash = HashRefreshToken(rawRefresh);
         var refreshEntity = new RefreshToken

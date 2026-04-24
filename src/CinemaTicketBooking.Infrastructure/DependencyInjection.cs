@@ -2,6 +2,7 @@ using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure.Cache;
+using CinemaTicketBooking.Infrastructure.Payments.Momo;
 using CinemaTicketBooking.Infrastructure.Payments;
 using CinemaTicketBooking.Infrastructure.Payments.Vnpay;
 using CinemaTicketBooking.Infrastructure.Persistence;
@@ -57,12 +58,16 @@ public static class DependencyInjection
         services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
         services.AddScoped<IUnitOfWork, EFUnitOfWork>();
         services.AddScoped<DataSeeder>();
+        services.AddHttpClient();
 
         // Payment services
+        services.Configure<MomoOptions>(configuration.GetSection(MomoOptions.SectionName));
         services.Configure<VnpayOptions>(configuration.GetSection(VnpayOptions.SectionName));
         services.AddScoped<IPaymentService, NoPaymentGatewayService>();
+        services.AddScoped<IPaymentService, MomoPaymentService>();
         services.AddScoped<IPaymentService, VnpayPaymentService>();
         services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
+        services.AddSingleton<IPaymentRealtimePublisher, NoOpPaymentRealtimePublisher>();
 
         services.AddSingleton<IQrCodeGenerator, QrCodeGenerator>();
 

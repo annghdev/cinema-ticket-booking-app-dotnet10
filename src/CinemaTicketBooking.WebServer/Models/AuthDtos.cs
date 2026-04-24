@@ -1,6 +1,6 @@
 namespace CinemaTicketBooking.WebServer.ApiEndpoints;
 
-public sealed record RegisterRequest(string Email, string Password, string Name, string PhoneNumber);
+public sealed record RegisterRequest(string Email, string Password, string Name, string PhoneNumber, string? SessionId = null);
 
 public sealed record LoginRequest(string Email, string Password);
 
@@ -9,6 +9,13 @@ public sealed record AuthTokenApiResponse(
     DateTimeOffset AccessTokenExpiresAtUtc,
     Guid AccountId,
     string? RefreshToken = null);
+
+public sealed record AuthProfileApiResponse(
+    Guid AccountId,
+    Guid? CustomerId,
+    string DisplayName,
+    string? Email,
+    string? AvatarUrl);
 
 public sealed record ForgotPasswordRequest(string Email);
 

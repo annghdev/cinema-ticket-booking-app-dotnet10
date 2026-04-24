@@ -70,6 +70,29 @@ export async function createBooking(body: CreateBookingRequest): Promise<CreateB
   return normalizeResponse(response.data)
 }
 
+export type RetryPaymentRequest = {
+  customerSessionId: string
+  paymentMethod: string
+  returnUrl: string
+  ipAddress: string
+  replacePendingPayment?: boolean
+}
+
+export async function retryPayment(bookingId: string, body: RetryPaymentRequest): Promise<CreateBookingResponse> {
+  const response = await httpClient.post<CreateBookingResponseRaw>(`/api/bookings/${bookingId}/retry-payment`, {
+    customerSessionId: body.customerSessionId,
+    paymentMethod: body.paymentMethod,
+    returnUrl: body.returnUrl,
+    ipAddress: body.ipAddress,
+    replacePendingPayment: body.replacePendingPayment ?? false,
+  })
+  return normalizeResponse(response.data)
+}
+
+export async function cancelBooking(bookingId: string): Promise<void> {
+  await httpClient.put(`/api/bookings/${bookingId}/cancel`)
+}
+
 export type BookingDetailsDto = {
   bookingId: string
   showTimeInfo: { screen: string; movie: string; startAt: string; endAt: string }
@@ -85,5 +108,44 @@ export type BookingDetailsDto = {
 
 export async function getBookingById(bookingId: string): Promise<BookingDetailsDto> {
   const response = await httpClient.get<BookingDetailsDto>(`/api/bookings/${bookingId}`)
+  return response.data
+}
+
+export type BookingHistoryItemDto = {
+  bookingId: string
+  showTimeInfo: { screen: string; movie: string; startAt: string; endAt: string }
+  finalAmount: number
+  createdAt: string
+  status: number | string
+}
+
+export type PagedResult<T> = {
+  items: T[]
+  pageNumber: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+}
+
+export type GetBookingHistoryRequest = {
+  pageNumber?: number
+  pageSize?: number
+  date?: string
+}
+
+export async function getBookingHistory(
+  customerId: string,
+  request: GetBookingHistoryRequest = {},
+): Promise<PagedResult<BookingHistoryItemDto>> {
+  const response = await httpClient.get<PagedResult<BookingHistoryItemDto>>(`/api/bookings/history/${customerId}`, {
+    params: {
+      customerId,
+      pageNumber: request.pageNumber ?? 1,
+      pageSize: request.pageSize ?? 10,
+      date: request.date,
+    },
+  })
   return response.data
 }

@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Common.Auth;
 using CinemaTicketBooking.Application.Features.Auth.Commands;
+using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Facebook;
@@ -36,6 +38,9 @@ public static class AuthEndpoints
 
         group.MapPost("/logout", LogoutAsync)
             .AllowAnonymous();
+
+        group.MapGet("/me", MeAsync)
+            .RequireAuthorization();
 
         group.MapPost("/forgot-password", ForgotPasswordAsync)
             .AllowAnonymous();
@@ -97,22 +102,26 @@ public static class AuthEndpoints
 
         try
         {
-            await bus.InvokeAsync(
+            var customerId = await bus.InvokeAsync<Guid>(
                 new ProvisionCustomerForAccountCommand
                 {
                     AccountId = user.Id,
                     Email = dto.Email,
                     Name = dto.Name,
                     PhoneNumber = dto.PhoneNumber,
+                    SessionId = dto.SessionId,
                     CorrelationId = http.TraceIdentifier
                 },
                 ct);
+            user.CustomerId = customerId;
         }
         catch
         {
             await userManager.DeleteAsync(user);
             throw;
         }
+
+        user = await userManager.FindByIdAsync(user.Id.ToString()) ?? user;
 
         var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
@@ -181,6 +190,40 @@ public static class AuthEndpoints
         http.Request.Cookies.TryGetValue(refreshOptions.Value.CookieName, out var raw);
         await auth.LogoutAsync(raw, ct);
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> MeAsync(
+        ClaimsPrincipal principal,
+        UserManager<Account> userManager,
+        IUnitOfWork uow,
+        CancellationToken ct)
+    {
+        var accountIdRaw = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(accountIdRaw, out var accountId))
+            return Results.Unauthorized();
+
+        var account = await userManager.FindByIdAsync(accountId.ToString());
+        if (account is null)
+            return Results.NotFound();
+
+        Customer? customer = null;
+        if (account.CustomerId is { } customerId)
+        {
+            customer = await uow.Customers.GetByIdAsync(customerId, ct);
+        }
+
+        var displayName = customer?.Name;
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            displayName = account.UserName ?? account.Email ?? "Khách hàng";
+        }
+
+        return Results.Ok(new AuthProfileApiResponse(
+            account.Id,
+            account.CustomerId,
+            displayName,
+            account.Email ?? customer?.Email,
+            null));
     }
 
     private static async Task<IResult> ForgotPasswordAsync(
@@ -324,16 +367,18 @@ public static class AuthEndpoints
 
                 try
                 {
-                    await bus.InvokeAsync(
+                    var customerId = await bus.InvokeAsync<Guid>(
                         new ProvisionCustomerForAccountCommand
                         {
                             AccountId = user.Id,
                             Email = email,
                             Name = name,
                             PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone) ?? "—",
+                            SessionId = null,
                             CorrelationId = http.TraceIdentifier
                         },
                         ct);
+                    user.CustomerId = customerId;
                 }
                 catch
                 {
@@ -348,6 +393,8 @@ public static class AuthEndpoints
                     return Results.ValidationProblem(addLogin.ErrorDictionary());
             }
         }
+
+        user = await userManager.FindByIdAsync(user.Id.ToString()) ?? user;
 
         var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
