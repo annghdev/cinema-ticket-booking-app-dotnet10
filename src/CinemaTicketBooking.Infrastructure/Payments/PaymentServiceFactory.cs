@@ -30,6 +30,7 @@ public sealed class PaymentServiceFactory(IEnumerable<IPaymentService> services)
         return _services.Values.Select(s => new PaymentGatewayOptionDto(
             Method: s.Method.ToString(),
             DisplayName: s.Method.ToString(),
-            RedirectBehavior: s.RedirectBehavior)).ToList();
+            RedirectBehavior: s.RedirectBehavior,
+            Icon: s.Icon)).ToList();
     }
 }

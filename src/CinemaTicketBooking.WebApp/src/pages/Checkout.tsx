@@ -1,9 +1,11 @@
 import { isAxiosError } from "axios"
+import type { HubConnection } from "@microsoft/signalr"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom"
-import { createBooking, type CreateBookingResponse } from "../apis/bookingApi"
+import { cancelBooking, createBooking, retryPayment, type CreateBookingResponse } from "../apis/bookingApi"
 import { getConcessions, type ConcessionDto } from "../apis/concessionApi"
-import { PaymentLinkModal } from "../components/PaymentLinkModal"
+import { connectPaymentHub, type PaymentConfirmedRealtimeEvent } from "../apis/paymentRealtime"
+import { PaymentQRModal } from "../components/PaymentQRModal"
 import { getAvailableGateways, getFakePaymentSuccess, isRedirectBehavior, type PaymentGatewayOptionDto, type VerifyPaymentResponse } from "../apis/paymentApi"
 import { getShowTimeById } from "../apis/showtimeApi"
 import { clearCheckoutDraft, loadCheckoutDraft, type CheckoutDraft } from "../lib/checkoutDraft"
@@ -31,6 +33,13 @@ function formatDateTimeLabel(dateInput: string) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date)
+}
+
+function svgToDataUrl(svgRaw: string | null | undefined): string | null {
+  if (!svgRaw || !svgRaw.trim()) {
+    return null
+  }
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svgRaw)}`
 }
 
 function parseGatewayIdFromPaymentUrl(paymentUrl: string | null | undefined, fallback: string | null | undefined): string | null {
@@ -83,6 +92,10 @@ function Checkout() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [completingFake, setCompletingFake] = useState(false)
+  const [switchingGateway, setSwitchingGateway] = useState(false)
+  const [cancellingPayment, setCancellingPayment] = useState(false)
+  const [modalError, setModalError] = useState<string | null>(null)
+  const [selectedSwitchGateway, setSelectedSwitchGateway] = useState<string | null>(null)
   const [postBooking, setPostBooking] = useState<CreateBookingResponse | null>(null)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
 
@@ -151,7 +164,16 @@ function Checkout() {
   )
 
   useEffect(() => {
+    if (!selectedPaymentMethod) {
+      setSelectedSwitchGateway(null)
+      return
+    }
+    setSelectedSwitchGateway(selectedPaymentMethod)
+  }, [selectedPaymentMethod, postBooking?.bookingId])
+
+  useEffect(() => {
     if (isPostPayQrFlow) {
+      setModalError(null)
       setPaymentModalOpen(true)
     }
   }, [isPostPayQrFlow, postBooking?.bookingId])
@@ -211,11 +233,12 @@ function Checkout() {
     }
 
     setSubmitError(null)
+    setModalError(null)
     setSubmitting(true)
     setPostBooking(null)
     try {
-      const isVnpay = selectedPaymentMethod.toLowerCase() === "vnpay"
-      const returnUrl = isVnpay
+      const selectedGateway = selectedPaymentMethod.toLowerCase()
+      const returnUrl = selectedGateway === "vnpay"
         ? `${resolveApiOrigin()}/api/payments/vnpay-return`
         : `${window.location.origin}/payment-result`
       const res = await createBooking({
@@ -263,6 +286,98 @@ function Checkout() {
     }
   }
 
+  const navigateToSuccess = useCallback((bookingId: string, checkinQrCode?: string | null, gatewayTxnRef?: string | null) => {
+    setPaymentModalOpen(false)
+    navigate({
+      pathname: "/payment-result",
+      search: `?status=success&bookingId=${encodeURIComponent(bookingId)}${gatewayTxnRef ? `&txnRef=${encodeURIComponent(gatewayTxnRef)}` : ""}`,
+    }, checkinQrCode ? {
+      state: {
+        checkinQrCode,
+        bookingId,
+        movieName: showtime?.movieName,
+        screenCode: showtime?.screenCode,
+        startAt: showtime?.startAt,
+        cinemaName: showtime?.cinemaName,
+        seatsLabel: selectedTickets.map((t) => t.code).join(", "),
+        finalAmount: postBooking?.finalAmount,
+        concessions: concessionLines.map((l) => ({
+          name: l.concession.name,
+          quantity: l.quantity,
+          amount: l.lineTotal,
+        })),
+      },
+    } : undefined)
+  }, [navigate, showtime?.movieName, showtime?.screenCode, showtime?.startAt, showtime?.cinemaName, selectedTickets, postBooking?.finalAmount, concessionLines])
+
+  const onPaymentConfirmedRealtime = useCallback((event: PaymentConfirmedRealtimeEvent) => {
+    setModalError(null)
+    navigateToSuccess(event.bookingId, event.checkinQrCode, event.gatewayTransactionId)
+  }, [navigateToSuccess])
+
+  const onCancelPendingPayment = async () => {
+    if (!postBooking) {
+      return
+    }
+    setModalError(null)
+    setCancellingPayment(true)
+    try {
+      await cancelBooking(postBooking.bookingId)
+      setPaymentModalOpen(false)
+      setPostBooking(null)
+      navigate(backToSeatSelectionPath)
+    } catch (e) {
+      if (isAxiosError(e) && e.response?.data) {
+        const d = e.response.data as { title?: string; detail?: string; message?: string }
+        setModalError(d.detail ?? d.title ?? d.message ?? "Không thể hủy thanh toán.")
+      } else {
+        setModalError("Không thể hủy thanh toán.")
+      }
+    } finally {
+      setCancellingPayment(false)
+    }
+  }
+
+  const onSwitchGateway = async () => {
+    if (!postBooking || !selectedSwitchGateway) {
+      return
+    }
+    setModalError(null)
+    setSwitchingGateway(true)
+    try {
+      const selectedGateway = selectedSwitchGateway.toLowerCase()
+      const returnUrl = selectedGateway === "vnpay"
+        ? `${resolveApiOrigin()}/api/payments/vnpay-return`
+        : `${window.location.origin}/payment-result`
+      const retry = await retryPayment(postBooking.bookingId, {
+        customerSessionId: getOrCreateCustomerSessionId(),
+        paymentMethod: selectedSwitchGateway,
+        returnUrl,
+        ipAddress: "127.0.0.1",
+        replacePendingPayment: true,
+      })
+
+      setSelectedPaymentMethod(selectedSwitchGateway)
+      setPostBooking(retry)
+
+      const behavior = isRedirectBehavior(retry.redirectBehavior)
+      if (behavior === "Redirect" && retry.paymentUrl) {
+        window.location.assign(retry.paymentUrl)
+        return
+      }
+      setPaymentModalOpen(true)
+    } catch (e) {
+      if (isAxiosError(e) && e.response?.data) {
+        const d = e.response.data as { title?: string; detail?: string; message?: string }
+        setModalError(d.detail ?? d.title ?? d.message ?? "Không thể đổi gateway.")
+      } else {
+        setModalError("Không thể đổi gateway.")
+      }
+    } finally {
+      setSwitchingGateway(false)
+    }
+  }
+
   const onCompleteFakeCallback = async () => {
     if (!postBooking) {
       return
@@ -273,54 +388,59 @@ function Checkout() {
       return
     }
     setSubmitError(null)
+    setModalError(null)
     setCompletingFake(true)
     try {
       const data: VerifyPaymentResponse = await getFakePaymentSuccess(postBooking.bookingId, gatewayId)
       if (!data.isSuccess) {
-        setSubmitError(data.errorMessage ?? "Thanh toán chưa được xác nhận.")
+        setModalError(data.errorMessage ?? "Thanh toán chưa được xác nhận.")
         return
       }
-      setPaymentModalOpen(false)
-      navigate(
-        {
-          pathname: "/payment-result",
-          search: `?status=success&bookingId=${encodeURIComponent(data.bookingId)}`,
-        },
-        {
-          state: {
-            checkinQrCode: data.checkinQrCode ?? undefined,
-            bookingId: data.bookingId,
-            movieName: showtime?.movieName,
-            screenCode: showtime?.screenCode,
-            startAt: showtime?.startAt,
-            cinemaName: showtime?.cinemaName,
-            seatsLabel: selectedTickets.map((t) => t.code).join(", "),
-            finalAmount: postBooking.finalAmount,
-            concessions: concessionLines.map((l) => ({
-              name: l.concession.name,
-              quantity: l.quantity,
-              amount: l.lineTotal,
-            })),
-          },
-        },
-      )
+      navigateToSuccess(data.bookingId, data.checkinQrCode, gatewayId)
     } catch (e) {
       if (isAxiosError(e) && e.response?.data) {
         const d = e.response.data as VerifyPaymentResponse | { title?: string; detail?: string }
         const maybeV = d as VerifyPaymentResponse
         if (typeof maybeV.errorMessage === "string" && maybeV.errorMessage) {
-          setSubmitError(maybeV.errorMessage)
+          setModalError(maybeV.errorMessage)
         } else {
           const t = d as { title?: string; detail?: string }
-          setSubmitError(t.detail ?? t.title ?? "Xác nhận thanh toán thất bại.")
+          setModalError(t.detail ?? t.title ?? "Xác nhận thanh toán thất bại.")
         }
       } else {
-        setSubmitError("Xác nhận thanh toán thất bại.")
+        setModalError("Xác nhận thanh toán thất bại.")
       }
     } finally {
       setCompletingFake(false)
     }
   }
+
+  useEffect(() => {
+    if (!postBooking || !isPostPayQrFlow) {
+      return
+    }
+    let connection: HubConnection | null = null
+    let disposed = false
+
+    void (async () => {
+      try {
+        connection = await connectPaymentHub(postBooking.bookingId, (payload) => {
+          if (!disposed) {
+            onPaymentConfirmedRealtime(payload)
+          }
+        })
+      } catch {
+        // Keep QR flow usable even when realtime channel is unavailable.
+      }
+    })()
+
+    return () => {
+      disposed = true
+      if (connection) {
+        void connection.stop()
+      }
+    }
+  }, [postBooking?.bookingId, isPostPayQrFlow, onPaymentConfirmedRealtime])
 
   if (!showtimeId) {
     return (
@@ -370,6 +490,7 @@ function Checkout() {
   }
 
   const seatList = selectedTickets.map((t) => t.code).join(", ")
+  const switchableGateways = gateways.filter((gateway) => gateway.method !== selectedPaymentMethod)
 
   return (
     <>
@@ -480,18 +601,13 @@ function Checkout() {
             <span className="material-symbols-outlined text-secondary">payment</span>
             Phương thức thanh toán
           </h2>
-          <p className="mb-6 text-sm text-on-surface-variant">
-            Tùy cổng: <strong className="text-on-background">mở trang ngoài</strong> (Redirect) hoặc{" "}
-            <strong className="text-on-background">giữ tại trang (QR / xác nhận)</strong> (QrCode). Hiện backend có
-            thể chỉ bật cổng giả lập.
-          </p>
           {gateways.length === 0 ? (
             <p className="text-sm text-amber-200/80">Chưa cấu hình phương thức thanh toán.</p>
           ) : (
             <div className="mb-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {gateways.map((g) => {
-                const r = isRedirectBehavior(g.redirectBehavior)
                 const selected = selectedPaymentMethod === g.method
+                const iconDataUrl = svgToDataUrl(g.icon)
                 return (
                   <button
                     key={g.method}
@@ -503,11 +619,18 @@ function Checkout() {
                         : "border-outline-variant/20 bg-surface-container-highest hover:border-outline-variant/40"
                     }`}
                   >
-                    <span className="material-symbols-outlined mb-2 block text-3xl text-secondary">account_balance</span>
-                    <h3 className="font-headline font-medium">{g.displayName || g.method}</h3>
-                    <p className="mt-1 text-xs text-on-surface-variant">
-                      {r === "Redirect" ? "Sẽ chuyển tới trang thanh toán" : "Thanh toán tại trang (QR / xác nhận)"}
-                    </p>
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-white/95 p-1.5">
+                      {iconDataUrl ? (
+                        <img
+                          src={iconDataUrl}
+                          alt={g.displayName || g.method}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <span className="material-symbols-outlined text-2xl text-secondary">account_balance</span>
+                      )}
+                    </div>
+                    <h3 className="font-headline text-base font-medium">{g.displayName || g.method}</h3>
                     <p className="mt-1 text-[10px] uppercase tracking-wider text-on-surface-variant/80">{g.method}</p>
                   </button>
                 )
@@ -572,11 +695,12 @@ function Checkout() {
         </div>
       </aside>
     </main>
-    <PaymentLinkModal
+    <PaymentQRModal
       open={Boolean(paymentModalOpen && isPostPayQrFlow && postBooking)}
       onOpenChange={setPaymentModalOpen}
       paymentUrl={postBooking?.paymentUrl ?? null}
       displayMethod={selectedPaymentMethod ?? "—"}
+      paymentExpiresAt={postBooking?.paymentExpiresAt ?? null}
       isNoneOrFake={
         selectedPaymentMethod?.toLowerCase() === "none" || Boolean(postBooking?.paymentUrl?.includes("fake-payment"))
       }
@@ -584,7 +708,18 @@ function Checkout() {
         void onCompleteFakeCallback()
       }}
       completingCallback={completingFake}
-      errorText={submitError}
+      errorText={modalError ?? submitError}
+      onCancelPayment={() => {
+        void onCancelPendingPayment()
+      }}
+      cancellingPayment={cancellingPayment}
+      switchableGateways={switchableGateways.map((x) => ({ method: x.method, displayName: x.displayName || x.method }))}
+      selectedSwitchGateway={selectedSwitchGateway}
+      onSelectSwitchGateway={setSelectedSwitchGateway}
+      onSwitchGateway={() => {
+        void onSwitchGateway()
+      }}
+      switchingGateway={switchingGateway}
     />
     </>
   )

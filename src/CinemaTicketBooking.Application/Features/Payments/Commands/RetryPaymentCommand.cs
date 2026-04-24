@@ -18,6 +18,7 @@ public class RetryPaymentCommand : ICommand
     public string PaymentMethod { get; set; } = string.Empty;
     public string ReturnUrl { get; set; } = string.Empty;
     public string IpAddress { get; set; } = string.Empty;
+    public bool ReplacePendingPayment { get; set; }
     public string CorrelationId { get; set; } = string.Empty;
 }
 
@@ -63,8 +64,15 @@ public class RetryPaymentHandler(
         var existingPending = await uow.PaymentTransactions.GetPendingByBookingIdAsync(command.BookingId, ct);
         if (existingPending is not null)
         {
-            throw new InvalidOperationException(
-                "A payment is already in progress for this booking. Complete or cancel it before retrying.");
+            if (!command.ReplacePendingPayment)
+            {
+                throw new InvalidOperationException(
+                    "A payment is already in progress for this booking. Complete or cancel it before retrying.");
+            }
+
+            existingPending.Status = PaymentTransactionStatus.Cancelled;
+            existingPending.GatewayResponseRaw = "Pending payment was cancelled by customer for gateway switch.";
+            uow.PaymentTransactions.Update(existingPending);
         }
 
         // 3. Extend pending-payment holds so recovery jobs do not release seats mid-retry.

@@ -1,3 +1,4 @@
+using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Features.Bookings.Commands;
 using Microsoft.AspNetCore.Mvc;
@@ -40,12 +41,24 @@ public static class BookingEndpoints
     }
 
     private static async Task<IResult> GetBookingsByCustomerId(
-        [AsParameters] GetBookingHistoryByCustomerIdQuery query,
+        Guid customerId,
+        [FromQuery] int pageNumber,
+        [FromQuery] int pageSize,
+        [FromQuery] DateOnly? date,
+        HttpContext http,
         IMessageBus bus,
         CancellationToken ct)
     {
-        var dtos = await bus.InvokeAsync<List<BookingDetailsDto>>(query, ct);
-        return Results.Ok(dtos ?? []);
+        var query = new GetBookingHistoryByCustomerIdQuery
+        {
+            CustomerId = customerId,
+            PageNumber = pageNumber <= 0 ? 1 : pageNumber,
+            PageSize = pageSize <= 0 ? 20 : pageSize,
+            Date = date
+        };
+        query.CorrelationId = http.TraceIdentifier;
+        var result = await bus.InvokeAsync<PagedResult<BookingMinimalInfoDto>>(query, ct);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> CreateBooking(
@@ -58,7 +71,7 @@ public static class BookingEndpoints
     }
 
     private static async Task<IResult> CheckInBooking(
-        Guid bookingId,
+        [FromRoute(Name = "id")] Guid bookingId,
         IMessageBus bus,
         CancellationToken ct)
     {
@@ -67,9 +80,9 @@ public static class BookingEndpoints
     }
 
     private static async Task<IResult> CancelBooking(
-    Guid bookingId,
-    IMessageBus bus,
-    CancellationToken ct)
+        [FromRoute(Name = "id")] Guid bookingId,
+        IMessageBus bus,
+        CancellationToken ct)
     {
         await bus.InvokeAsync(new CancelBookingCommand { BookingId = bookingId }, ct);
         return Results.NoContent();
@@ -87,7 +100,8 @@ public static class BookingEndpoints
             CustomerSessionId = request.CustomerSessionId,
             PaymentMethod = request.PaymentMethod,
             ReturnUrl = request.ReturnUrl,
-            IpAddress = request.IpAddress
+            IpAddress = request.IpAddress,
+            ReplacePendingPayment = request.ReplacePendingPayment
         };
         var response = await bus.InvokeAsync<CreateBookingResponse>(command, ct);
         return Results.Ok(response);
@@ -98,5 +112,6 @@ public record RetryPaymentRequest(
     string CustomerSessionId,
     string PaymentMethod,
     string ReturnUrl,
-    string IpAddress
+    string IpAddress,
+    bool ReplacePendingPayment = false
 );

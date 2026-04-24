@@ -6,6 +6,7 @@ using CinemaTicketBooking.Infrastructure.Payments.Vnpay;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 using Wolverine;
 
 namespace CinemaTicketBooking.WebServer.ApiEndpoints;
@@ -17,7 +18,7 @@ public static class PaymentEndpoints
         var group = app.MapGroup("/api/payments")
             .WithTags("Payments");
 
-        group.MapGet("/momo-callback", MomoCallback)
+        group.MapPost("/momo-ipn", MomoIpn)
             .AllowAnonymous();
 
         group.MapGet("/fake-callback", FakeCallback)
@@ -62,9 +63,67 @@ public static class PaymentEndpoints
         return Results.BadRequest(response);
     }
 
-    public static async Task<IResult> MomoCallback()
+    public static async Task<IResult> MomoIpn(
+        HttpRequest request,
+        IMessageBus bus,
+        IUnitOfWork uow)
     {
-        return Results.Ok();
+        var gatewayParams = await ReadBodyAsStringDictionaryAsync(request);
+        if (!gatewayParams.TryGetValue("orderId", out var orderId) || string.IsNullOrWhiteSpace(orderId))
+        {
+            return Results.Ok(new MomoIpnResponse(1001, "Invalid request"));
+        }
+
+        if (!gatewayParams.TryGetValue("amount", out var amountRaw)
+            || !long.TryParse(amountRaw, out var momoAmount))
+        {
+            return Results.Ok(new MomoIpnResponse(1001, "Invalid amount"));
+        }
+
+        var transaction = await uow.PaymentTransactions.GetByGatewayTransactionIdAsync(orderId, default);
+        if (transaction is null)
+        {
+            return Results.Ok(new MomoIpnResponse(1002, "Order not found"));
+        }
+
+        var expectedAmount = Convert.ToInt64(decimal.Round(transaction.Amount, 0, MidpointRounding.AwayFromZero));
+        if (expectedAmount != momoAmount)
+        {
+            return Results.Ok(new MomoIpnResponse(1003, "Amount mismatch"));
+        }
+
+        if (transaction.Status != PaymentTransactionStatus.Pending)
+        {
+            return Results.Ok(new MomoIpnResponse(0, "Already processed"));
+        }
+
+        try
+        {
+            var verify = await bus.InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+            {
+                BookingId = transaction.BookingId,
+                GatewayTransactionId = orderId,
+                PaymentMethod = PaymentMethod.Momo.ToString(),
+                GatewayResponseParams = gatewayParams
+            });
+
+            if (!verify.IsSuccess && !string.IsNullOrWhiteSpace(verify.ErrorMessage)
+                && verify.ErrorMessage.Contains("signature", StringComparison.OrdinalIgnoreCase))
+            {
+                return Results.Ok(new MomoIpnResponse(1005, "Invalid signature"));
+            }
+
+            // IPN is acknowledgment-oriented: once processed, return success to stop retries.
+            return Results.Ok(new MomoIpnResponse(0, "Success"));
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("signature", StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.Ok(new MomoIpnResponse(1005, "Invalid signature"));
+        }
+        catch
+        {
+            return Results.Ok(new MomoIpnResponse(99, "Unknown error"));
+        }
     }
 
     public static async Task<IResult> VnpayIpn(
@@ -294,9 +353,43 @@ public static class PaymentEndpoints
                 c.Concession.Price * c.Quantity)).ToList()
         };
     }
+
+    private static async Task<Dictionary<string, string>> ReadBodyAsStringDictionaryAsync(HttpRequest request)
+    {
+        if (request.Body is null)
+            return [];
+
+        try
+        {
+            using var document = await JsonDocument.ParseAsync(request.Body);
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+                return [];
+
+            var result = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var property in document.RootElement.EnumerateObject())
+            {
+                result[property.Name] = property.Value.ValueKind switch
+                {
+                    JsonValueKind.String => property.Value.GetString() ?? string.Empty,
+                    JsonValueKind.Number => property.Value.GetRawText(),
+                    JsonValueKind.True => "true",
+                    JsonValueKind.False => "false",
+                    JsonValueKind.Null => string.Empty,
+                    _ => property.Value.GetRawText()
+                };
+            }
+
+            return result;
+        }
+        catch
+        {
+            return [];
+        }
+    }
 }
 
 public sealed record VnpayIpnResponse(string RspCode, string Message);
+public sealed record MomoIpnResponse(int ResultCode, string Message);
 public sealed record PaymentResultLookupResponse(
     Guid? BookingId,
     bool IsSuccess,

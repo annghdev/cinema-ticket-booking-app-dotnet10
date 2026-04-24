@@ -54,7 +54,7 @@ function PaymentResult() {
   const navState = location.state as PaymentResultLocationState | null
 
   const status = searchParams.get("status")
-  const txnRef = searchParams.get("txnRef")
+  const txnRef = searchParams.get("txnRef") ?? searchParams.get("orderId")
   const bookingIdParam = searchParams.get("bookingId")
   const [resolvedBookingId, setResolvedBookingId] = useState<string | null>(bookingIdParam ?? navState?.bookingId ?? null)
 

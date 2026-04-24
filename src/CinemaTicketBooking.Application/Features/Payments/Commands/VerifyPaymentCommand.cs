@@ -27,7 +27,8 @@ public class VerifyPaymentCommand : ICommand
 public class VerifyPaymentHandler(
     IUnitOfWork uow,
     IPaymentServiceFactory paymentServiceFactory,
-    IQrCodeGenerator qrCodeGenerator)
+    IQrCodeGenerator qrCodeGenerator,
+    IPaymentRealtimePublisher paymentRealtimePublisher)
 {
     /// <summary>
     /// Verifies payment, updates transaction status, and confirms or signals retry for the booking.
@@ -115,6 +116,23 @@ public class VerifyPaymentHandler(
             ?? throw new InvalidOperationException(
                 $"Booking '{transaction.BookingId}' not found.");
 
+        if (booking.Status == BookingStatus.Cancelled)
+        {
+            transaction.Status = PaymentTransactionStatus.Cancelled;
+            transaction.GatewayResponseRaw = "Payment callback arrived after booking was cancelled.";
+            uow.PaymentTransactions.Update(transaction);
+            await uow.CommitAsync(ct);
+
+            return new VerifyPaymentResponse(
+                BookingId: booking.Id,
+                PaymentTransactionId: transaction.Id,
+                IsSuccess: false,
+                CheckinQrCode: null,
+                Status: "booking_cancelled",
+                ErrorMessage: "Booking was cancelled before payment confirmation.",
+                CanRetry: false);
+        }
+
         booking.Confirm();
         uow.Bookings.Update(booking);
 
@@ -130,6 +148,16 @@ public class VerifyPaymentHandler(
 
         // 5. Atomic commit: Transaction(Success) + Booking(Confirmed) + Tickets(Sold).
         await uow.CommitAsync(ct);
+
+        await paymentRealtimePublisher.PublishPaymentConfirmedAsync(
+            new PaymentConfirmedRealtimeEvent(
+                BookingId: booking.Id,
+                PaymentTransactionId: transaction.Id,
+                GatewayTransactionId: transaction.GatewayTransactionId,
+                Status: "confirmed",
+                CheckinQrCode: booking.QrCode,
+                OccurredAtUtc: DateTimeOffset.UtcNow),
+            ct);
 
         return new VerifyPaymentResponse(
             BookingId: booking.Id,

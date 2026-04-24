@@ -8,12 +8,14 @@ export type PaymentGatewayOptionDto = {
   method: string
   displayName: string
   redirectBehavior: PaymentRedirectBehavior
+  icon: string
 }
 
 type PaymentGatewayOptionDtoRaw = {
   method: string
   displayName: string
   redirectBehavior: PaymentRedirectBehavior
+  icon: string
 }
 
 function normalizeOption(r: PaymentGatewayOptionDtoRaw): PaymentGatewayOptionDto {
@@ -21,6 +23,7 @@ function normalizeOption(r: PaymentGatewayOptionDtoRaw): PaymentGatewayOptionDto
     method: r.method,
     displayName: r.displayName,
     redirectBehavior: r.redirectBehavior,
+    icon: r.icon,
   }
 }
 
@@ -50,7 +53,7 @@ export type VerifyPaymentResponse = {
 }
 
 export type PaymentResultLookupResponse = {
-  bookingId: string
+  bookingId: string | null
   isSuccess: boolean
   status: string
   checkinQrCode: string | null

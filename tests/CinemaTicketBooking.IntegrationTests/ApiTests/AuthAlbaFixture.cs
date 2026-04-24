@@ -58,6 +58,12 @@ public sealed class AuthAlbaFixture : IAsyncLifetime
             builder.UseSetting("VnPay:HashSecret", "TEST_VNPAY_SECRET_KEY");
             builder.UseSetting("VnPay:PaymentBaseUrl", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
             builder.UseSetting("VnPay:FrontendResultUrl", "http://localhost:3000/payment-result");
+            builder.UseSetting("Momo:PartnerCode", "MOMO_TEST_PARTNER");
+            builder.UseSetting("Momo:AccessKey", "MOMO_TEST_ACCESS_KEY");
+            builder.UseSetting("Momo:SecretKey", "MOMO_TEST_SECRET_KEY");
+            builder.UseSetting("Momo:CreateEndpoint", "https://test-payment.momo.vn/v2/gateway/api/create");
+            builder.UseSetting("Momo:PublicBaseUrl", "http://localhost");
+            builder.UseSetting("Momo:FrontendResultUrl", "http://localhost:3000/payment-result");
             builder.UseSetting(WebHostDefaults.EnvironmentKey, Environments.Development);
         });
     }

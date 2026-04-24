@@ -11,6 +11,12 @@
 #   VnPay__TmnCode=...
 #   VnPay__HashSecret=...
 #   VnPay__FrontendResultUrl={{FrontendResultUrl}}
+# - Cấu hình app trước khi test MoMo:
+#   Momo__PartnerCode=...
+#   Momo__AccessKey=...
+#   Momo__SecretKey=...
+#   Momo__PublicBaseUrl={{PublicHost}}
+#   Momo__FrontendResultUrl={{FrontendResultUrl}}
 @showTimeId = 00000000-0000-0000-0000-000000040001
 @ticketId = 00000000-0000-0000-0000-000000050001
 @sessionId = test-session-http-request-01
@@ -124,3 +130,60 @@ GET {{PublicHost}}/api/payments/vnpay-ipn?vnp_TxnRef={{vnpTxnRef}}&vnp_Amount={{
 ### 8. VNPay return URL callback mẫu (browser -> frontend)
 # Endpoint backend sẽ redirect về FrontendResultUrl kèm status/bookingId
 GET {{PublicHost}}/api/payments/vnpay-return?vnp_TxnRef={{vnpTxnRef}}&vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_SecureHash={{vnpSecureHash}}
+
+###
+
+### 9. Create Booking qua MoMo (QR-only)
+# Dùng paymentMethod = Momo để backend tạo paymentUrl/deeplink MoMo
+POST {{HostAddress}}/api/bookings
+Content-Type: application/json
+
+{
+    "showTimeId": "{{showTimeId}}",
+    "customerSessionId": "{{sessionId}}",
+    "customerName": "Test MoMo Customer",
+    "customerEmail": "momo-test@example.com",
+    "customerPhoneNumber": "0901234567",
+    "selectedTicketIds": [
+        "{{ticketId}}"
+    ],
+    "concessions": [],
+    "paymentMethod": "Momo",
+    "returnUrl": "{{FrontendResultUrl}}",
+    "ipAddress": "127.0.0.1"
+}
+
+###
+
+# Gán lại transaction id (orderId) từ response create booking MoMo
+@momoOrderId = REPLACE_WITH_MOMO_ORDER_ID
+@momoAmount = 100000
+@momoSignature = REPLACE_WITH_CALCULATED_HMAC_SHA256
+
+### 10. MoMo IPN callback mẫu (sandbox -> backend)
+# MoMo notify thường là POST JSON. Endpoint trả ResultCode/Message để ack.
+POST {{PublicHost}}/api/payments/momo-ipn
+Content-Type: application/json
+
+{
+    "partnerCode": "REPLACE_PARTNER_CODE",
+    "accessKey": "REPLACE_ACCESS_KEY",
+    "requestId": "REPLACE_REQUEST_ID",
+    "orderId": "{{momoOrderId}}",
+    "orderInfo": "Booking demo",
+    "orderType": "momo_wallet",
+    "amount": "{{momoAmount}}",
+    "resultCode": "0",
+    "message": "Success",
+    "payType": "qr",
+    "transId": "REPLACE_TRANS_ID",
+    "responseTime": "REPLACE_RESPONSE_TIME",
+    "extraData": "",
+    "signature": "{{momoSignature}}"
+}
+
+###
+
+### 11. MoMo return URL callback mẫu (browser -> frontend)
+# MoMo redirect về frontend trực tiếp (không qua backend), frontend dùng txnRef/orderId để poll kết quả.
+GET {{FrontendResultUrl}}?orderId={{momoOrderId}}&resultCode=0

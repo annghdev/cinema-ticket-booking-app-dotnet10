@@ -13,9 +13,16 @@ public sealed class VnpayPaymentService(IOptions<VnpayOptions> options) : IPayme
 {
     private readonly VnpayOptions _options = options.Value;
     private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+    private const string GatewayIcon = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VNPay">
+          <rect width="64" height="64" rx="14" fill="#F8FAFC"/>
+          <path d="M10 22h10l6 20h-8l-8-20Zm14 0h8l3 10 3-10h8l-7 20h-8l-7-20Zm24 0h6v20h-6V22Z" fill="#0F4C81"/>
+        </svg>
+        """;
 
     public PaymentMethod Method => PaymentMethod.VnPay;
     public PaymentRedirectBehavior RedirectBehavior => PaymentRedirectBehavior.Redirect;
+    public string Icon => GatewayIcon;
 
     /// <summary>
     /// Creates a signed VNPay payment URL.

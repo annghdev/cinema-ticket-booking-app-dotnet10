@@ -241,6 +241,18 @@ public sealed class PaymentEndpointsTests(AuthAlbaFixture fixture)
     }
 
     [Fact]
+    public async Task GetGateways_Should_Return_Icon_ForEachGateway()
+    {
+        var client = fixture.CreateClient();
+        var response = await client.GetAsync("/api/payments/gateways");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<List<PaymentGatewayOptionDto>>();
+        payload.Should().NotBeNullOrEmpty();
+        payload!.Should().OnlyContain(x => !string.IsNullOrWhiteSpace(x.Icon));
+    }
+
+    [Fact]
     public async Task VnpayIpn_Should_Return_01_When_Order_NotFound()
     {
         var client = fixture.CreateClient();
@@ -276,6 +288,26 @@ public sealed class PaymentEndpointsTests(AuthAlbaFixture fixture)
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var transaction = await SeedPendingVnpayTransactionAsync(db, amount: 100_000m);
         transaction.Status = PaymentTransactionStatus.Success;
+        db.PaymentTransactions.Update(transaction);
+        await db.SaveChangesAsync();
+
+        var client = fixture.CreateClient();
+        var url = $"/api/payments/vnpay-ipn?vnp_TxnRef={transaction.GatewayTransactionId}&vnp_Amount=10000000";
+        var response = await client.GetAsync(url);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<VnpayIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.RspCode.Should().Be("02");
+    }
+
+    [Fact]
+    public async Task VnpayIpn_Should_Return_02_When_Booking_Was_Cancelled()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingVnpayTransactionAsync(db, amount: 100_000m);
+        transaction.Status = PaymentTransactionStatus.Cancelled;
         db.PaymentTransactions.Update(transaction);
         await db.SaveChangesAsync();
 
@@ -361,6 +393,159 @@ public sealed class PaymentEndpointsTests(AuthAlbaFixture fixture)
         payload!.RspCode.Should().Be("99");
     }
 
+    [Fact]
+    public async Task MomoIpn_Should_Return_1002_When_Order_NotFound()
+    {
+        var client = fixture.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/payments/momo-ipn", new
+        {
+            orderId = "NOT-FOUND",
+            amount = "100000"
+        });
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<MomoIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.ResultCode.Should().Be(1002);
+    }
+
+    [Fact]
+    public async Task MomoIpn_Should_Return_1003_When_Amount_Mismatch()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingMomoTransactionAsync(db, amount: 100_000m);
+
+        var client = fixture.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/payments/momo-ipn", new
+        {
+            orderId = transaction.GatewayTransactionId,
+            amount = "1"
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<MomoIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.ResultCode.Should().Be(1003);
+    }
+
+    [Fact]
+    public async Task MomoIpn_Should_Return_0_When_Transaction_Already_Processed()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingMomoTransactionAsync(db, amount: 100_000m);
+        transaction.Status = PaymentTransactionStatus.Success;
+        db.PaymentTransactions.Update(transaction);
+        await db.SaveChangesAsync();
+
+        var client = fixture.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/payments/momo-ipn", new
+        {
+            orderId = transaction.GatewayTransactionId,
+            amount = "100000"
+        });
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<MomoIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.ResultCode.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task MomoIpn_Should_Return_0_When_Booking_Was_Cancelled()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingMomoTransactionAsync(db, amount: 100_000m);
+        transaction.Status = PaymentTransactionStatus.Cancelled;
+        db.PaymentTransactions.Update(transaction);
+        await db.SaveChangesAsync();
+
+        var client = fixture.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/payments/momo-ipn", new
+        {
+            orderId = transaction.GatewayTransactionId,
+            amount = "100000"
+        });
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<MomoIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.ResultCode.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task MomoIpn_Should_Return_1005_When_Signature_Invalid()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingMomoTransactionAsync(db, amount: 100_000m);
+
+        var client = fixture.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/payments/momo-ipn", new
+        {
+            partnerCode = "MOMO_TEST_PARTNER",
+            requestId = "MOMO-REQ-1",
+            orderId = transaction.GatewayTransactionId,
+            orderInfo = $"Booking {transaction.BookingId}",
+            orderType = "momo_wallet",
+            amount = "100000",
+            resultCode = "0",
+            message = "Success",
+            payType = "qr",
+            transId = "123456",
+            responseTime = "1710000000000",
+            extraData = "",
+            signature = "invalid-signature"
+        });
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<MomoIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.ResultCode.Should().Be(1005);
+    }
+
+    [Fact]
+    public async Task MomoIpn_Should_Return_0_And_Confirm_Booking_When_Valid()
+    {
+        await using var scope = fixture.Host.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var transaction = await SeedPendingMomoTransactionAsync(db, amount: 100_000m);
+
+        var callbackFields = new Dictionary<string, string>
+        {
+            ["partnerCode"] = "MOMO_TEST_PARTNER",
+            ["requestId"] = "MOMO-REQ-1",
+            ["orderId"] = transaction.GatewayTransactionId,
+            ["orderInfo"] = $"Booking {transaction.BookingId}",
+            ["orderType"] = "momo_wallet",
+            ["amount"] = "100000",
+            ["resultCode"] = "0",
+            ["message"] = "Success",
+            ["payType"] = "qr",
+            ["transId"] = "123456",
+            ["responseTime"] = "1710000000000",
+            ["extraData"] = ""
+        };
+        var signature = ComputeMomoSignature(callbackFields, "MOMO_TEST_SECRET_KEY");
+        callbackFields["signature"] = signature;
+
+        var client = fixture.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/payments/momo-ipn", callbackFields);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<MomoIpnResponse>();
+        payload.Should().NotBeNull();
+        payload!.ResultCode.Should().Be(0);
+
+        var db2 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var txAfter = await db2.PaymentTransactions.AsNoTracking().SingleAsync(x => x.Id == transaction.Id);
+        txAfter.Status.Should().Be(PaymentTransactionStatus.Success);
+        var bookingAfter = await db2.Bookings.AsNoTracking().SingleAsync(x => x.Id == transaction.BookingId);
+        bookingAfter.Status.Should().Be(BookingStatus.Confirmed);
+    }
+
     private static string ComputeVnpaySignature(
         Dictionary<string, string> parameters,
         string secret)
@@ -373,6 +558,40 @@ public sealed class PaymentEndpointsTests(AuthAlbaFixture fixture)
         var keyBytes = Encoding.UTF8.GetBytes(secret);
         var dataBytes = Encoding.UTF8.GetBytes(canonical);
         return Convert.ToHexStringLower(HMACSHA512.HashData(keyBytes, dataBytes));
+    }
+
+    private static string ComputeMomoSignature(
+        Dictionary<string, string> fields,
+        string secret)
+    {
+        var orderedKeys = new[]
+        {
+            "accessKey",
+            "amount",
+            "extraData",
+            "message",
+            "orderId",
+            "orderInfo",
+            "orderType",
+            "partnerCode",
+            "payType",
+            "requestId",
+            "responseTime",
+            "resultCode",
+            "transId"
+        };
+
+        var raw = string.Join("&", orderedKeys
+            .Select(k =>
+            {
+                if (k == "accessKey")
+                    return $"{k}=MOMO_TEST_ACCESS_KEY";
+                return $"{k}={(fields.TryGetValue(k, out var value) ? value : string.Empty)}";
+            }));
+
+        var keyBytes = Encoding.UTF8.GetBytes(secret);
+        var dataBytes = Encoding.UTF8.GetBytes(raw);
+        return Convert.ToHexStringLower(HMACSHA256.HashData(keyBytes, dataBytes));
     }
 
     private static async Task<PaymentTransaction> SeedPendingVnpayTransactionAsync(AppDbContext db, decimal amount)
@@ -395,6 +614,42 @@ public sealed class PaymentEndpointsTests(AuthAlbaFixture fixture)
             Amount = amount,
             GatewayTransactionId = $"VNP-{Guid.CreateVersion7():N}",
             PaymentUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
+            Status = PaymentTransactionStatus.Pending,
+            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
+        };
+
+        db.Cinemas.Add(cinema);
+        db.Movies.Add(movie);
+        db.Screens.Add(screen);
+        db.ShowTimes.Add(showTime);
+        db.Customers.Add(customer);
+        db.Bookings.Add(booking);
+        db.PaymentTransactions.Add(transaction);
+        await db.SaveChangesAsync();
+
+        return transaction;
+    }
+
+    private static async Task<PaymentTransaction> SeedPendingMomoTransactionAsync(AppDbContext db, decimal amount)
+    {
+        var cinema = IntegrationEntityBuilder.Cinema($"API Momo Cinema {Guid.CreateVersion7():N}");
+        var movie = IntegrationEntityBuilder.Movie($"API Momo Movie {Guid.CreateVersion7():N}", MovieStatus.NowShowing);
+        var screen = IntegrationEntityBuilder.Screen(cinema.Id, $"API-MOMO-{Guid.CreateVersion7():N}", "[[1,1,1]]");
+        var showTime = IntegrationEntityBuilder.ShowTime(movie.Id, screen.Id);
+        var customer = IntegrationEntityBuilder.Customer($"session-{Guid.CreateVersion7():N}");
+        var booking = IntegrationEntityBuilder.Booking(showTime.Id, customer.Id, "MoMo IPN Tester");
+        booking.OriginAmount = amount;
+        booking.FinalAmount = amount;
+        booking.Status = BookingStatus.Pending;
+
+        var transaction = new PaymentTransaction
+        {
+            Id = Guid.CreateVersion7(),
+            BookingId = booking.Id,
+            Method = PaymentMethod.Momo,
+            Amount = amount,
+            GatewayTransactionId = $"BOOKING-{booking.Id:N}".ToUpperInvariant(),
+            PaymentUrl = "https://test-payment.momo.vn",
             Status = PaymentTransactionStatus.Pending,
             ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
         };

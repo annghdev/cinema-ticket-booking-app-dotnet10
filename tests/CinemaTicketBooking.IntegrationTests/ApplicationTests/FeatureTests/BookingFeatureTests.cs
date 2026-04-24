@@ -4,8 +4,11 @@ using CinemaTicketBooking.Application.Common.Auth;
 using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.IntegrationTests.Shared.DataSeeders;
+using CinemaTicketBooking.IntegrationTests.Shared.Fakes;
 using CinemaTicketBooking.IntegrationTests.Shared.Fixtures;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CinemaTicketBooking.IntegrationTests.ApplicationTests.FeatureTests;
 
@@ -122,6 +125,8 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
     public async Task VerifyPayment_Should_ConfirmBooking_SetQrAndSoldTickets_When_GatewayConfirms()
     {
         var (bookingId, gatewayTxId, paymentTxId, _) = await ArrangePendingBookingForVerifyPaymentAsync();
+        var paymentRealtime = ResolveRequiredService<InMemoryPaymentRealtimePublisher>();
+        paymentRealtime.Reset();
 
         var verifyResponse = await InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
         {
@@ -154,6 +159,13 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
         var paymentAfter = await db.PaymentTransactions.SingleAsync(x => x.Id == paymentTxId);
         paymentAfter.Status.Should().Be(PaymentTransactionStatus.Success);
         paymentAfter.PaidAt.Should().NotBeNull();
+
+        paymentRealtime.Events.Should().ContainSingle();
+        var realtimeEvent = paymentRealtime.Events.Single();
+        realtimeEvent.BookingId.Should().Be(bookingId);
+        realtimeEvent.PaymentTransactionId.Should().Be(paymentTxId);
+        realtimeEvent.Status.Should().Be("confirmed");
+        realtimeEvent.CheckinQrCode.Should().Be(verifyResponse.CheckinQrCode);
     }
 
     [Fact]
@@ -244,6 +256,53 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
     }
 
     [Fact]
+    public async Task VerifyPayment_Should_ConfirmBooking_When_MomoSignatureIsValid()
+    {
+        var (bookingId, _, paymentTxId, _) = await ArrangePendingBookingForVerifyPaymentAsync();
+
+        await using (var db = CreateDbContext())
+        {
+            var tx = await db.PaymentTransactions.SingleAsync(x => x.Id == paymentTxId);
+            tx.Method = PaymentMethod.Momo;
+            tx.GatewayTransactionId = $"BOOKING-{bookingId:N}".ToUpperInvariant();
+            tx.PaymentUrl = "https://test-payment.momo.vn";
+            db.PaymentTransactions.Update(tx);
+            await db.SaveChangesAsync();
+        }
+
+        var callbackFields = new Dictionary<string, string>
+        {
+            ["partnerCode"] = "MOMO_TEST_PARTNER",
+            ["requestId"] = "MOMO-REQ-1",
+            ["orderId"] = $"BOOKING-{bookingId:N}".ToUpperInvariant(),
+            ["orderInfo"] = $"Booking {bookingId}",
+            ["orderType"] = "momo_wallet",
+            ["amount"] = "100000",
+            ["resultCode"] = "0",
+            ["message"] = "Success",
+            ["payType"] = "qr",
+            ["transId"] = "123456",
+            ["responseTime"] = "1710000000000",
+            ["extraData"] = ""
+        };
+        callbackFields["signature"] = ComputeMomoSignature(callbackFields, "MOMO_TEST_SECRET_KEY");
+
+        var verifyResponse = await InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+        {
+            BookingId = bookingId,
+            GatewayTransactionId = callbackFields["orderId"],
+            PaymentMethod = "Momo",
+            GatewayResponseParams = callbackFields,
+            CorrelationId = "it-verify-payment-momo-success"
+        });
+
+        verifyResponse.IsSuccess.Should().BeTrue();
+        verifyResponse.Status.Should().Be("confirmed");
+        verifyResponse.PaymentTransactionId.Should().Be(paymentTxId);
+        verifyResponse.CheckinQrCode.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
     public async Task RetryPayment_Should_CreateNewPendingTransaction_When_PreviousVerificationFailed()
     {
         var (bookingId, sessionId) = await ArrangeBookingWithFailedPaymentAsync();
@@ -319,6 +378,96 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
 
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*already in progress*");
+    }
+
+    [Fact]
+    public async Task RetryPayment_Should_Cancel_CurrentPendingTransaction_When_UserSwitchesGateway()
+    {
+        await ResetDatabaseAsync();
+        var seed = await SeedCheckoutGraphAsync();
+
+        var createResponse = await InvokeAsync<CreateBookingResponse>(new CreateBookingCommand
+        {
+            ShowTimeId = seed.ShowTimeId,
+            CustomerSessionId = seed.SessionId,
+            CustomerName = "Retry Switch Gateway",
+            CustomerPhoneNumber = "0123456789",
+            CustomerEmail = "retry.switch@example.com",
+            SelectedTicketIds = [seed.TicketsBySeatCode["A1"]],
+            Concessions = [],
+            DiscountAmount = 0,
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            CorrelationId = "it-retry-switch-gateway-initial"
+        });
+
+        var retryResponse = await InvokeAsync<CreateBookingResponse>(new RetryPaymentCommand
+        {
+            BookingId = createResponse.BookingId,
+            CustomerSessionId = seed.SessionId,
+            PaymentMethod = "VnPay",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            ReplacePendingPayment = true,
+            CorrelationId = "it-retry-switch-gateway"
+        });
+
+        await using var db = CreateDbContext();
+        var transactions = await db.PaymentTransactions
+            .Where(x => x.BookingId == createResponse.BookingId)
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync();
+
+        transactions.Should().HaveCount(2);
+        transactions.Should().ContainSingle(x => x.Status == PaymentTransactionStatus.Cancelled);
+        transactions.Should().ContainSingle(x => x.Status == PaymentTransactionStatus.Pending);
+        transactions.Single(x => x.Status == PaymentTransactionStatus.Pending).Method.Should().Be(PaymentMethod.VnPay);
+        retryResponse.PaymentTransactionId.Should().Be(transactions.Single(x => x.Status == PaymentTransactionStatus.Pending).Id);
+    }
+
+    [Fact]
+    public async Task CancelBooking_Should_ReleaseTickets_And_CancelPendingPaymentTransactions()
+    {
+        await ResetDatabaseAsync();
+        var seed = await SeedCheckoutGraphAsync();
+
+        var createResponse = await InvokeAsync<CreateBookingResponse>(new CreateBookingCommand
+        {
+            ShowTimeId = seed.ShowTimeId,
+            CustomerSessionId = seed.SessionId,
+            CustomerName = "Cancel Booking",
+            CustomerPhoneNumber = "0123456789",
+            CustomerEmail = "cancel.booking@example.com",
+            SelectedTicketIds = [seed.TicketsBySeatCode["A1"], seed.TicketsBySeatCode["A2"]],
+            Concessions = [],
+            DiscountAmount = 0,
+            PaymentMethod = "None",
+            ReturnUrl = "https://localhost/checkout/return",
+            IpAddress = "127.0.0.1",
+            CorrelationId = "it-cancel-booking-setup"
+        });
+
+        await InvokeAsync(new CancelBookingCommand
+        {
+            BookingId = createResponse.BookingId,
+            CorrelationId = "it-cancel-booking"
+        });
+
+        await using var db = CreateDbContext();
+        var booking = await db.Bookings
+            .Include(x => x.Tickets)
+            .ThenInclude(x => x.Ticket)
+            .SingleAsync(x => x.Id == createResponse.BookingId);
+
+        booking.Status.Should().Be(BookingStatus.Cancelled);
+        booking.Tickets.Should().OnlyContain(x => x.Ticket != null && x.Ticket.Status == TicketStatus.Available);
+
+        var pendingTransactions = await db.PaymentTransactions
+            .Where(x => x.BookingId == createResponse.BookingId)
+            .ToListAsync();
+        pendingTransactions.Should().ContainSingle();
+        pendingTransactions.Single().Status.Should().Be(PaymentTransactionStatus.Cancelled);
     }
 
     [Fact]
@@ -502,6 +651,39 @@ public sealed class BookingFeatureTests(PostgresContainerFixture databaseFixture
             tickets.ToDictionary(
                 x => x.SeatCode,
                 x => x.Id));
+    }
+
+    private static string ComputeMomoSignature(
+        Dictionary<string, string> fields,
+        string secret)
+    {
+        var orderedKeys = new[]
+        {
+            "accessKey",
+            "amount",
+            "extraData",
+            "message",
+            "orderId",
+            "orderInfo",
+            "orderType",
+            "partnerCode",
+            "payType",
+            "requestId",
+            "responseTime",
+            "resultCode",
+            "transId"
+        };
+
+        var raw = string.Join("&", orderedKeys
+            .Select(k =>
+            {
+                if (k == "accessKey")
+                    return $"{k}=MOMO_TEST_ACCESS_KEY";
+                return $"{k}={(fields.TryGetValue(k, out var value) ? value : string.Empty)}";
+            }));
+        var keyBytes = Encoding.UTF8.GetBytes(secret);
+        var dataBytes = Encoding.UTF8.GetBytes(raw);
+        return Convert.ToHexStringLower(HMACSHA256.HashData(keyBytes, dataBytes));
     }
 
     private async Task<Guid> SeedConcessionAsync()

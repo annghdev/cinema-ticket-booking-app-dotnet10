@@ -63,4 +63,14 @@ public abstract class ApplicationFeatureTestBase(PostgresContainerFixture databa
     {
         await MessageBus.InvokeAsync(request, ct);
     }
+
+    protected T ResolveRequiredService<T>() where T : notnull
+    {
+        if (_messageHost is null)
+        {
+            throw new InvalidOperationException("Wolverine message host has not been initialized.");
+        }
+
+        return _messageHost.Services.GetRequiredService<T>();
+    }
 }

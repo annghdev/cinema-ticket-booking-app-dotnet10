@@ -31,6 +31,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthInfrastructure(builder.Configuration);
 builder.Services.AddSingleton<ITicketRealtimePublisher, SignalRTicketRealtimePublisher>();
+builder.Services.AddSingleton<IPaymentRealtimePublisher, SignalRPaymentRealtimePublisher>();
 builder.Services.AddHostedService<TicketLockRecoveryHostedService>();
 
 
@@ -80,20 +81,17 @@ var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>() ?? [];
 
+var normalizedAllowedOrigins = allowedOrigins
+    .Where(origin => !string.IsNullOrWhiteSpace(origin))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
+
 builder.Services.AddCors(options =>
 {
-    // Policy 1: Allow All for Development
-    options.AddPolicy("AllowAll", policy =>
+    // Allow specific frontend origins and credentials for cookie-based auth.
+    options.AddPolicy("AllowFrontendOrigins", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-
-    // Policy 2: Allow Specific domains for Production
-    options.AddPolicy("AllowSpecificOrigins", policy =>
-    {
-        policy.WithOrigins(allowedOrigins)
+        policy.WithOrigins(normalizedAllowedOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -118,11 +116,11 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-    app.UseCors("AllowSpecificOrigins");
+    app.UseCors("AllowFrontendOrigins");
 }
 else
 {
-    app.UseCors("AllowAll");
+    app.UseCors("AllowFrontendOrigins");
 }
 //app.UseHttpsRedirection();
 
@@ -144,6 +142,7 @@ app.MapConcessionEndpoints();
 app.MapScreenEndpoints();
 app.MapPaymentEndpoints();
 app.MapHub<TicketStatusHub>("/hubs/tickets").AllowAnonymous();
+app.MapHub<PaymentHub>("/hubs/payments").AllowAnonymous();
 
 app.MapStaticAssets();
 
