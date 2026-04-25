@@ -76,6 +76,11 @@ public class ScreenGenerateSeatsTests
         act.Should().Throw<FormatException>();
     }
 
+    /// <summary>
+    /// SeatMap encoding: 0=Aisle, 1=Regular, 2=VIP, 3=SweetBox, 4=SweetBoxGap (couple spacer).
+    /// Any value outside [0..4] must be rejected.
+    /// Note: value 4 is now valid (SweetBox couple gap spacer) — use 5 as the out-of-range probe.
+    /// </summary>
     [Fact]
     public void GenerateSeats_Should_ThrowFormatException_When_CellValueIsOutOfRange()
     {
@@ -88,7 +93,7 @@ public class ScreenGenerateSeatsTests
             IsActive = true
         };
 
-        var act = () => screen.GenerateSeats("[[4]]");
+        var act = () => screen.GenerateSeats("[[5]]");
         act.Should().Throw<FormatException>();
     }
 
@@ -104,7 +109,7 @@ public class ScreenGenerateSeatsTests
             IsActive = true
         };
 
-        screen.GenerateSeats("[[3,0]]");
+        screen.GenerateSeats("[[4,3,0]]");
 
         screen.Seats.Should().ContainSingle();
         screen.Seats[0].Code.Should().StartWith("Sweet");

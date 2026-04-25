@@ -7,13 +7,21 @@ import { saveCheckoutDraft } from "../lib/checkoutDraft"
 import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
 import type { ShowTimeDetailDto } from "../types/contracts"
 
-type SeatCellType = 0 | 1 | 2 | 3
+/**
+ * SeatMap cell encoding — mirrors SeatMapCellValue.cs in the Domain layer.
+ *   0 = Walking aisle / stair (segment boundary)
+ *   1 = Regular seat
+ *   2 = VIP seat
+ *   3 = SweetBox (couple) seat
+ *   4 = SweetBox couple gap spacer (visual only; NOT a seat, NOT an aisle boundary)
+ */
+type SeatCellType = 0 | 1 | 2 | 3 | 4
 
 type ParsedSeat = {
   code: string
   row: number
   column: number
-  type: Exclude<SeatCellType, 0>
+  type: Exclude<SeatCellType, 0 | 4>
 }
 
 function parseSeatMap(seatMap: string): SeatCellType[][] {
@@ -65,8 +73,9 @@ function parseSeatMap(seatMap: string): SeatCellType[][] {
 function validateSeatMap(seatGrid: SeatCellType[][]) {
   seatGrid.forEach((row, rowIndex) => {
     row.forEach((value, colIndex) => {
-      if (value < 0 || value > 3) {
-        throw new Error(`Invalid seat type at row ${rowIndex + 1}, column ${colIndex + 1}`)
+      // Valid range: 0 (aisle), 1-3 (seat types), 4 (SweetBox couple gap spacer).
+      if (value < 0 || value > 4) {
+        throw new Error(`Invalid seat map value ${value} at row ${rowIndex + 1}, column ${colIndex + 1}`)
       }
     })
   })
@@ -76,11 +85,13 @@ function validateSeatMap(seatGrid: SeatCellType[][]) {
     return
   }
 
+  // True aisle columns (0 in the first row) must be 0 in every row.
+  // SweetBox gap spacers (4) are row-local and are exempt from this constraint.
   firstRow.forEach((value, colIndex) => {
     if (value === 0) {
       for (let rowIndex = 0; rowIndex < seatGrid.length; rowIndex += 1) {
         if (seatGrid[rowIndex][colIndex] !== 0) {
-          throw new Error(`Stair must be in the same column at row ${rowIndex + 1}, column ${colIndex + 1}`)
+          throw new Error(`Aisle column ${colIndex + 1} must be 0 in all rows, but row ${rowIndex + 1} has value ${seatGrid[rowIndex][colIndex]}`)
         }
       }
     }
@@ -89,23 +100,28 @@ function validateSeatMap(seatGrid: SeatCellType[][]) {
 
 function generateSeatsFromSeatMap(seatGrid: SeatCellType[][]): ParsedSeat[] {
   const seats: ParsedSeat[] = []
+  let sweetBoxCounter = 1
 
   for (let row = 0; row < seatGrid.length; row += 1) {
     let seatNumber = 1
 
+    // Scan right-to-left, matching the backend Screen.GenerateSeats() convention.
     for (let col = seatGrid[row].length - 1; col >= 0; col -= 1) {
       const seatType = seatGrid[row][col]
 
-      if (seatType !== 0) {
-        const code = seatType === 3 ? `Sweet${seatNumber}` : `${String.fromCharCode(65 + row)}${seatNumber}`
-        seats.push({
-          code,
-          row: row + 1,
-          column: col + 1,
-          type: seatType,
-        })
-        seatNumber += 1
+      // Skip true aisles (0) and SweetBox couple gap spacers (4) — neither produces a Seat entity.
+      if (seatType === 0 || seatType === 4) {
+        continue
       }
+
+      const code = seatType === 3 ? `Sweet${sweetBoxCounter++}` : `${String.fromCharCode(65 + row)}${seatNumber}`
+      seats.push({
+        code,
+        row: row + 1,
+        column: col + 1,
+        type: seatType as Exclude<SeatCellType, 0 | 4>,
+      })
+      seatNumber += 1
     }
   }
 
@@ -364,78 +380,190 @@ function ShowtimeSeatSelection() {
               }}
             >
               {seatGrid.map((row, rowIndex) => {
-              const rowCells: ReactElement[] = []
+                const rowCells: ReactElement[] = []
 
-              for (let colIndex = 0; colIndex < row.length; colIndex += 1) {
-                const cell = row[colIndex]
+                // 1. Analyze the row above to identify seat blocks
+                type Block = { start: number; end: number; length: number }
+                const blocks: Block[] = []
+                if (rowIndex > 0) {
+                  const rowAbove = seatGrid[rowIndex - 1]
+                  let blockStart = -1
+                  for (let i = 0; i < rowAbove.length; i++) {
+                    if (rowAbove[i] !== 0) {
+                      if (blockStart === -1) blockStart = i
+                    } else {
+                      if (blockStart !== -1) {
+                        blocks.push({ start: blockStart, end: i - 1, length: i - blockStart })
+                        blockStart = -1
+                      }
+                    }
+                  }
+                  if (blockStart !== -1) {
+                    blocks.push({ start: blockStart, end: rowAbove.length - 1, length: rowAbove.length - blockStart })
+                  }
+                }
 
-                if (cell === 0) {
+                // 2. Build rendering commands for the current row
+                type RenderCommand = { type: "wide-seat" | "single-seat"; seatIdx: number; span: number }
+                const commands: Record<number, RenderCommand> = {}
+
+                for (const block of blocks) {
+                  if (block.length % 2 !== 0 && block.start > 0 && seatGrid[rowIndex][block.start - 1] === 0) {
+                    // ODD block: overwrite the aisle on the left!
+                    const startIdx = block.start - 1
+                    const endIdx = block.end
+                    const numPairs = Math.floor((endIdx - startIdx + 1) / 2)
+
+                    for (let k = 0; k < numPairs; k++) {
+                      const pairStart = startIdx + 2 * k
+                      // Search for a '3' in the pair area
+                      let seatIdx = -1
+                      if (seatGrid[rowIndex][pairStart] === 3) seatIdx = pairStart
+                      else if (seatGrid[rowIndex][pairStart + 1] === 3) seatIdx = pairStart + 1
+
+                      if (seatIdx !== -1) {
+                        commands[pairStart] = { type: "wide-seat", seatIdx, span: 2 }
+                      }
+                    }
+                  } else {
+                    // EVEN block or no aisle on left: map normally
+                    for (let i = block.start; i <= block.end; i++) {
+                      if (seatGrid[rowIndex][i] === 4 && seatGrid[rowIndex][i + 1] === 3) {
+                        commands[i] = { type: "wide-seat", seatIdx: i + 1, span: 2 }
+                        i++
+                      } else if (seatGrid[rowIndex][i] === 3 && seatGrid[rowIndex][i + 1] === 4) {
+                        commands[i] = { type: "wide-seat", seatIdx: i, span: 2 }
+                        i++
+                      }
+                    }
+                  }
+                }
+
+                // If no blocks were analyzed (e.g., rowIndex 0), fall back to basic standalone mapping
+                if (blocks.length === 0) {
+                  for (let i = 0; i < row.length; i++) {
+                    if (row[i] === 4 && row[i + 1] === 3) {
+                      commands[i] = { type: "wide-seat", seatIdx: i + 1, span: 2 }
+                      i++
+                    } else if (row[i] === 3 && row[i + 1] === 4) {
+                      commands[i] = { type: "wide-seat", seatIdx: i, span: 2 }
+                      i++
+                    }
+                  }
+                }
+
+                // 3. Execute rendering commands left-to-right
+                for (let colIndex = 0; colIndex < row.length; colIndex += 1) {
+                  const cell = row[colIndex]
+
+                  if (commands[colIndex]) {
+                    const cmd = commands[colIndex]
+                    const seat = seatsByPosition[`${rowIndex + 1}-${cmd.seatIdx + 1}`]
+
+                    if (seat) {
+                      const ticket = ticketsByCode[seat.code]
+                      const status = ticket?.status ?? "Available"
+                      const isPending = pendingSeatCodes.includes(seat.code)
+                      const isSelected = selectedSeatCodes.includes(seat.code)
+                      const lockOwner = ticket?.lockingBy ?? null
+                      const lockIsOurs = status === "Locking" && lockOwner === clientSessionId
+                      const isUnavailable =
+                        status === "Sold" ||
+                        status === "PendingPayment" ||
+                        (status === "Locking" && !lockIsOurs && !isSelected) ||
+                        isPending
+
+                      const baseClass = "border-fuchsia-300/40 bg-fuchsia-500/10"
+                      const stateClass = isSelected
+                        ? "border-secondary bg-secondary text-on-primary shadow-[0_0_8px_rgba(0,244,254,0.5)]"
+                        : isUnavailable
+                          ? "cursor-not-allowed border-outline-variant/20 bg-surface-dim text-on-surface-variant opacity-40"
+                          : `${baseClass} text-on-background hover:border-primary/50 hover:text-primary`
+
+                      rowCells.push(
+                        <button
+                          key={seat.code}
+                          type="button"
+                          onClick={() => void toggleSeat(seat.code)}
+                          disabled={isUnavailable}
+                          title={`${seat.code} - ${status}`}
+                          className={`relative h-11 rounded-md border text-[11px] font-semibold transition-colors col-span-2 w-full ${stateClass}`}
+                        >
+                          {isPending ? (
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            </span>
+                          ) : (
+                            seat.code
+                          )}
+                        </button>
+                      )
+                    } else {
+                      rowCells.push(<div key={`missing-${rowIndex}-${colIndex}`} className="h-11 w-11 col-span-2" />)
+                    }
+                    colIndex += cmd.span - 1
+                    continue
+                  }
+
+                  // Standard fallback rendering
+                  if (cell === 0) {
+                    rowCells.push(<div key={`aisle-${rowIndex}-${colIndex}`} className="h-11 w-11" />)
+                    continue
+                  }
+
+                  const seat = seatsByPosition[`${rowIndex + 1}-${colIndex + 1}`]
+                  if (!seat) {
+                    rowCells.push(<div key={`missing-${rowIndex}-${colIndex}`} className="h-11 w-11" />)
+                    continue
+                  }
+
+                  const ticket = ticketsByCode[seat.code]
+                  const status = ticket?.status ?? "Available"
+                  const isPending = pendingSeatCodes.includes(seat.code)
+                  const isSelected = selectedSeatCodes.includes(seat.code)
+                  const lockOwner = ticket?.lockingBy ?? null
+                  const lockIsOurs = status === "Locking" && lockOwner === clientSessionId
+                  const isUnavailable =
+                    status === "Sold" ||
+                    status === "PendingPayment" ||
+                    (status === "Locking" && !lockIsOurs && !isSelected) ||
+                    isPending
+
+                  const baseClass =
+                    seat.type === 1
+                      ? "border-outline-variant/20 bg-surface-container-highest"
+                      : seat.type === 2
+                        ? "border-amber-300/40 bg-amber-500/10"
+                        : "border-fuchsia-300/40 bg-fuchsia-500/10"
+
+                  const stateClass = isSelected
+                    ? "border-secondary bg-secondary text-on-primary shadow-[0_0_8px_rgba(0,244,254,0.5)]"
+                    : isUnavailable
+                      ? "cursor-not-allowed border-outline-variant/20 bg-surface-dim text-on-surface-variant opacity-40"
+                      : `${baseClass} text-on-background hover:border-primary/50 hover:text-primary`
+
                   rowCells.push(
-                    <div key={`aisle-${rowIndex}-${colIndex}`} className="h-11 w-11" />,
+                    <button
+                      key={seat.code}
+                      type="button"
+                      onClick={() => void toggleSeat(seat.code)}
+                      disabled={isUnavailable}
+                      title={`${seat.code} - ${status}`}
+                      className={`relative h-11 rounded-md border text-[11px] font-semibold transition-colors w-11 ${stateClass}`}
+                    >
+                      {isPending ? (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        </span>
+                      ) : (
+                        seat.code
+                      )}
+                    </button>
                   )
-                  continue
                 }
 
-                const seat = seatsByPosition[`${rowIndex + 1}-${colIndex + 1}`]
-                if (!seat) {
-                  rowCells.push(<div key={`missing-${rowIndex}-${colIndex}`} className="h-11 w-11" />)
-                  continue
-                }
-
-                const ticket = ticketsByCode[seat.code]
-                const status = ticket?.status ?? "Available"
-                const isPending = pendingSeatCodes.includes(seat.code)
-                const isSelected = selectedSeatCodes.includes(seat.code)
-                const lockOwner = ticket?.lockingBy ?? null
-                const lockIsOurs = status === "Locking" && lockOwner === clientSessionId
-                const isUnavailable =
-                  status === "Sold" ||
-                  status === "PendingPayment" ||
-                  (status === "Locking" && !lockIsOurs && !isSelected) ||
-                  isPending
-                const baseClass =
-                  seat.type === 1
-                    ? "border-outline-variant/20 bg-surface-container-highest"
-                    : seat.type === 2
-                      ? "border-amber-300/40 bg-amber-500/10"
-                      : "border-fuchsia-300/40 bg-fuchsia-500/10"
-
-                const stateClass = isSelected
-                  ? "border-secondary bg-secondary text-on-primary shadow-[0_0_8px_rgba(0,244,254,0.5)]"
-                  : isUnavailable
-                    ? "cursor-not-allowed border-outline-variant/20 bg-surface-dim text-on-surface-variant opacity-40"
-                    : `${baseClass} text-on-background hover:border-primary/50 hover:text-primary`
-
-                const isSweetSeat = seat.type === 3
-                const canSpanDoubleCell = isSweetSeat && row[colIndex + 1] === 0
-
-                rowCells.push(
-                  <button
-                    key={seat.code}
-                    type="button"
-                    onClick={() => void toggleSeat(seat.code)}
-                    disabled={isUnavailable}
-                    title={`${seat.code} - ${status}`}
-                    className={`relative h-11 rounded-md border text-[11px] font-semibold transition-colors ${canSpanDoubleCell ? "col-span-2 w-full" : "w-11"} ${stateClass}`}
-                  >
-                    {isPending ? (
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      </span>
-                    ) : (
-                      seat.code
-                    )}
-                  </button>,
-                )
-
-                // SweetBox visually occupies two cells; consume the next aisle cell on the right.
-                if (canSpanDoubleCell) {
-                  colIndex += 1
-                }
-              }
-
-              return rowCells
-            })}
+                return rowCells
+              })}
           </div>
           <div className="relative flex h-12 w-full min-w-0 shrink-0 items-center justify-center overflow-hidden rounded-t-[50%] border-t-4 border-secondary bg-gradient-to-t from-transparent to-surface-container-high/50 shadow-[0_-15px_40px_rgba(0,244,254,0.3)] sm:h-16 sm:rounded-t-full">
             <span className="mt-2 font-headline text-sm uppercase tracking-widest text-on-surface-variant">MÀN HÌNH</span>

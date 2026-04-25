@@ -29,10 +29,15 @@ public class DataSeeder(
     public static readonly Guid ScreenId1 = new("00000000-0000-0000-0000-000000030001");
     public static readonly Guid ScreenId2 = new("00000000-0000-0000-0000-000000030002");
     public static readonly Guid ScreenId3 = new("00000000-0000-0000-0000-000000030003");
+    public static readonly Guid ScreenId4 = new("00000000-0000-0000-0000-000000030004");
+    public static readonly Guid ScreenId5 = new("00000000-0000-0000-0000-000000030005");
 
     public static readonly Guid ShowTimeId1 = new("00000000-0000-0000-0000-000000040001");
     public static readonly Guid ShowTimeId2 = new("00000000-0000-0000-0000-000000040002");
     public static readonly Guid ShowTimeId3 = new("00000000-0000-0000-0000-000000040003");
+    public static readonly Guid ShowTimeId4= new("00000000-0000-0000-0000-000000040004");
+    public static readonly Guid ShowTimeId5= new("00000000-0000-0000-0000-000000040005");
+
 
     public static readonly Guid TicketId1 = new("00000000-0000-0000-0000-000000050001");
 
@@ -199,8 +204,30 @@ public class DataSeeder(
 
     private static List<Screen> SeedScreens(List<Cinema> cinemas)
     {
-        var standardSeatMap = "[[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[3,0,0,3,0,3,0,0]]";
-        var compactSeatMap = "[[1,1,0,2,2,1,0],[1,1,0,2,2,1,0],[1,1,0,2,2,1,0],[3,0,0,3,0,3,0]]";
+        // SeatMap encoding: 0=aisle, 1=Regular, 2=VIP, 3=SweetBox, 4=SweetBox couple gap spacer.
+        // Row 5 of standard: Sweet3 | aisle | aisle | Sweet2 | [gap] | Sweet1 | aisle | aisle
+        var standardSeatMap = "[[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[1,1,0,2,2,2,1,0],[4,3,0,4,3,4,3,0]]";
+        // Row 4 of compact: Sweet3 | Sweet2 | Sweet1 | aisle
+        var compactSeatMap = "[[1,1,0,2,2,1,0],[1,1,0,2,2,1,0],[1,1,0,2,2,1,0],[4,3,0,3,4,3,0]]";
+
+        var mediumSeatMap =
+         "[[0,1,1,1,1,1,1,1,1,1,1,0],"
+         +"[0,1,1,2,2,2,2,2,2,1,1,0],"
+         +"[0,1,1,2,2,2,2,2,2,1,1,0],"
+         +"[0,1,1,2,2,2,2,2,2,1,1,0],"
+         +"[0,4,3,4,3,4,3,4,3,4,3,0]]";
+
+        var largestSeatMap =
+            "[[1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1],"
+            + "[1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1],"
+            + "[1,1,1,1,0,2,2,2,2,2,2,2,2,0,1,1,1,1],"
+            + "[1,1,1,1,0,2,2,2,2,2,2,2,2,0,1,1,1,1],"
+            + "[1,1,1,1,0,2,2,2,2,2,2,2,2,0,1,1,1,1],"
+            + "[1,1,1,1,0,2,2,2,2,2,2,2,2,0,1,1,1,1],"
+            + "[1,1,1,1,0,2,2,2,2,2,2,2,2,0,1,1,1,1],"
+            + "[1,1,1,1,0,4,3,4,3,4,3,4,3,0,1,1,1,1],"
+            + "[4,3,4,3,0,4,3,4,3,4,3,4,3,0,4,3,4,3]]";
+
 
         var screen1 = CreateScreen(cinemas[0].Id, "ND-S1", standardSeatMap, ScreenType.TwoD);
         screen1.Id = ScreenId1;
@@ -211,7 +238,13 @@ public class DataSeeder(
         var screen3 = CreateScreen(cinemas[1].Id, "BQK-IMAX-1", standardSeatMap, ScreenType.IMAX);
         screen3.Id = ScreenId3;
 
-        return [screen1, screen2, screen3];
+        var screen4 = CreateScreen(cinemas[1].Id, "BQK-IMAX-2", mediumSeatMap, ScreenType.IMAX);
+        screen4.Id = ScreenId4;
+
+        var screen5 = CreateScreen(cinemas[1].Id, "BQK-IMAX-3", largestSeatMap, ScreenType.IMAX);
+        screen5.Id = ScreenId5;
+
+        return [screen1, screen2, screen3, screen4, screen5];
     }
 
     private static Screen CreateScreen(Guid cinemaId, string code, string seatMap, ScreenType type)
@@ -284,7 +317,29 @@ public class DataSeeder(
             ticket.ShowTimeId = ShowTimeId3;
         }
 
-        return [showTime1, showTime2, showTime3];
+        var showTime4 = ShowTime.Create(
+            movie: movies[0],
+            screen: screens[3],
+            startAt: now.AddDays(1).AddHours(6),
+            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == screens[3].Type).ToList());
+        showTime4.Id = ShowTimeId4;
+        foreach (var ticket in showTime4.Tickets)
+        {
+            ticket.ShowTimeId = ShowTimeId4;
+        }
+
+        var showTime5 = ShowTime.Create(
+            movie: movies[1],
+            screen: screens[4],
+            startAt: now.AddDays(1).AddHours(9),
+            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == screens[4].Type).ToList());
+        showTime5.Id = ShowTimeId5; 
+        foreach (var ticket in showTime5.Tickets)
+        {
+            ticket.ShowTimeId = ShowTimeId5;
+        }
+
+        return [showTime1, showTime2, showTime3, showTime4, showTime5];
     }
 
     private static List<Customer> SeedCustomers()

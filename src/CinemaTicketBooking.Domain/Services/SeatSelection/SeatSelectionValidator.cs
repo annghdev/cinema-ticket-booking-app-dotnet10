@@ -199,12 +199,15 @@ public sealed class SeatSelectionValidator
         var seatArray = ParseSeatMapArray(seatMap);
         var result = new Dictionary<int, IReadOnlyList<int>>();
         // 1. Translate seat map matrix into aisle column indexes per row (1-based).
+        //    Only value 0 (true aisle/stair) is treated as a segment boundary.
+        //    Value 4 (SweetBox couple gap spacer) is intentionally skipped so that
+        //    the two halves of a couple seat remain in the same aisle segment.
         for (var row = 0; row < seatArray.GetLength(0); row++)
         {
             var aisles = new List<int>();
             for (var col = 0; col < seatArray.GetLength(1); col++)
             {
-                if (seatArray[row, col] == 0)
+                if (seatArray[row, col] == SeatMapCellValue.Aisle)
                 {
                     aisles.Add(col + 1);
                 }

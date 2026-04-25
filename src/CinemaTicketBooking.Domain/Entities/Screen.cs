@@ -5,26 +5,31 @@ namespace CinemaTicketBooking.Domain;
 /// Each Screen has a seat layout (SeatMap) and can host ShowTimes.
 ///
 /// Seat Map Encoding (integer grid):
-///   0 = Stair/Aisle (not a seat)
+///   0 = Aisle (walking corridor — treated as segment boundary by the validator)
 ///   1 = Regular seat
 ///   2 = VIP seat
 ///   3 = SweetBox seat
+///   4 = SweetBox couple gap spacer (visual only — NOT a seat, NOT an aisle boundary)
+///
+/// The value 4 marks the display-only gap between the two cells of a SweetBox couple
+/// seat. It is skipped during seat generation and is invisible to the aisle-split logic,
+/// so Sweet1+Sweet2 are correctly treated as neighbours.
 ///
 /// Example — physical layout:
 ///       ----------Screen---------
 ///                                    ←---door
-/// A6, A5, stair, A4, A3, A2, A1, stair
-/// B6, B5, stair, B4, B3, B2, B1, stair
-/// C6, C5, stair, C4, C3, C2, C1, stair
-/// D6, D5, stair, D4, D3, D2, D1, stair
-/// Sweet3, stair, Sweet2, Sweet1, stair
+/// A6, A5, aisle, A4, A3, A2, A1, aisle
+/// B6, B5, aisle, B4, B3, B2, B1, aisle
+/// C6, C5, aisle, C4, C3, C2, C1, aisle
+/// D6, D5, aisle, D4, D3, D2, D1, aisle
+/// Sweet3, aisle, aisle, Sweet2, [gap], Sweet1, aisle, aisle
 ///
 /// Equivalent SeatMap (JSON or plain text):
 /// [[1,1,0,2,2,2,1,0],
 ///  [1,1,0,2,2,2,1,0],
 ///  [1,1,0,2,2,2,1,0],
 ///  [1,1,0,2,2,2,1,0],
-///  [3,0,0,3,0,3,0,0]]
+///  [4,3,0,4,3,4,3,0]]
 /// </summary>
 public class Screen : AggregateRoot
 {
@@ -191,9 +196,11 @@ public class Screen : AggregateRoot
         // 1. Parse the seat map string into a 2D integer array
         var seatArray = ParseSeatMap(seatMap);
 
-        // 2. Validate all cell values and stair column consistency
+        // 2. Validate all cell values and aisle column consistency
         ValidateSeatMap(seatArray);
         var seats = new List<Seat>();
+        
+        int sweetBoxCounter = 1;
         
         for(int i = 0; i < seatArray.GetLength(0); i++)
         {
@@ -202,31 +209,35 @@ public class Screen : AggregateRoot
             // 3. Generate seats from right to left (j = last column → 0)
             for(int j = seatArray.GetLength(1) - 1; j >= 0; j--)
             {
-                // Skip stair/aisle positions (value = 0)
-                if (seatArray[i, j] != 0)
-                {
-                    string seatCode;
-                    if (seatArray[i, j] == 3) // SweetBox uses "Sweet{N}" naming
-                    {
-                        seatCode = $"Sweet{seatNumber}";
-                    }
-                    else // Regular & VIP use "{RowLetter}{N}" naming (A1, B3, etc.)
-                    {
-                        seatCode = $"{(char)('A' + i)}{seatNumber}";
-                    }
+                var cellValue = seatArray[i, j];
 
-                    seats.Add(new Seat
-                    {
-                        Id = Guid.CreateVersion7(),
-                        Code = seatCode,
-                        Row = i + 1,
-                        Column = j + 1,
-                        IsAvailable = true,
-                        Type = (SeatType)seatArray[i, j]
-                    });
-                    
-                    seatNumber++;
+                // Skip aisle/aisle (0) and SweetBox couple gap spacer (4) — neither is a seat.
+                if (cellValue == SeatMapCellValue.Aisle || cellValue == SeatMapCellValue.SweetBoxGap)
+                {
+                    continue;
                 }
+
+                string seatCode;
+                if (cellValue == SeatMapCellValue.SweetBox) // SweetBox uses "Sweet{N}" naming globally across the screen
+                {
+                    seatCode = $"Sweet{sweetBoxCounter++}";
+                }
+                else // Regular & VIP use "{RowLetter}{N}" naming (A1, B3, etc.) per row
+                {
+                    seatCode = $"{(char)('A' + i)}{seatNumber}";
+                }
+
+                seats.Add(new Seat
+                {
+                    Id = Guid.CreateVersion7(),
+                    Code = seatCode,
+                    Row = i + 1,
+                    Column = j + 1,
+                    IsAvailable = true,
+                    Type = (SeatType)cellValue
+                });
+
+                seatNumber++;
             }
         }
         Seats = seats;
@@ -306,7 +317,7 @@ public class Screen : AggregateRoot
     }
 
     // =============================================================
-    // Validation: seat type range and stair column consistency
+    // Validation: seat type range and aisle column consistency
     // =============================================================
 
     /// <summary>
@@ -318,31 +329,32 @@ public class Screen : AggregateRoot
         {
             for (int j = 0; j < seatArray.GetLength(1); j++)
             {
-                if (seatArray[i, j] < 0 || seatArray[i, j] > 3)
+                // Valid values: 0 (aisle), 1-3 (seat types), 4 (SweetBox couple gap spacer).
+                if (seatArray[i, j] < 0 || seatArray[i, j] > SeatMapCellValue.SweetBoxGap)
                 {
-                    throw new FormatException($"Invalid seat type at row {i + 1}, column {j + 1}");
+                    throw new FormatException($"Invalid seat map value {seatArray[i, j]} at row {i + 1}, column {j + 1}.");
                 }
             }
         }
-        ValidateStairsInSeatMap(seatArray);
+        ValidateaislesInSeatMap(seatArray);
     }
 
     /// <summary>
-    /// Validates that stair columns (value = 0 in the first row) are consistent
-    /// across all rows. A stair must span the entire column.
+    /// Validates that true aisle columns (value = 0 in the first row) remain 0
+    /// across all rows. SweetBox gap spacers (value = 4) are row-local and are exempt.
     /// </summary>
-    private void ValidateStairsInSeatMap(int[,] seatArray)
+    private void ValidateaislesInSeatMap(int[,] seatArray)
     {
         for (int i = 0; i < seatArray.GetLength(1); i++)
         {
-            // If the first row has a stair in this column, all rows must also have a stair
-            if (seatArray[0,i] == 0)
+            // If the first row has a true aisle in this column, all rows must also have a true aisle.
+            if (seatArray[0, i] == 0)
             {
                 for (int j = 0; j < seatArray.GetLength(0); j++)
                 {
                     if (seatArray[j, i] != 0)
                     {
-                        throw new FormatException($"Stair must be in the same column at row {j + 1}, column {i + 1}");
+                        throw new FormatException($"Aisle column {i + 1} must be 0 in all rows, but row {j + 1} has value {seatArray[j, i]}.");
                     }
                 }
             }
