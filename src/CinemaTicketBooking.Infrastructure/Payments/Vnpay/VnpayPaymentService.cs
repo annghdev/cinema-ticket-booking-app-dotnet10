@@ -13,12 +13,7 @@ public sealed class VnpayPaymentService(IOptions<VnpayOptions> options) : IPayme
 {
     private readonly VnpayOptions _options = options.Value;
     private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-    private const string GatewayIcon = """
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VNPay">
-          <rect width="64" height="64" rx="14" fill="#F8FAFC"/>
-          <path d="M10 22h10l6 20h-8l-8-20Zm14 0h8l3 10 3-10h8l-7 20h-8l-7-20Zm24 0h6v20h-6V22Z" fill="#0F4C81"/>
-        </svg>
-        """;
+    private const string GatewayIcon = "/assets/vnpay-logo.png";
 
     public PaymentMethod Method => PaymentMethod.VnPay;
     public PaymentRedirectBehavior RedirectBehavior => PaymentRedirectBehavior.Redirect;
@@ -43,7 +38,7 @@ public sealed class VnpayPaymentService(IOptions<VnpayOptions> options) : IPayme
         }
 
         // 2. Build VNPay parameters.
-        var txnRef = BuildTxnRef(request.BookingId);
+        var txnRef = BuildTxnRef(request.PaymentTransactionId);
         var now = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, VietnamTimeZone);
         var expireAt = now.AddMinutes(Math.Max(_options.ExpireMinutes, 1));
         var amount = Convert.ToInt64(decimal.Round(request.Amount * 100m, 0, MidpointRounding.AwayFromZero));
@@ -62,6 +57,7 @@ public sealed class VnpayPaymentService(IOptions<VnpayOptions> options) : IPayme
             ["vnp_OrderInfo"] = request.OrderDescription,
             ["vnp_OrderType"] = _options.OrderType,
             ["vnp_ReturnUrl"] = request.ReturnUrl,
+            //["vnp_ReturnUrl"] = _options.FrontendResultUrl,
             ["vnp_TxnRef"] = txnRef
         };
 
@@ -143,8 +139,8 @@ public sealed class VnpayPaymentService(IOptions<VnpayOptions> options) : IPayme
             GatewayTransactionId: txnRef));
     }
 
-    private static string BuildTxnRef(Guid bookingId)
+    private static string BuildTxnRef(Guid paymentTransactionId)
     {
-        return bookingId.ToString("N", CultureInfo.InvariantCulture).ToUpperInvariant();
+        return $"TXN-{paymentTransactionId.ToString("N", CultureInfo.InvariantCulture).ToUpperInvariant()}";
     }
 }

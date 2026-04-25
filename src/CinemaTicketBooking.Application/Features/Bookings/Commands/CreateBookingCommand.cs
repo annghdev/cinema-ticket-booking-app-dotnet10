@@ -31,7 +31,8 @@ public class CreateBookingHandler(
     IUnitOfWork uow,
     ITicketLocker locker,
     IOptions<TicketLockingOptions> options,
-    IPaymentServiceFactory paymentServiceFactory)
+    IPaymentServiceFactory paymentServiceFactory,
+    IUserContext userContext)
 {
     /// <summary>
     /// Re-validates selection, creates booking, initiates payment, and persists everything atomically.
@@ -60,8 +61,23 @@ public class CreateBookingHandler(
         }
 
         // 3. Resolve customer context used by Booking.AddTicket lock ownership check.
-        // Must be tracked: GetQueryFilter() is AsNoTracking; a detached existing Customer is re-inserted and violates PK.
-        var customer = await uow.Customers.GetTrackedBySessionIdAsync(command.CustomerSessionId, ct);
+        // Priority: 1. Authenticated customer, 2. Guest by session id, 3. Create new guest.
+        Customer? customer = null;
+        if (userContext.IsAuthenticated && userContext.CustomerId.HasValue)
+        {
+            customer = await uow.Customers.GetByIdAsync(userContext.CustomerId.Value, ct);
+            // Ensure the registered customer's current session is updated to match the checkout session.
+            // This allows the Domain model (Booking.AddTicket) to validate ticket ownership.
+            if (customer != null && !string.IsNullOrWhiteSpace(command.CustomerSessionId) && customer.SessionId != command.CustomerSessionId)
+            {
+                customer.SessionId = command.CustomerSessionId;
+            }
+        }
+
+        customer ??= string.IsNullOrWhiteSpace(command.CustomerSessionId)
+            ? null
+            : await uow.Customers.GetTrackedBySessionIdAsync(command.CustomerSessionId, ct);
+
         customer ??= BuildGuestCustomer(command);
 
         var booking = Booking.Create(
@@ -117,8 +133,11 @@ public class CreateBookingHandler(
         var method = Enum.Parse<PaymentMethod>(command.PaymentMethod, ignoreCase: true);
         var paymentService = paymentServiceFactory.GetService(method);
 
+        var transactionId = Guid.CreateVersion7();
+
         var paymentResult = await paymentService.CreatePaymentAsync(new CreatePaymentRequest(
             BookingId: booking.Id,
+            PaymentTransactionId: transactionId,
             Amount: booking.FinalAmount,
             OrderDescription: $"Booking {booking.Id}",
             CustomerEmail: command.CustomerEmail,
@@ -132,7 +151,7 @@ public class CreateBookingHandler(
         // 7. Build PaymentTransaction record.
         var transaction = new PaymentTransaction
         {
-            Id = Guid.CreateVersion7(),
+            Id = transactionId,
             BookingId = booking.Id,
             Method = method,
             GatewayTransactionId = paymentResult.GatewayTransactionId,

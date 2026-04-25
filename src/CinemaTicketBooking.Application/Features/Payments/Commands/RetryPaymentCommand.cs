@@ -96,11 +96,14 @@ public class RetryPaymentHandler(
         var method = Enum.Parse<PaymentMethod>(command.PaymentMethod, ignoreCase: true);
         var paymentService = paymentServiceFactory.GetService(method);
 
+        var transactionId = Guid.CreateVersion7();
+
         var paymentResult = await paymentService.CreatePaymentAsync(
             new CreatePaymentRequest(
                 BookingId: booking.Id,
+                PaymentTransactionId: transactionId,
                 Amount: booking.FinalAmount,
-                OrderDescription: $"Booking {booking.Id} (retry)",
+                OrderDescription: $"Booking {booking.Id}",
                 CustomerEmail: booking.Email,
                 ReturnUrl: command.ReturnUrl,
                 IpAddress: command.IpAddress),
@@ -115,7 +118,7 @@ public class RetryPaymentHandler(
         // 5. Persist the new payment transaction.
         var transaction = new PaymentTransaction
         {
-            Id = Guid.CreateVersion7(),
+            Id = transactionId,
             BookingId = booking.Id,
             Method = method,
             GatewayTransactionId = paymentResult.GatewayTransactionId,

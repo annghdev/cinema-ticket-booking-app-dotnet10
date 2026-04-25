@@ -20,11 +20,8 @@ public sealed class NoPaymentGatewayService : IPaymentService
     /// </summary>
     private const string SecretKey = "FAKE-GATEWAY-DEV-SECRET-KEY-DO-NOT-USE-IN-PRODUCTION";
     private const string GatewayIcon = """
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cash">
-          <rect x="6" y="14" width="52" height="36" rx="7" fill="#0F172A"/>
-          <rect x="10" y="18" width="44" height="28" rx="5" fill="#1E293B"/>
-          <circle cx="32" cy="32" r="8" fill="#22D3EE"/>
-          <path d="M28 32h8M32 28v8" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#10b981" d="M11.5 1L2 6v2h19V6l-9.5-5zM2 20v2h19v-2H2zm2-11v10h3V9H4zm5 0v10h3V9H9zm5 0v10h3V9h-3zm5 0v10h3V9h-3z"/>
         </svg>
         """;
 

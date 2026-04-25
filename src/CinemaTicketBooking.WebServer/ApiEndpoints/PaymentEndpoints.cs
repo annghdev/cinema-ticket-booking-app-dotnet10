@@ -18,6 +18,12 @@ public static class PaymentEndpoints
         var group = app.MapGroup("/api/payments")
             .WithTags("Payments");
 
+        group.MapGet("/vnpay-return", VnpayReturn)
+            .AllowAnonymous();
+
+        group.MapGet("/momo-return", MomoReturn)
+            .AllowAnonymous();
+
         group.MapPost("/momo-ipn", MomoIpn)
             .AllowAnonymous();
 
@@ -27,14 +33,112 @@ public static class PaymentEndpoints
         group.MapGet("/vnpay-ipn", VnpayIpn)
             .AllowAnonymous();
 
-        group.MapGet("/vnpay-return", VnpayReturn)
-            .AllowAnonymous();
-
         group.MapGet("/result", GetPaymentResult)
             .AllowAnonymous();
 
         group.MapGet("/gateways", GetAvailableGateways)
             .AllowAnonymous();
+    }
+
+    /// <summary>
+    /// VNPay return URL: browser is redirected here after payment.
+    /// Resolves the authoritative payment status via the transaction record,
+    /// then issues a normalized redirect to the frontend result page.
+    /// Frontend contract: ?status=success|pending|failed &amp;bookingId=...&amp;txnRef=...
+    /// </summary>
+    public static async Task<IResult> VnpayReturn(
+        HttpRequest request,
+        IConfiguration configuration,
+        IUnitOfWork uow)
+    {
+        var frontendOrigin = configuration["FrontendOrigin"] ?? request.Scheme + "://" + request.Host;
+
+        // 1. Extract VNPay transaction reference.
+        var txnRef = request.Query["vnp_TxnRef"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(txnRef))
+        {
+            return BuildFailedRedirect(frontendOrigin, txnRef: null, bookingId: null, "Ma giao dich khong hop le.");
+        }
+
+        // 2. Look up payment transaction by gateway txnRef.
+        var transaction = await uow.PaymentTransactions.GetByGatewayTransactionIdAsync(txnRef, default);
+        if (transaction is null)
+        {
+            return BuildFailedRedirect(frontendOrigin, txnRef, bookingId: null, "Giao dich khong ton tai.");
+        }
+
+        // 3. Build normalized redirect based on authoritative DB status (written by IPN handler).
+        return BuildGatewayRedirect(frontendOrigin, transaction, txnRef);
+    }
+
+    /// <summary>
+    /// MoMo return URL: browser is redirected here after payment.
+    /// Resolves the authoritative payment status via the transaction record,
+    /// then issues a normalized redirect to the frontend result page.
+    /// Frontend contract: ?status=success|pending|failed &amp;bookingId=...&amp;txnRef=...
+    /// </summary>
+    public static async Task<IResult> MomoReturn(
+        HttpRequest request,
+        IConfiguration configuration,
+        IUnitOfWork uow)
+    {
+        var frontendOrigin = configuration["FrontendOrigin"] ?? request.Scheme + "://" + request.Host;
+
+        // 1. Extract MoMo orderId (acts as the transaction reference).
+        var txnRef = request.Query["orderId"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(txnRef))
+        {
+            return BuildFailedRedirect(frontendOrigin, txnRef: null, bookingId: null, "Ma don hang khong hop le.");
+        }
+
+        // 2. Look up payment transaction.
+        var transaction = await uow.PaymentTransactions.GetByGatewayTransactionIdAsync(txnRef, default);
+        if (transaction is null)
+        {
+            return BuildFailedRedirect(frontendOrigin, txnRef, bookingId: null, "Giao dich khong ton tai.");
+        }
+
+        // 3. Build normalized redirect.
+        return BuildGatewayRedirect(frontendOrigin, transaction, txnRef);
+    }
+
+    // =============================================
+    // Shared redirect helpers
+    // =============================================
+
+    /// <summary>
+    /// Builds a normalized frontend redirect from the transaction's persisted status.
+    /// </summary>
+    private static IResult BuildGatewayRedirect(string frontendOrigin, PaymentTransaction transaction, string txnRef)
+    {
+        var bookingId = transaction.BookingId.ToString();
+
+        return transaction.Status switch
+        {
+            PaymentTransactionStatus.Success =>
+                Results.Redirect(
+                    $"{frontendOrigin}/payment-result?status=success&bookingId={bookingId}&txnRef={Uri.EscapeDataString(txnRef)}"),
+
+            PaymentTransactionStatus.Pending =>
+                // IPN may still be in-flight; frontend will poll /api/payments/result.
+                Results.Redirect(
+                    $"{frontendOrigin}/payment-result?status=pending&bookingId={bookingId}&txnRef={Uri.EscapeDataString(txnRef)}"),
+
+            _ =>
+                BuildFailedRedirect(frontendOrigin, txnRef, bookingId, "Thanh toan khong thanh cong hoac da bi tu choi."),
+        };
+    }
+
+    /// <summary>
+    /// Builds a normalized failure redirect URL.
+    /// </summary>
+    private static IResult BuildFailedRedirect(
+        string frontendOrigin, string? txnRef, string? bookingId, string message)
+    {
+        var qs = $"status=failed&message={Uri.EscapeDataString(message)}";
+        if (!string.IsNullOrWhiteSpace(txnRef)) qs += $"&txnRef={Uri.EscapeDataString(txnRef)}";
+        if (!string.IsNullOrWhiteSpace(bookingId)) qs += $"&bookingId={bookingId}";
+        return Results.Redirect($"{frontendOrigin}/payment-result?{qs}");
     }
 
     public static async Task<IResult> FakeCallback(
@@ -196,56 +300,6 @@ public static class PaymentEndpoints
         }
     }
 
-    public static async Task<IResult> VnpayReturn(
-        HttpRequest request,
-        IMessageBus bus,
-        IUnitOfWork uow,
-        IOptions<VnpayOptions> options)
-    {
-        var gatewayParams = request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
-        var txnRef = gatewayParams.TryGetValue("vnp_TxnRef", out var value) ? value : string.Empty;
-        var transaction = string.IsNullOrWhiteSpace(txnRef)
-            ? null
-            : await uow.PaymentTransactions.GetByGatewayTransactionIdAsync(txnRef, default);
-
-        VerifyPaymentResponse? verifyResponse = null;
-        if (transaction is not null && transaction.Status == PaymentTransactionStatus.Pending)
-        {
-            try
-            {
-                verifyResponse = await bus.InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
-                {
-                    BookingId = transaction.BookingId,
-                    GatewayTransactionId = txnRef,
-                    PaymentMethod = PaymentMethod.VnPay.ToString(),
-                    GatewayResponseParams = gatewayParams
-                });
-            }
-            catch
-            {
-                // Ignore verification failure here; frontend will query backend result endpoint.
-            }
-        }
-
-        var responseCode = gatewayParams.TryGetValue("vnp_ResponseCode", out var code) ? code : string.Empty;
-        var transactionStatus = gatewayParams.TryGetValue("vnp_TransactionStatus", out var statusCode) ? statusCode : string.Empty;
-        var isSuccess = verifyResponse?.IsSuccess
-                        ?? (responseCode == "00" && (string.IsNullOrWhiteSpace(transactionStatus) || transactionStatus == "00"));
-
-        var frontendUrl = string.IsNullOrWhiteSpace(options.Value.FrontendResultUrl)
-            ? "http://localhost:3000/payment-result"
-            : options.Value.FrontendResultUrl;
-        var redirectUrl = QueryHelpers.AddQueryString(frontendUrl, new Dictionary<string, string?>
-        {
-            ["status"] = isSuccess ? "success" : "failed",
-            ["bookingId"] = transaction?.BookingId.ToString(),
-            ["txnRef"] = txnRef,
-            ["responseCode"] = responseCode
-        });
-
-        return Results.Redirect(redirectUrl);
-    }
-
     public static async Task<IResult> GetPaymentResult(
         [FromQuery] Guid? bookingId,
         [FromQuery] string txnRef,
@@ -333,6 +387,7 @@ public static class PaymentEndpoints
         return new BookingDetailsDto
         {
             BookingId = booking.Id,
+            ShowTimeId = booking.ShowTimeId,
             ShowTimeInfo = new ShowTimeInfo(
                 booking.ShowTime!.Screen!.Code,
                 booking.ShowTime.Movie!.Name,
@@ -345,6 +400,7 @@ public static class PaymentEndpoints
             CreatedAt = booking.CreatedAt,
             Status = booking.Status,
             Tickets = booking.Tickets.Select(t => new TicketInfo(t.Ticket!.SeatCode, t.Ticket.Price)).ToList(),
+            TicketIds = booking.Tickets.Select(t => t.TicketId).ToList(),
             Concessions = booking.Concessions.Select(c => new ConcessionInfo(
                 c.Concession!.Name,
                 c.Concession.ImageUrl,

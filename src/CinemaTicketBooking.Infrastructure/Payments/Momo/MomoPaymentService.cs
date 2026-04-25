@@ -16,16 +16,11 @@ public sealed class MomoPaymentService(
     IHttpClientFactory httpClientFactory) : IPaymentService
 {
     private readonly MomoOptions _options = options.Value;
-    private const string GatewayIcon = """
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MoMo">
-          <rect width="64" height="64" rx="14" fill="#A50064"/>
-          <path d="M14 42V22h6l6 8 6-8h6v20h-6V32l-6 8-6-8v10h-6Zm30 0V22h6v20h-6Z" fill="#fff"/>
-        </svg>
-        """;
+    private const string GatewayIcon = "/assets/momo-logo.png";
 
     public PaymentMethod Method => PaymentMethod.Momo;
     //public PaymentRedirectBehavior RedirectBehavior => PaymentRedirectBehavior.Redirect;
-    public PaymentRedirectBehavior RedirectBehavior => PaymentRedirectBehavior.QrCode;
+    public PaymentRedirectBehavior RedirectBehavior => PaymentRedirectBehavior.Redirect;
     public string Icon => GatewayIcon;
 
     /// <summary>
@@ -46,7 +41,7 @@ public sealed class MomoPaymentService(
         }
 
         // 1. Build request payload.
-        var orderId = BuildOrderId(request.BookingId);
+        var orderId = BuildOrderId(request.PaymentTransactionId);
         var requestId = $"MOMO-{Guid.CreateVersion7():N}";
         var amount = Convert.ToInt64(decimal.Round(request.Amount, 0, MidpointRounding.AwayFromZero))
             .ToString(CultureInfo.InvariantCulture);
@@ -256,9 +251,9 @@ public sealed class MomoPaymentService(
                && !string.IsNullOrWhiteSpace(_options.CreateEndpoint);
     }
 
-    private static string BuildOrderId(Guid bookingId)
+    private static string BuildOrderId(Guid paymentTransactionId)
     {
-        return $"BOOKING-{bookingId:N}".ToUpperInvariant();
+        return $"TXN-{paymentTransactionId:N}".ToUpperInvariant();
     }
 
     private string? BuildPublicUrl(string path)

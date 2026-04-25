@@ -7,6 +7,7 @@ namespace CinemaTicketBooking.Application.Features;
 /// </summary>
 public sealed record CreatePaymentRequest(
     Guid BookingId,
+    Guid PaymentTransactionId,
     decimal Amount,
     string OrderDescription,
     string CustomerEmail,
