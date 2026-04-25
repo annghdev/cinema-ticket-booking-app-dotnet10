@@ -95,6 +95,7 @@ export async function cancelBooking(bookingId: string): Promise<void> {
 
 export type BookingDetailsDto = {
   bookingId: string
+  showTimeId: string
   showTimeInfo: { screen: string; movie: string; startAt: string; endAt: string }
   originalAmount: number
   discountAmount: number
@@ -103,11 +104,14 @@ export type BookingDetailsDto = {
   status: number | string
   createdAt: string
   tickets: { seatCode: string; price: number }[]
+  ticketIds: string[]
   concessions: { name: string; imageUrl: string; price: number; quantity: number; amount: number }[]
 }
 
-export async function getBookingById(bookingId: string): Promise<BookingDetailsDto> {
-  const response = await httpClient.get<BookingDetailsDto>(`/api/bookings/${bookingId}`)
+export async function getBookingById(bookingId: string, customerSessionId?: string): Promise<BookingDetailsDto> {
+  const response = await httpClient.get<BookingDetailsDto>(`/api/bookings/${bookingId}`, {
+    params: { customerSessionId },
+  })
   return response.data
 }
 

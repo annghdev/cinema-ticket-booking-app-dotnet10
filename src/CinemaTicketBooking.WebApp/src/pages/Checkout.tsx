@@ -10,6 +10,7 @@ import { getAvailableGateways, getFakePaymentSuccess, isRedirectBehavior, type P
 import { getShowTimeById } from "../apis/showtimeApi"
 import { clearCheckoutDraft, loadCheckoutDraft, type CheckoutDraft } from "../lib/checkoutDraft"
 import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
+import { useAuth } from "../contexts/AuthContext"
 import type { ShowTimeDetailDto, ShowTimeTicketDto } from "../types/contracts"
 
 type CheckoutLocationState = {
@@ -35,11 +36,15 @@ function formatDateTimeLabel(dateInput: string) {
   }).format(date)
 }
 
-function svgToDataUrl(svgRaw: string | null | undefined): string | null {
-  if (!svgRaw || !svgRaw.trim()) {
+function resolvePaymentIcon(icon: string | null | undefined): string | null {
+  if (!icon || !icon.trim()) {
     return null
   }
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svgRaw)}`
+  const trimmed = icon.trim()
+  if (trimmed.startsWith("<svg") || trimmed.includes("xmlns=")) {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(trimmed)}`
+  }
+  return trimmed
 }
 
 function parseGatewayIdFromPaymentUrl(paymentUrl: string | null | undefined, fallback: string | null | undefined): string | null {
@@ -73,9 +78,17 @@ function Checkout() {
   const showtimeId = searchParams.get("showtimeId")
   const locState = location.state as CheckoutLocationState | null
 
-  const [customerName, setCustomerName] = useState("")
-  const [customerEmail, setCustomerEmail] = useState("")
-  const [customerPhone, setCustomerPhone] = useState("")
+  const { displayName, email, phoneNumber } = useAuth()
+
+  const [customerName, setCustomerName] = useState(() => displayName ?? "")
+  const [customerEmail, setCustomerEmail] = useState(() => email ?? "")
+  const [customerPhone, setCustomerPhone] = useState(() => phoneNumber ?? "")
+
+  useEffect(() => {
+    if (displayName) setCustomerName((prev) => prev || displayName)
+    if (email) setCustomerEmail((prev) => prev || email)
+    if (phoneNumber && phoneNumber !== "—") setCustomerPhone((prev) => prev || phoneNumber)
+  }, [displayName, email, phoneNumber])
 
   const [showtime, setShowtime] = useState<ShowTimeDetailDto | null>(null)
   const [selectedTicketIds, setSelectedTicketIds] = useState<string[]>([])
@@ -238,9 +251,11 @@ function Checkout() {
     setPostBooking(null)
     try {
       const selectedGateway = selectedPaymentMethod.toLowerCase()
-      const returnUrl = selectedGateway === "vnpay"
-        ? `${resolveApiOrigin()}/api/payments/vnpay-return`
-        : `${window.location.origin}/payment-result`
+      const returnUrl = selectedGateway === "momo"
+        ? `${resolveApiOrigin()}/api/payments/momo-return`
+        : selectedGateway === "vnpay"
+          ? `${resolveApiOrigin()}/api/payments/vnpay-return`
+          : `${window.location.origin}/payment-result`
       const res = await createBooking({
         showTimeId: showtimeId,
         customerSessionId: getOrCreateCustomerSessionId(),
@@ -346,9 +361,11 @@ function Checkout() {
     setSwitchingGateway(true)
     try {
       const selectedGateway = selectedSwitchGateway.toLowerCase()
-      const returnUrl = selectedGateway === "vnpay"
-        ? `${resolveApiOrigin()}/api/payments/vnpay-return`
-        : `${window.location.origin}/payment-result`
+      const returnUrl = selectedGateway === "momo"
+        ? `${resolveApiOrigin()}/api/payments/momo-return`
+        : selectedGateway === "vnpay"
+          ? `${resolveApiOrigin()}/api/payments/vnpay-return`
+          : `${window.location.origin}/payment-result`
       const retry = await retryPayment(postBooking.bookingId, {
         customerSessionId: getOrCreateCustomerSessionId(),
         paymentMethod: selectedSwitchGateway,
@@ -604,22 +621,22 @@ function Checkout() {
           {gateways.length === 0 ? (
             <p className="text-sm text-amber-200/80">Chưa cấu hình phương thức thanh toán.</p>
           ) : (
-            <div className="mb-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="mb-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {gateways.map((g) => {
                 const selected = selectedPaymentMethod === g.method
-                const iconDataUrl = svgToDataUrl(g.icon)
+                const iconDataUrl = resolvePaymentIcon(g.icon)
                 return (
                   <button
                     key={g.method}
                     type="button"
                     onClick={() => setSelectedPaymentMethod(g.method)}
-                    className={`rounded-xl border p-5 text-left transition-colors ${
+                    className={`flex h-16 items-center gap-4 rounded-xl border px-4 transition-all ${
                       selected
-                        ? "border-secondary bg-surface-container-highest shadow-[0_0_0_1px_rgba(0,244,254,0.3)]"
-                        : "border-outline-variant/20 bg-surface-container-highest hover:border-outline-variant/40"
+                        ? "border-secondary bg-secondary/5 shadow-[0_0_15px_rgba(0,244,254,0.15)]"
+                        : "border-outline-variant/10 bg-surface-container-highest hover:border-outline-variant/30 hover:bg-surface-container-highest/80"
                     }`}
                   >
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-white/95 p-1.5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white p-1">
                       {iconDataUrl ? (
                         <img
                           src={iconDataUrl}
@@ -627,11 +644,13 @@ function Checkout() {
                           className="h-full w-full object-contain"
                         />
                       ) : (
-                        <span className="material-symbols-outlined text-2xl text-secondary">account_balance</span>
+                        <span className="material-symbols-outlined text-xl text-secondary">account_balance</span>
                       )}
                     </div>
-                    <h3 className="font-headline text-base font-medium">{g.displayName || g.method}</h3>
-                    <p className="mt-1 text-[10px] uppercase tracking-wider text-on-surface-variant/80">{g.method}</p>
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <h3 className="truncate font-headline text-sm font-semibold">{g.displayName || g.method}</h3>
+                      <p className="truncate text-[9px] uppercase tracking-wider text-on-surface-variant/70">{g.method}</p>
+                    </div>
                   </button>
                 )
               })}
@@ -713,7 +732,11 @@ function Checkout() {
         void onCancelPendingPayment()
       }}
       cancellingPayment={cancellingPayment}
-      switchableGateways={switchableGateways.map((x) => ({ method: x.method, displayName: x.displayName || x.method }))}
+      switchableGateways={switchableGateways.map((x) => ({
+        method: x.method,
+        displayName: x.displayName || x.method,
+        icon: x.icon,
+      }))}
       selectedSwitchGateway={selectedSwitchGateway}
       onSelectSwitchGateway={setSelectedSwitchGateway}
       onSwitchGateway={() => {
