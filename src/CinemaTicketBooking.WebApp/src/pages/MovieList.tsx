@@ -119,8 +119,9 @@ function MovieList() {
     return (
       <main className="min-h-screen bg-background pb-20 pt-24 md:pt-28">
         <div className="mx-auto w-full max-w-screen-2xl px-8 py-16">
-          <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low p-8 text-center text-on-surface-variant">
-            Đang tải danh sách phim...
+          <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low p-12 text-center text-on-surface-variant flex flex-col items-center justify-center gap-4">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-[0_0_15px_rgba(97,180,254,0.3)]"></div>
+            <p className="font-headline font-semibold text-lg text-on-surface">Đang tải danh sách phim...</p>
           </div>
         </div>
       </main>

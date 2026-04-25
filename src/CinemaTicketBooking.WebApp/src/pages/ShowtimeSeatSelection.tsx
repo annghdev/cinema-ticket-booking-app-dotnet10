@@ -592,17 +592,17 @@ function ShowtimeSeatSelection() {
             )}
           </section>
 
-          <aside className="fixed bottom-0 left-0 right-0 z-40 w-full border-t border-outline-variant/20 bg-surface-container-low p-6 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:sticky md:top-[72px] md:bottom-auto md:left-auto md:right-auto md:z-auto md:h-[calc(100vh-72px)] md:w-80 md:shrink-0 md:self-start md:overflow-y-auto md:border-l md:border-t-0 md:shadow-none lg:w-96">
+          <aside className="fixed rounded-md bottom-0 left-0 right-0 z-40 w-full border-t border-outline-variant/20 bg-surface-container-low p-6 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:sticky md:top-[72px] md:bottom-auto md:left-auto md:right-auto md:z-auto md:h-[calc(100vh-72px)] md:w-80 md:shrink-0 md:self-start md:overflow-y-auto md:border-l md:border-t-0 md:shadow-none lg:w-96">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-headline text-xl font-bold">Đã chọn</h2>
-              <span className="border border-outline-variant/20 bg-surface-container-highest px-2 py-1 text-xs text-primary">
+              <span className="border border-outline-variant/20 rounded-sm bg-surface-container-highest px-2 py-1 text-xs text-primary">
                 {selectedTickets.length} Vé
               </span>
             </div>
             <div className="mb-6 max-h-[45vh] space-y-3 overflow-auto pr-1">
               {selectedTickets.length > 0 ? (
                 selectedTickets.map((ticket) => (
-                  <div key={ticket.id} className="rounded-xl border border-outline-variant/20 bg-surface-variant/40 p-4">
+                  <div key={ticket.id} className="rounded-md border border-outline-variant/20 bg-surface-variant/40 p-4">
                     <div className="flex items-center justify-between">
                       <span>{ticket.code}</span>
                       <span className="font-headline text-primary">{formatCurrency(ticket.price)}</span>
@@ -610,7 +610,7 @@ function ShowtimeSeatSelection() {
                   </div>
                 ))
               ) : (
-                <div className="rounded-xl border border-outline-variant/20 bg-surface-variant/20 p-4 text-sm text-on-surface-variant">Chưa chọn ghế nào.</div>
+                <div className="rounded-md border border-outline-variant/20 bg-surface-variant/20 p-4 text-sm text-on-surface-variant">Chưa chọn ghế nào.</div>
               )}
             </div>
             <div className="flex items-end justify-between pb-3">
@@ -648,7 +648,7 @@ function ShowtimeSeatSelection() {
                   warning(err instanceof Error ? err.message : "Không thể xác nhận lựa chọn ghế.")
                 }
               }}
-              className="flex w-full items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container py-4 font-headline font-bold text-on-primary transition-all hover:shadow-[0_0_20px_rgba(0,244,254,0.4)] enabled:hover:brightness-105 enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center rounded-md justify-center gap-2 bg-gradient-to-br from-primary to-primary-container py-4 font-headline font-bold text-on-primary transition-all hover:shadow-[0_0_20px_rgba(0,244,254,0.4)] enabled:hover:brightness-105 enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {checkoutNavigating ? (
                 <>
