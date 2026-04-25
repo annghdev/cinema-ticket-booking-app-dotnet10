@@ -2,16 +2,20 @@ import { isAxiosError } from "axios"
 import type { HubConnection } from "@microsoft/signalr"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom"
-import { cancelBooking, createBooking, retryPayment, type CreateBookingResponse } from "../apis/bookingApi"
-import { getConcessions, type ConcessionDto } from "../apis/concessionApi"
-import { connectPaymentHub, type PaymentConfirmedRealtimeEvent } from "../apis/paymentRealtime"
+import { cancelBooking, createBooking, retryPayment } from "../apis/bookingApi"
+import { getConcessions } from "../apis/concessionApi"
+import { connectPaymentHub } from "../apis/paymentRealtime"
 import { PaymentQRModal } from "../components/PaymentQRModal"
-import { getAvailableGateways, getFakePaymentSuccess, isRedirectBehavior, type PaymentGatewayOptionDto, type VerifyPaymentResponse } from "../apis/paymentApi"
+import { getAvailableGateways, getFakePaymentSuccess } from "../apis/paymentApi"
 import { getShowTimeById } from "../apis/showtimeApi"
 import { clearCheckoutDraft, loadCheckoutDraft, type CheckoutDraft } from "../lib/checkoutDraft"
 import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
 import { useAuth } from "../contexts/AuthContext"
-import type { ShowTimeDetailDto, ShowTimeTicketDto } from "../types/contracts"
+import { useToast } from "../contexts/ToastContext"
+import type { ShowTimeDetailDto, ShowTimeTicketDto } from "../types/ShowTime"
+import type { CreateBookingResponse } from "../types/Booking"
+import type { ConcessionDto } from "../types/Concession"
+import { isRedirectBehavior, type PaymentConfirmedRealtimeEvent, type PaymentGatewayOptionDto, type VerifyPaymentResponse } from "../types/Payment"
 
 type CheckoutLocationState = {
   showtimeId?: string
@@ -74,6 +78,7 @@ function Checkout() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const { success: toastSuccess, error: toastError } = useToast()
 
   const showtimeId = searchParams.get("showtimeId")
   const locState = location.state as CheckoutLocationState | null
@@ -237,11 +242,15 @@ function Checkout() {
       return
     }
     if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
-      setSubmitError("Vui lòng nhập đủ họ tên, email và số điện thoại.")
+      const msg = "Vui lòng nhập đủ họ tên, email và số điện thoại."
+      setSubmitError(msg)
+      toastError(msg)
       return
     }
     if (!selectedPaymentMethod) {
-      setSubmitError("Chưa chọn phương thức thanh toán.")
+      const msg = "Chưa chọn phương thức thanh toán."
+      setSubmitError(msg)
+      toastError(msg)
       return
     }
 
@@ -290,11 +299,14 @@ function Checkout() {
         const msg = d.detail ?? d.title ?? d.message
         if (msg) {
           setSubmitError(String(msg))
+          toastError(String(msg))
         } else {
           setSubmitError("Không thể xử lý thanh toán. Vui lòng thử lại.")
+          toastError("Không thể xử lý thanh toán. Vui lòng thử lại.")
         }
       } else {
         setSubmitError("Không thể xử lý thanh toán. Vui lòng thử lại.")
+        toastError("Không thể xử lý thanh toán. Vui lòng thử lại.")
       }
     } finally {
       setSubmitting(false)
@@ -303,6 +315,7 @@ function Checkout() {
 
   const navigateToSuccess = useCallback((bookingId: string, checkinQrCode?: string | null, gatewayTxnRef?: string | null) => {
     setPaymentModalOpen(false)
+    toastSuccess("Đặt vé thành công!")
     navigate({
       pathname: "/payment-result",
       search: `?status=success&bookingId=${encodeURIComponent(bookingId)}${gatewayTxnRef ? `&txnRef=${encodeURIComponent(gatewayTxnRef)}` : ""}`,

@@ -2,7 +2,8 @@ import { isAxiosError } from "axios"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import QRCode from "qrcode"
-import { getBookingById, type BookingDetailsDto } from "../apis/bookingApi"
+import { getBookingById } from "../apis/bookingApi"
+import { type BookingDetailsDto } from "../types/Booking"
 import { getPaymentResultByTxn } from "../apis/paymentApi"
 import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
 import { downloadCheckinPassPdf, type CheckinTicketPdfInfo, type ConcessionLine } from "../lib/checkinPdf"
@@ -115,7 +116,13 @@ function PaymentResult() {
   const hasQrPayload = Boolean(qrPayload)
 
   // A result is "ok" when backend confirmed success OR we already have QR data from the QR flow.
-  const ok = statusParam === "success" || hasQrPayload
+  const ok =
+    statusParam === "success" ||
+    fetched?.status === "Confirmed" ||
+    fetched?.status === 2 ||
+    fetched?.status === "CheckedIn" ||
+    fetched?.status === 3 ||
+    Boolean(navState?.checkinQrCode)
 
   const movie = navState?.movieName ?? fetched?.showTimeInfo?.movie
   const screen = navState?.screenCode ?? fetched?.showTimeInfo?.screen
@@ -167,7 +174,7 @@ function PaymentResult() {
       // 2. Use txnRef + bookingId to fetch via the anonymous payment result endpoint.
       //    This avoids hitting GetBookingByIdQuery which requires auth/ownership checks.
       const bid = bookingIdParam ?? resolvedBookingId
-      if (txnRef && bid) {
+      if (txnRef) {
         try {
           const result = await getPaymentResultByTxn(bid, txnRef)
           if (cancelled) return
@@ -221,17 +228,25 @@ function PaymentResult() {
 
           if (result.status === "payment_failed") {
             // Navigate away to show failure UI
-            navigate("/payment-result?status=failed&message=" + encodeURIComponent("Thanh toán không thành công."), { replace: true })
+            const bid = resolvedBookingId || result.bookingId || ""
+            navigate(`/payment-result?status=failed&message=${encodeURIComponent("Thanh toán không thành công.")}&bookingId=${bid}&txnRef=${txnRef}`, { replace: true })
             return
           }
 
           await new Promise((r) => setTimeout(r, 1500))
         }
-        if (!cancelled && !resolved) setLoadDetailError(true)
+        if (!cancelled && !resolved) {
+          if (resolvedBookingId) {
+            navigate(`/retry-payment?bookingId=${resolvedBookingId}`, { replace: true })
+          } else {
+            navigate("/showtimes", { replace: true })
+          }
+        }
       } catch (e) {
         if (!cancelled) {
           if (isAxiosError(e) && e.response?.status === 404) {
-            navigate("/payment-result?status=failed&message=" + encodeURIComponent("Không tìm thấy giao dịch."), { replace: true })
+            const bid = resolvedBookingId || ""
+            navigate(`/payment-result?status=failed&message=${encodeURIComponent("Không tìm thấy giao dịch.")}&bookingId=${bid}&txnRef=${txnRef}`, { replace: true })
           } else {
             setLoadDetailError(true)
           }

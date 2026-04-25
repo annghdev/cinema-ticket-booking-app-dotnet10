@@ -1,31 +1,15 @@
 import { httpClient } from "./httpClient"
-import { type PaymentRedirectBehavior } from "./paymentApi"
-
-export type CreateBookingRequest = {
-  showTimeId: string
-  customerSessionId: string
-  customerName: string
-  customerEmail: string
-  customerPhoneNumber: string
-  selectedTicketIds: string[]
-  concessions: { concessionId: string; quantity: number }[]
-  discountAmount: number
-  paymentMethod: string
-  returnUrl: string
-  ipAddress: string
-}
-
-export type CreateBookingResponse = {
-  bookingId: string
-  paymentExpiresAt: string
-  originAmount: number
-  finalAmount: number
-  paymentStatus: string
-  paymentUrl: string | null
-  redirectBehavior: PaymentRedirectBehavior | null
-  paymentTransactionId: string | null
-  gatewayTransactionId: string | null
-}
+import { type PaymentRedirectBehavior } from "../types/Payment"
+import {
+  type CreateBookingRequest,
+  type CreateBookingResponse,
+  type RetryPaymentRequest,
+  type BookingDetailsDto,
+  type BookingHistoryItemDto,
+  type GetBookingHistoryRequest,
+  normalizeResponse,
+} from "../types/Booking"
+import { type PagedResult } from "../types/Common"
 
 type CreateBookingResponseRaw = {
   bookingId: string
@@ -37,20 +21,6 @@ type CreateBookingResponseRaw = {
   redirectBehavior: PaymentRedirectBehavior | null
   paymentTransactionId: string | null
   gatewayTransactionId: string | null
-}
-
-function normalizeResponse(r: CreateBookingResponseRaw): CreateBookingResponse {
-  return {
-    bookingId: r.bookingId,
-    paymentExpiresAt: r.paymentExpiresAt,
-    originAmount: r.originAmount,
-    finalAmount: r.finalAmount,
-    paymentStatus: r.paymentStatus,
-    paymentUrl: r.paymentUrl,
-    redirectBehavior: r.redirectBehavior,
-    paymentTransactionId: r.paymentTransactionId,
-    gatewayTransactionId: r.gatewayTransactionId,
-  }
 }
 
 export async function createBooking(body: CreateBookingRequest): Promise<CreateBookingResponse> {
@@ -70,14 +40,6 @@ export async function createBooking(body: CreateBookingRequest): Promise<CreateB
   return normalizeResponse(response.data)
 }
 
-export type RetryPaymentRequest = {
-  customerSessionId: string
-  paymentMethod: string
-  returnUrl: string
-  ipAddress: string
-  replacePendingPayment?: boolean
-}
-
 export async function retryPayment(bookingId: string, body: RetryPaymentRequest): Promise<CreateBookingResponse> {
   const response = await httpClient.post<CreateBookingResponseRaw>(`/api/bookings/${bookingId}/retry-payment`, {
     customerSessionId: body.customerSessionId,
@@ -93,50 +55,11 @@ export async function cancelBooking(bookingId: string): Promise<void> {
   await httpClient.put(`/api/bookings/${bookingId}/cancel`)
 }
 
-export type BookingDetailsDto = {
-  bookingId: string
-  showTimeId: string
-  showTimeInfo: { screen: string; movie: string; startAt: string; endAt: string }
-  originalAmount: number
-  discountAmount: number
-  finalAmount: number
-  checkinQrCode: string
-  status: number | string
-  createdAt: string
-  tickets: { seatCode: string; price: number }[]
-  ticketIds: string[]
-  concessions: { name: string; imageUrl: string; price: number; quantity: number; amount: number }[]
-}
-
 export async function getBookingById(bookingId: string, customerSessionId?: string): Promise<BookingDetailsDto> {
   const response = await httpClient.get<BookingDetailsDto>(`/api/bookings/${bookingId}`, {
     params: { customerSessionId },
   })
   return response.data
-}
-
-export type BookingHistoryItemDto = {
-  bookingId: string
-  showTimeInfo: { screen: string; movie: string; startAt: string; endAt: string }
-  finalAmount: number
-  createdAt: string
-  status: number | string
-}
-
-export type PagedResult<T> = {
-  items: T[]
-  pageNumber: number
-  pageSize: number
-  totalItems: number
-  totalPages: number
-  hasPreviousPage: boolean
-  hasNextPage: boolean
-}
-
-export type GetBookingHistoryRequest = {
-  pageNumber?: number
-  pageSize?: number
-  date?: string
 }
 
 export async function getBookingHistory(

@@ -1,40 +1,10 @@
-export type ApiMovieStatus = "Upcoming" | "NowShowing" | "NoShow"
-export type ApiMovieGenre =
-  | "Action"
-  | "Comedy"
-  | "Drama"
-  | "Horror"
-  | "SciFi"
-  | "Romance"
-  | "Thriller"
-  | "Animation"
-  | "Documentary"
+import { normalizeEnumValue } from "./Common"
+
 export type ApiShowTimeStatus = "Upcoming" | "Showing" | "Completed" | "Cancelled"
 export type ApiTicketStatus = "Available" | "Locking" | "PendingPayment" | "Sold"
 
-type MovieStatusValue = ApiMovieStatus | number
-type MovieGenreValue = ApiMovieGenre | number
-type ShowTimeStatusValue = ApiShowTimeStatus | number
-type TicketStatusValue = ApiTicketStatus | number
-
-export type MovieDtoRaw = {
-  id: string
-  name: string
-  description: string
-  thumbnailUrl: string
-  studio: string
-  director: string
-  officialTrailerUrl: string | null
-  duration: number
-  genre: MovieGenreValue
-  status: MovieStatusValue
-  createdAt: string
-}
-
-export type MovieDto = Omit<MovieDtoRaw, "genre" | "status"> & {
-  genre: ApiMovieGenre
-  status: ApiMovieStatus
-}
+export type ShowTimeStatusValue = ApiShowTimeStatus | number
+export type TicketStatusValue = ApiTicketStatus | number
 
 export type ShowTimeDtoRaw = {
   id: string
@@ -95,44 +65,18 @@ export type ShowTimeDetailDto = Omit<ShowTimeDetailDtoRaw, "status" | "tickets">
   tickets: ShowTimeTicketDto[]
 }
 
-const movieStatusFromNumber: Record<number, ApiMovieStatus> = {
-  0: "Upcoming",
-  1: "NowShowing",
-  2: "NoShow",
-}
-
-const movieGenreFromNumber: Record<number, ApiMovieGenre> = {
-  0: "Action",
-  1: "Comedy",
-  2: "Drama",
-  3: "Horror",
-  4: "SciFi",
-  5: "Romance",
-  6: "Thriller",
-  7: "Animation",
-  8: "Documentary",
-}
-
-const showTimeStatusFromNumber: Record<number, ApiShowTimeStatus> = {
+export const showTimeStatusFromNumber: Record<number, ApiShowTimeStatus> = {
   0: "Upcoming",
   1: "Showing",
   2: "Completed",
   3: "Cancelled",
 }
 
-const ticketStatusFromNumber: Record<number, ApiTicketStatus> = {
+export const ticketStatusFromNumber: Record<number, ApiTicketStatus> = {
   0: "Available",
   1: "Locking",
   2: "PendingPayment",
   3: "Sold",
-}
-
-function normalizeEnumValue<T extends string>(value: T | number, numberMap: Record<number, T>, fallback: T): T {
-  if (typeof value === "string") {
-    return value
-  }
-
-  return numberMap[value] ?? fallback
 }
 
 function extractSeatCodeFromTicketCode(ticketCode: string): string {
@@ -150,14 +94,6 @@ function extractSeatCodeFromTicketCode(ticketCode: string): string {
 
 export function normalizeTicketStatus(value: TicketStatusValue): ApiTicketStatus {
   return normalizeEnumValue(value, ticketStatusFromNumber, "Available")
-}
-
-export function normalizeMovieDto(raw: MovieDtoRaw): MovieDto {
-  return {
-    ...raw,
-    genre: normalizeEnumValue(raw.genre, movieGenreFromNumber, "Action"),
-    status: normalizeEnumValue(raw.status, movieStatusFromNumber, "Upcoming"),
-  }
 }
 
 export function normalizeShowTimeDto(raw: ShowTimeDtoRaw): ShowTimeDto {
@@ -182,4 +118,23 @@ export function normalizeShowTimeDetailDto(raw: ShowTimeDetailDtoRaw): ShowTimeD
     status: normalizeEnumValue(raw.status, showTimeStatusFromNumber, "Upcoming"),
     tickets: raw.tickets.map(normalizeShowTimeTicketDto),
   }
+}
+
+export type ValidateSeatSelectionRequest = {
+  selectedTicketIds: string[]
+  customerSessionId: string
+}
+
+export type TicketStatusChangedRealtimeEventRaw = {
+  showTimeId: string
+  ticketId: string
+  ticketCode: string
+  status: TicketStatusValue
+  occurredAtUtc: string
+  lockingBy?: string | null
+}
+
+export type TicketStatusChangedRealtimeEvent = Omit<TicketStatusChangedRealtimeEventRaw, "status"> & {
+  status: ApiTicketStatus
+  lockingBy: string | null
 }

@@ -1,19 +1,5 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr"
-import { normalizeTicketStatus, type ApiTicketStatus } from "../types/contracts"
-
-type TicketStatusChangedRealtimeEventRaw = {
-  showTimeId: string
-  ticketId: string
-  ticketCode: string
-  status: ApiTicketStatus | number
-  occurredAtUtc: string
-  lockingBy?: string | null
-}
-
-export type TicketStatusChangedRealtimeEvent = Omit<TicketStatusChangedRealtimeEventRaw, "status"> & {
-  status: ApiTicketStatus
-  lockingBy: string | null
-}
+import { normalizeTicketStatus, type TicketStatusChangedRealtimeEvent, type TicketStatusChangedRealtimeEventRaw } from "../types/ShowTime"
 
 const TICKET_STATUS_CHANGED_EVENT = "ticket-status-changed"
 

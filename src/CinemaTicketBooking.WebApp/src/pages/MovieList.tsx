@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { getUpcomingAndNowShowingMovies } from "../apis/movieApi"
 import { getShowTimes } from "../apis/showtimeApi"
-import type { MovieDto, ShowTimeDto } from "../types/contracts"
+import type { MovieDto } from "../types/Movie"
+import type { ShowTimeDto } from "../types/ShowTime"
 
 type MovieWithShowTimes = {
   movie: MovieDto

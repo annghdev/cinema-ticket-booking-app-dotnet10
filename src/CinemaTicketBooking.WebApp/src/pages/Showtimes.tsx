@@ -1,6 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog"
 import { ShowtimeButton, type ShowtimeSlot } from "../components/ShowtimeButton"
 import { useState } from "react"
+import { useToast } from "../contexts/ToastContext"
 
 type GroupMode = "cinema" | "movie"
 
@@ -164,6 +165,7 @@ const byMovieData: {
 ]
 
 function Showtimes() {
+  const { success } = useToast()
   const [groupMode, setGroupMode] = useState<GroupMode>("cinema")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [timeRange, setTimeRange] = useState("all")
@@ -420,7 +422,11 @@ function Showtimes() {
                 Xóa lọc
               </button>
               <Dialog.Close asChild>
-                <button type="button" className="rounded bg-gradient-to-r from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary">
+                <button
+                  type="button"
+                  onClick={() => success("Đã áp dụng bộ lọc thành công!")}
+                  className="rounded bg-gradient-to-r from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary"
+                >
                   Áp dụng
                 </button>
               </Dialog.Close>

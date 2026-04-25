@@ -2,11 +2,14 @@ import { isAxiosError } from "axios"
 import type { HubConnection } from "@microsoft/signalr"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
-import { retryPayment, getBookingById, cancelBooking, type BookingDetailsDto, type CreateBookingResponse } from "../apis/bookingApi"
-import { connectPaymentHub, type PaymentConfirmedRealtimeEvent } from "../apis/paymentRealtime"
+import { retryPayment, getBookingById, cancelBooking } from "../apis/bookingApi"
+import { connectPaymentHub } from "../apis/paymentRealtime"
 import { PaymentQRModal } from "../components/PaymentQRModal"
-import { getAvailableGateways, getFakePaymentSuccess, isRedirectBehavior, type PaymentGatewayOptionDto, type VerifyPaymentResponse } from "../apis/paymentApi"
+import { getAvailableGateways, getFakePaymentSuccess } from "../apis/paymentApi"
+import { type BookingDetailsDto, type CreateBookingResponse } from "../types/Booking"
+import { isRedirectBehavior, type PaymentConfirmedRealtimeEvent, type PaymentGatewayOptionDto, type VerifyPaymentResponse } from "../types/Payment"
 import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
+import { useToast } from "../contexts/ToastContext"
 
 function resolveApiOrigin(): string {
   const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined
@@ -65,6 +68,7 @@ function formatDateTimeLabel(dateInput: string) {
 export default function RetryPayment() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { success } = useToast()
 
   const bookingId = searchParams.get("bookingId")
 
@@ -210,7 +214,10 @@ export default function RetryPayment() {
     setCancellingBooking(true)
     try {
       await cancelBooking(bookingId)
-      navigate("/showtimes")
+      success("Hủy đặt vé thành công!")
+      setTimeout(() => {
+        navigate("/showtimes")
+      }, 1000)
     } catch (e) {
       if (isAxiosError(e) && e.response?.data) {
         const d = e.response.data as { title?: string; detail?: string; message?: string }
@@ -411,12 +418,12 @@ export default function RetryPayment() {
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white p-1">
                         {iconDataUrl ? (
-                          <img src={iconDataUrl} alt={g.name} className="max-h-full max-w-full object-contain" />
+                          <img src={iconDataUrl} alt={g.displayName || g.method} className="max-h-full max-w-full object-contain" />
                         ) : (
                           <span className="material-symbols-outlined text-gray-400">account_balance_wallet</span>
                         )}
                       </div>
-                      <span className="font-semibold">{g.name}</span>
+                      <span className="font-semibold">{g.displayName || g.method}</span>
                     </button>
                   )
                 })}
@@ -467,7 +474,7 @@ export default function RetryPayment() {
         open={paymentModalOpen}
         onOpenChange={setPaymentModalOpen}
         paymentUrl={postBooking?.paymentUrl ?? null}
-        displayMethod={gateways.find(g => g.method === selectedPaymentMethod)?.name ?? selectedPaymentMethod ?? ""}
+        displayMethod={gateways.find(g => g.method === selectedPaymentMethod)?.displayName ?? selectedPaymentMethod ?? ""}
         paymentExpiresAt={postBooking?.paymentExpiresAt ?? null}
         isNoneOrFake={selectedPaymentMethod?.toLowerCase() === "none"}
         onConfirmNonePayment={onCompleteFakeCallback}
@@ -477,7 +484,7 @@ export default function RetryPayment() {
         cancellingPayment={false}
         switchableGateways={gateways
           .filter((g) => g.method !== selectedPaymentMethod)
-          .map((g) => ({ method: g.method, displayName: g.name, icon: g.icon }))}
+          .map((g) => ({ method: g.method, displayName: g.displayName || g.method, icon: g.icon }))}
         selectedSwitchGateway={selectedSwitchGateway}
         onSelectSwitchGateway={onSelectSwitchGateway}
         onSwitchGateway={handleSwitchGateway}

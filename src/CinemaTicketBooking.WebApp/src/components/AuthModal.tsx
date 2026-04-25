@@ -3,6 +3,7 @@ import { isAxiosError } from "axios"
 import { useEffect, useState } from "react"
 import { forgotPassword, login, register } from "../apis/authApi"
 import { useAuth } from "../contexts/AuthContext"
+import { useToast } from "../contexts/ToastContext"
 import { getOrCreateCustomerSessionId } from "../lib/customerSessionId"
 
 type AuthModalProps = {
@@ -64,6 +65,7 @@ function resolveBackendUrl(path: string): string {
 
 function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const { setAuthFromTokens } = useAuth()
+  const { success: toastSuccess, error: toastError } = useToast()
   const [isSignup, setIsSignup] = useState(false)
   const [isForgotPassword, setIsForgotPassword] = useState(false)
   const [authForm, setAuthForm] = useState<AuthFormValues>(emptyForm)
@@ -96,11 +98,15 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setSubmitSuccess(null)
 
     if (!authForm.email.trim() || !authForm.password.trim()) {
-      setSubmitError("Vui lòng nhập email và mật khẩu.")
+      const msg = "Vui lòng nhập email và mật khẩu."
+      setSubmitError(msg)
+      toastError(msg)
       return
     }
     if (isSignup && (!authForm.name.trim() || !authForm.phoneNumber.trim())) {
-      setSubmitError("Vui lòng nhập đầy đủ họ tên và số điện thoại.")
+      const msg = "Vui lòng nhập đầy đủ họ tên và số điện thoại."
+      setSubmitError(msg)
+      toastError(msg)
       return
     }
 
@@ -123,10 +129,14 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
         displayName: isSignup ? authForm.name.trim() : null,
         email: authForm.email.trim(),
       })
-      setSubmitSuccess(isSignup ? "Đăng ký thành công." : "Đăng nhập thành công.")
+      const msg = isSignup ? "Đăng ký thành công." : "Đăng nhập thành công."
+      setSubmitSuccess(msg)
+      toastSuccess(msg)
       onOpenChange(false)
     } catch (error) {
-      setSubmitError(parseErrorMessage(error) ?? "Không thể xác thực tài khoản. Vui lòng thử lại.")
+      const msg = parseErrorMessage(error) ?? "Không thể xác thực tài khoản. Vui lòng thử lại."
+      setSubmitError(msg)
+      toastError(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -138,16 +148,22 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setSubmitSuccess(null)
 
     if (!forgotEmail.trim()) {
-      setSubmitError("Vui lòng nhập email để nhận liên kết đặt lại mật khẩu.")
+      const msg = "Vui lòng nhập email để nhận liên kết đặt lại mật khẩu."
+      setSubmitError(msg)
+      toastError(msg)
       return
     }
 
     setIsSendingReset(true)
     try {
       await forgotPassword({ email: forgotEmail.trim() })
-      setSubmitSuccess("Đã gửi hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra email.")
+      const msg = "Đã gửi hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra email."
+      setSubmitSuccess(msg)
+      toastSuccess(msg)
     } catch (error) {
-      setSubmitError(parseErrorMessage(error) ?? "Không thể gửi yêu cầu đặt lại mật khẩu.")
+      const msg = parseErrorMessage(error) ?? "Không thể gửi yêu cầu đặt lại mật khẩu."
+      setSubmitError(msg)
+      toastError(msg)
     } finally {
       setIsSendingReset(false)
     }

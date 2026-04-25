@@ -1,37 +1,11 @@
 import { httpClient } from "./httpClient"
-
-export type AuthTokenResponse = {
-  accessToken: string
-  accessTokenExpiresAtUtc: string
-  accountId: string
-  refreshToken: string | null
-}
-
-export type LoginRequest = {
-  email: string
-  password: string
-}
-
-export type RegisterRequest = {
-  email: string
-  password: string
-  name: string
-  phoneNumber: string
-  sessionId?: string | null
-}
-
-export type ForgotPasswordRequest = {
-  email: string
-}
-
-export type AuthProfileResponse = {
-  accountId: string
-  customerId: string | null
-  displayName: string
-  email: string | null
-  avatarUrl: string | null
-  phoneNumber?: string | null
-}
+import {
+  type AuthTokenResponse,
+  type LoginRequest,
+  type RegisterRequest,
+  type ForgotPasswordRequest,
+  type AuthProfileResponse,
+} from "../types/Auth"
 
 export async function login(body: LoginRequest): Promise<AuthTokenResponse> {
   const response = await httpClient.post<AuthTokenResponse>("/api/auth/login", body, {

@@ -18,3 +18,26 @@ httpClient.interceptors.request.use((config) => {
   }
   return config
 })
+
+type GlobalErrorHandler = (msg: string) => void
+let onGlobalError: GlobalErrorHandler | null = null
+
+export function registerGlobalErrorHandler(handler: GlobalErrorHandler) {
+  onGlobalError = handler
+}
+
+httpClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!error.response) {
+      if (onGlobalError) {
+        onGlobalError("Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền.")
+      }
+    } else if (error.response.status >= 500) {
+      if (onGlobalError) {
+        onGlobalError("Lỗi hệ thống. Vui lòng thử lại sau.")
+      }
+    }
+    return Promise.reject(error)
+  }
+)

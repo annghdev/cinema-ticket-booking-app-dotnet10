@@ -1,6 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog"
 import { useEffect, useState } from "react"
 import QRCode from "qrcode"
+import { useToast } from "../contexts/ToastContext"
 
 type SwitchGatewayOption = {
   method: string
@@ -63,6 +64,7 @@ export function PaymentQRModal({
   onSwitchGateway,
   switchingGateway,
 }: PaymentQRModalProps) {
+  const { error: toastError } = useToast()
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
@@ -106,6 +108,12 @@ export function PaymentQRModal({
       setShowCloseConfirm(false)
     }
   }, [open])
+
+  useEffect(() => {
+    if (errorText) {
+      toastError(errorText)
+    }
+  }, [errorText, toastError])
 
   const expiresAtMs = paymentExpiresAt ? new Date(paymentExpiresAt).getTime() : Number.NaN
   const remainingSeconds = Number.isFinite(expiresAtMs) ? Math.floor((expiresAtMs - nowMs) / 1000) : 0

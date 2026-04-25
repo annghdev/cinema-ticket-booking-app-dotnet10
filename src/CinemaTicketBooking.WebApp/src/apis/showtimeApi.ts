@@ -7,7 +7,7 @@ import {
   type ShowTimeDtoRaw,
   normalizeShowTimeDetailDto,
   normalizeShowTimeDto,
-} from "../types/contracts"
+} from "../types/ShowTime"
 
 type GetShowTimesParams = {
   movieId?: string
@@ -35,10 +35,7 @@ export async function releaseTicket(showtimeId: string, ticketId: string, releas
   await httpClient.post(`/api/showtimes/${showtimeId}/tickets/${ticketId}/release`, { releaseBy })
 }
 
-export type ValidateSeatSelectionRequest = {
-  selectedTicketIds: string[]
-  customerSessionId: string
-}
+import { type ValidateSeatSelectionRequest } from "../types/ShowTime"
 
 type SeatSelectionViolation = {
   type?: string

@@ -1,4 +1,4 @@
-import type { AuthTokenResponse } from "../apis/authApi"
+import type { AuthTokenResponse } from "../types/Auth"
 
 export type StoredAuthSession = {
   accessToken: string

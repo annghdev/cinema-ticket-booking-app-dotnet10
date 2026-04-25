@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type PropsWithChildren } from "react"
-import { getCurrentAuthProfile, type AuthTokenResponse } from "../apis/authApi"
+import { getCurrentAuthProfile } from "../apis/authApi"
+import { type AuthTokenResponse } from "../types/Auth"
 import {
   AUTH_STATE_CHANGED_EVENT,
   clearAuthState,

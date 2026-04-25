@@ -1,8 +1,10 @@
 import { isAxiosError } from "axios"
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { getBookingHistory, type BookingHistoryItemDto } from "../apis/bookingApi"
+import { getBookingHistory } from "../apis/bookingApi"
+import { type BookingHistoryItemDto } from "../types/Booking"
 import { useAuth } from "../contexts/AuthContext"
+import { useToast } from "../contexts/ToastContext"
 
 const PAGE_SIZE = 10
 
@@ -53,6 +55,7 @@ function normalizeBookingStatus(status: number | string): { label: string; class
 
 function BookingHistory() {
   const { isAuthenticated, isResolvingProfile, customerId, displayName } = useAuth()
+  const { error: toastError } = useToast()
   const [pageNumber, setPageNumber] = useState(1)
   const [loading, setLoading] = useState(true)
   const [errorText, setErrorText] = useState<string | null>(null)
@@ -88,9 +91,12 @@ function BookingHistory() {
         }
         if (isAxiosError(error) && error.response?.data) {
           const payload = error.response.data as { detail?: string; title?: string; message?: string }
-          setErrorText(payload.detail ?? payload.title ?? payload.message ?? "Không tải được lịch sử đặt vé.")
+          const msg = payload.detail ?? payload.title ?? payload.message ?? "Không tải được lịch sử đặt vé."
+          setErrorText(msg)
+          toastError(msg)
         } else {
           setErrorText("Không tải được lịch sử đặt vé.")
+          toastError("Không tải được lịch sử đặt vé.")
         }
       } finally {
         if (!disposed) {

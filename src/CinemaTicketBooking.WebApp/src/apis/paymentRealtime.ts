@@ -1,15 +1,8 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr"
-
-type PaymentConfirmedRealtimeEventRaw = {
-  bookingId: string
-  paymentTransactionId: string
-  gatewayTransactionId: string
-  status: string
-  checkinQrCode: string | null
-  occurredAtUtc: string
-}
-
-export type PaymentConfirmedRealtimeEvent = PaymentConfirmedRealtimeEventRaw
+import {
+  type PaymentConfirmedRealtimeEvent,
+  type PaymentConfirmedRealtimeEventRaw,
+} from "../types/Payment"
 
 const PAYMENT_CONFIRMED_EVENT = "payment-confirmed"
 
