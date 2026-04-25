@@ -32,20 +32,23 @@ function normalizeBookingStatus(status: number | string): { label: string; class
   const raw = typeof status === "string" ? status : String(status)
   const key = raw.toLowerCase()
 
-  if (key === "0" || key === "pendingpayment" || key === "pending_payment") {
+  if (key === "1" || key === "pending") {
     return { label: "Chờ thanh toán", className: "bg-amber-500/10 text-amber-300 border-amber-300/30" }
   }
-  if (key === "1" || key === "paid") {
-    return { label: "Đã thanh toán", className: "bg-emerald-500/10 text-emerald-300 border-emerald-300/30" }
-  }
-  if (key === "2" || key === "cancelled" || key === "canceled") {
-    return { label: "Đã hủy", className: "bg-rose-500/10 text-rose-300 border-rose-300/30" }
+  if (key === "2" || key === "confirmed") {
+    return { label: "Đã xác nhận", className: "bg-emerald-500/10 text-emerald-300 border-emerald-300/30" }
   }
   if (key === "3" || key === "checkedin" || key === "checked_in") {
     return { label: "Đã check-in", className: "bg-sky-500/10 text-sky-300 border-sky-300/30" }
   }
+  if (key === "4" || key === "cancelled" || key === "canceled") {
+    return { label: "Đã hủy", className: "bg-rose-500/10 text-rose-300 border-rose-300/30" }
+  }
 
-  return { label: typeof status === "string" ? status : `Trạng thái ${status}`, className: "bg-surface-container-high text-on-surface border-outline-variant/30" }
+  return {
+    label: typeof status === "string" ? status : `Trạng thái ${status}`,
+    className: "bg-surface-container-high text-on-surface border-outline-variant/30",
+  }
 }
 
 function BookingHistory() {

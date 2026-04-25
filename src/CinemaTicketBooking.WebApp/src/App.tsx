@@ -8,6 +8,7 @@ import MovieList from "./pages/MovieList"
 import MovieWithShowTimes from "./pages/MovieWithShowtimes"
 import ShowtimeSeatSelection from "./pages/ShowtimeSeatSelection"
 import PaymentResult from "./pages/PaymentResult"
+import RetryPayment from "./pages/RetryPayment"
 import Showtimes from "./pages/Showtimes"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="/showtimes/:showtimeId/seats" element={<ShowtimeSeatSelection />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment-result" element={<PaymentResult />} />
+          <Route path="/retry-payment" element={<RetryPayment />} />
           <Route path="/booking-history" element={<BookingHistory />} />
           <Route path="/member" element={<Member />} />
           <Route path="*" element={<Navigate to="/" replace />} />

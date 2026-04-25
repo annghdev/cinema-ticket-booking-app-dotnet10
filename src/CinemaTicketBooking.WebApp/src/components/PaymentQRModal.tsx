@@ -5,6 +5,18 @@ import QRCode from "qrcode"
 type SwitchGatewayOption = {
   method: string
   displayName: string
+  icon?: string | null
+}
+
+function resolvePaymentIcon(icon: string | null | undefined): string | null {
+  if (!icon || !icon.trim()) {
+    return null
+  }
+  const trimmed = icon.trim()
+  if (trimmed.startsWith("<svg") || trimmed.includes("xmlns=")) {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(trimmed)}`
+  }
+  return trimmed
 }
 
 type PaymentQRModalProps = {
@@ -124,7 +136,8 @@ export function PaymentQRModal({
               <Dialog.Description className="mt-1 text-sm text-on-surface-variant">
                 {displayMethod} · mở liên kết trên thiết bị thanh toán, hoặc dùng mã QR bên dưới.
               </Dialog.Description>
-              <div className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${isExpired ? "bg-red-500/20 text-red-200" : "bg-secondary/15 text-secondary"}`}>
+              <div className={`mt-3 inline-flex items-center rounded-full px-4 py-1.5 text-sm font-bold shadow-sm ${isExpired ? "bg-red-500/20 text-red-200" : "bg-secondary/15 text-secondary border border-secondary/20"}`}>
+                <span className="material-symbols-outlined mr-1.5 text-[1.1rem]">{isExpired ? "event_busy" : "schedule"}</span>
                 {isExpired ? "Đơn thanh toán đã hết hạn" : `Hết hạn sau ${formatRemainingLabel(remainingSeconds)}`}
               </div>
             </div>
@@ -202,20 +215,30 @@ export function PaymentQRModal({
                 <div className="space-y-2 border-t border-outline-variant/20 pt-3">
                   <p className="text-xs text-on-surface-variant">Đổi phương thức thanh toán cho cùng đơn đặt vé</p>
                   <div className="grid grid-cols-1 gap-2">
-                    {switchableGateways.map((gateway) => (
-                      <button
-                        key={gateway.method}
-                        type="button"
-                        onClick={() => onSelectSwitchGateway(gateway.method)}
-                        className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
-                          selectedSwitchGateway === gateway.method
-                            ? "border-secondary bg-secondary/10 text-secondary"
-                            : "border-outline-variant/25 bg-surface-container-low text-on-surface-variant hover:border-outline-variant/50"
-                        }`}
-                      >
-                        {gateway.displayName}
-                      </button>
-                    ))}
+                    {switchableGateways.map((gateway) => {
+                      const iconUrl = resolvePaymentIcon(gateway.icon)
+                      return (
+                        <button
+                          key={gateway.method}
+                          type="button"
+                          onClick={() => onSelectSwitchGateway(gateway.method)}
+                          className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${
+                            selectedSwitchGateway === gateway.method
+                              ? "border-secondary bg-secondary/10 text-secondary shadow-[0_0_10px_rgba(0,244,254,0.1)]"
+                              : "border-outline-variant/25 bg-surface-container-low text-on-surface-variant hover:border-outline-variant/50 hover:bg-surface-container-low/80"
+                          }`}
+                        >
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded bg-white p-0.5">
+                            {iconUrl ? (
+                              <img src={iconUrl} alt="" className="h-full w-full object-contain" />
+                            ) : (
+                              <span className="material-symbols-outlined text-sm">account_balance</span>
+                            )}
+                          </div>
+                          <span className="font-medium">{gateway.displayName}</span>
+                        </button>
+                      )
+                    })}
                   </div>
                   <button
                     type="button"

@@ -223,7 +223,8 @@ public static class AuthEndpoints
             account.CustomerId,
             displayName,
             account.Email ?? customer?.Email,
-            null));
+            null,
+            customer?.PhoneNumber));
     }
 
     private static async Task<IResult> ForgotPasswordAsync(

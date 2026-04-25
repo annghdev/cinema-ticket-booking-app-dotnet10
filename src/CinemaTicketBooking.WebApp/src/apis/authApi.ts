@@ -30,6 +30,7 @@ export type AuthProfileResponse = {
   displayName: string
   email: string | null
   avatarUrl: string | null
+  phoneNumber?: string | null
 }
 
 export async function login(body: LoginRequest): Promise<AuthTokenResponse> {

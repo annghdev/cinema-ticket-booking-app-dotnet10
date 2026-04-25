@@ -12,6 +12,7 @@ export type StoredAuthProfile = {
   displayName: string
   email: string | null
   avatarUrl: string | null
+  phoneNumber?: string | null
 }
 
 export type StoredAuthState = {
@@ -24,6 +25,7 @@ export type PersistAuthProfileInput = {
   email?: string | null
   avatarUrl?: string | null
   customerId?: string | null
+  phoneNumber?: string | null
 }
 
 export const AUTH_SESSION_KEY = "ctb.auth.session"
@@ -85,6 +87,7 @@ function deriveProfile(tokens: AuthTokenResponse, input?: PersistAuthProfileInpu
     displayName,
     email: email ?? null,
     avatarUrl: avatarUrl ?? null,
+    phoneNumber: input?.phoneNumber ?? null,
   }
 }
 

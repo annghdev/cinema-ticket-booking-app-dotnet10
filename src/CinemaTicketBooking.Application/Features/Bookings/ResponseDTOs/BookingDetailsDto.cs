@@ -1,8 +1,9 @@
-﻿namespace CinemaTicketBooking.Application.Features;
+namespace CinemaTicketBooking.Application.Features;
 
 public class BookingDetailsDto
 {
     public Guid BookingId { get; set; }
+    public Guid ShowTimeId { get; set; }
     public ShowTimeInfo ShowTimeInfo { get; set; } = default!;
     public decimal OriginalAmount { get; set; }
     public decimal DiscountAmount { get; set; }
@@ -11,6 +12,7 @@ public class BookingDetailsDto
     public BookingStatus Status { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public List<TicketInfo> Tickets { get; set; } = [];
+    public List<Guid> TicketIds { get; set; } = [];
     public List<ConcessionInfo> Concessions { get; set; } = [];
 }
 

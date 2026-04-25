@@ -14,7 +14,9 @@ type AuthContextValue = {
   isAuthenticated: boolean
   isResolvingProfile: boolean
   displayName: string | null
+  email: string | null
   avatarUrl: string | null
+  phoneNumber: string | null
   customerId: string | null
   setAuthFromTokens: (tokens: AuthTokenResponse, profileInput?: PersistAuthProfileInput) => Promise<void>
   refreshProfile: () => Promise<void>
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
           email: profile.email,
           avatarUrl: profile.avatarUrl,
           customerId: profile.customerId,
+          phoneNumber: profile.phoneNumber,
         },
       )
       profileSyncTokenRef.current = nextState.session.accessToken
@@ -117,7 +120,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isAuthenticated: Boolean(authState),
       isResolvingProfile,
       displayName: authState?.profile.displayName ?? null,
+      email: authState?.profile.email ?? null,
       avatarUrl: authState?.profile.avatarUrl ?? null,
+      phoneNumber: authState?.profile.phoneNumber ?? null,
       customerId: authState?.session.customerId ?? null,
       setAuthFromTokens,
       refreshProfile,
