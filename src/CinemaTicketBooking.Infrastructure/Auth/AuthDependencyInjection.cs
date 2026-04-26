@@ -60,16 +60,8 @@ public static class AuthDependencyInjection
         services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.HttpOnly = true;
-            options.Events.OnRedirectToLogin = ctx =>
-            {
-                ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return Task.CompletedTask;
-            };
-            options.Events.OnRedirectToAccessDenied = ctx =>
-            {
-                ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
-                return Task.CompletedTask;
-            };
+            options.LoginPath = "/Account/Login";
+            options.AccessDeniedPath = "/Account/AccessDenied";
         });
 
         var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()

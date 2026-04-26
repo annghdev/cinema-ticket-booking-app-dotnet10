@@ -19,11 +19,16 @@ public static class IdentityDataSeeder
     ];
 
     /// <summary>
-    /// Ensures roles exist and admin role has static permission claims.
+    /// Ensures roles exist, admin role has static permission claims, and default accounts are seeded.
     /// </summary>
-    public static async Task SeedAsync(RoleManager<Role> roleManager, ILogger logger, CancellationToken cancellationToken = default)
+    public static async Task SeedAsync(
+        RoleManager<Role> roleManager, 
+        UserManager<Account> userManager, 
+        ILogger logger, 
+        CancellationToken cancellationToken = default)
     {
-        foreach (var roleName in new[] { RoleNames.Customer, RoleNames.Admin })
+        // 1. Seed Roles
+        foreach (var roleName in new[] { RoleNames.Customer, RoleNames.Admin, RoleNames.Manager })
         {
             if (await roleManager.RoleExistsAsync(roleName))
                 continue;
@@ -45,26 +50,75 @@ public static class IdentityDataSeeder
             logger.LogInformation("Created Identity role {Role}.", roleName);
         }
 
+        // 2. Grant Claims to Admin
         var adminRole = await roleManager.Roles.FirstOrDefaultAsync(
             x => x.NormalizedName == RoleNames.Admin.ToUpperInvariant(),
             cancellationToken);
-        if (adminRole is null)
-            return;
-
-        var existingClaims = await roleManager.GetClaimsAsync(adminRole);
-        foreach (var claim in AdminPermissionClaims)
+        if (adminRole is not null)
         {
-            if (existingClaims.Any(c => c.Type == claim.Type && c.Value == claim.Value))
-                continue;
-
-            var add = await roleManager.AddClaimAsync(adminRole, claim);
-            if (!add.Succeeded)
+            var existingClaims = await roleManager.GetClaimsAsync(adminRole);
+            foreach (var claim in AdminPermissionClaims)
             {
-                logger.LogError(
-                    "Failed to add claim {Type}={Value} to Admin: {Errors}",
-                    claim.Type,
-                    claim.Value,
-                    string.Join(", ", add.Errors.Select(e => e.Description)));
+                if (existingClaims.Any(c => c.Type == claim.Type && c.Value == claim.Value))
+                    continue;
+
+                var add = await roleManager.AddClaimAsync(adminRole, claim);
+                if (!add.Succeeded)
+                {
+                    logger.LogError(
+                        "Failed to add claim {Type}={Value} to Admin: {Errors}",
+                        claim.Type,
+                        claim.Value,
+                        string.Join(", ", add.Errors.Select(e => e.Description)));
+                }
+            }
+        }
+
+        // 3. Seed Admin User
+        var adminEmail = "admin@aethercinema.com";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser is null)
+        {
+            adminUser = new Account
+            {
+                Id = Guid.CreateVersion7(),
+                UserName = "admin",
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(adminUser, "Admin@123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, RoleNames.Admin);
+                logger.LogInformation("Seeded Admin user.");
+            }
+            else
+            {
+                logger.LogError("Failed to seed Admin user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
+
+        // 4. Seed Manager User
+        var managerEmail = "manager@aethercinema.com";
+        var managerUser = await userManager.FindByEmailAsync(managerEmail);
+        if (managerUser is null)
+        {
+            managerUser = new Account
+            {
+                Id = Guid.CreateVersion7(),
+                UserName = "manager",
+                Email = managerEmail,
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(managerUser, "Manager@123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(managerUser, RoleNames.Manager);
+                logger.LogInformation("Seeded Manager user.");
+            }
+            else
+            {
+                logger.LogError("Failed to seed Manager user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
     }

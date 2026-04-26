@@ -1,49 +1,257 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html class="dark" lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CinemaTicketBooking.WebServer</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/CinemaTicketBooking.WebServer.styles.css" asp-append-version="true" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - Aether Cinema</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#a7a9ff",
+                        "secondary": "#00f4fe",
+                        "on-tertiary": "#090079",
+                        "surface-bright": "#282c36",
+                        "surface-tint": "#61b4fe",
+                        "surface-container": "#161a21",
+                        "inverse-primary": "#00639f",
+                        "primary-dim": "#4fa3ed",
+                        "on-error-container": "#ffa8a3",
+                        "secondary-container": "#00696e",
+                        "on-surface": "#ecedf6",
+                        "surface-variant": "#22262f",
+                        "surface-dim": "#0b0e14",
+                        "surface-container-high": "#1c2028",
+                        "surface-container-lowest": "#000000",
+                        "error-container": "#9f0519",
+                        "surface": "#0b0e14",
+                        "on-secondary": "#00575b",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "on-tertiary-fixed": "#060061",
+                        "primary": "#61b4fe",
+                        "surface-container-highest": "#22262f",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "on-primary-container": "#00243f",
+                        "inverse-surface": "#f9f9ff",
+                        "inverse-on-surface": "#52555c",
+                        "outline-variant": "#45484f",
+                        "on-surface-variant": "#a9abb3",
+                        "secondary-fixed": "#00f4fe",
+                        "primary-fixed": "#5eb1fc",
+                        "secondary-dim": "#00e5ee",
+                        "error": "#ff716c",
+                        "on-tertiary-container": "#ffffff",
+                        "outline": "#73757d",
+                        "tertiary-container": "#4949fc",
+                        "on-primary-fixed-variant": "#00385d",
+                        "on-secondary-container": "#dffdff",
+                        "background": "#0b0e14",
+                        "on-primary-fixed": "#001222",
+                        "on-background": "#ecedf6",
+                        "on-secondary-fixed": "#004346",
+                        "primary-container": "#52a6f0",
+                        "on-error": "#490006",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "tertiary": "#9093ff",
+                        "on-primary": "#003152",
+                        "error-dim": "#d7383b",
+                        "surface-container-low": "#10131a",
+                        "on-secondary-fixed-variant": "#006266",
+                        "tertiary-dim": "#5c5eff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "display": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-card {
+            background: rgba(34, 38, 47, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(69, 72, 79, 0.2);
+        }
+
+        .neon-glow {
+            filter: drop-shadow(0 0 8px rgba(0, 244, 254, 0.5));
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CinemaTicketBooking.WebServer</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+<body class="bg-background text-on-surface font-body selection:bg-secondary selection:text-on-secondary-fixed">
+    @{
+        var controller = ViewContext.RouteData.Values["Controller"]?.ToString() ?? "";
+        var action = ViewContext.RouteData.Values["Action"]?.ToString() ?? "";
+    }
+    <!-- SideNavBar -->
+    <aside
+        class="fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-[#0b0e14] border-r border-[#45484f]/10 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+        <div class="p-8">
+            <h1 class="text-xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Neon Cinema</h1>
+            <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản lý</p>
+        </div>
+        <nav class="flex-1 mt-4">
+            <!-- Dashboard Active -->
+            <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Home" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                asp-controller="Home" asp-action="Index">
+                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Trang tổng quan
+            </a>
+            <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Movie" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                asp-controller="Movie" asp-action="Index">
+                <span class="material-symbols-outlined" data-icon="movie">movie</span>
+                Thư viện phim
+            </a>
+            <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "ShowTime" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                asp-controller="ShowTime" asp-action="Index">
+                <span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+                Lịch chiếu
+            </a>
+            <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+                Phòng vé
+            </a>
+            <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+                Nhật ký hệ thống
+            </a>
+        </nav>
+
+    </aside>
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 right-0 left-64 z-40 bg-[#0b0e14]/60 backdrop-blur-xl border-b border-[#45484f]/20 shadow-2xl shadow-black/40 flex items-center justify-between px-8 h-20">
+        <div class="flex items-center gap-6">
+            <h2
+                class="text-2xl font-bold text-[#00f4fe] drop-shadow-[0_0_8px_rgba(0,244,254,0.5)] font-headline tracking-tight">
+                @ViewData["Title"]</h2>
+            <div class="relative hidden lg:block">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+                    data-icon="search">search</span>
+                <input
+                    class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm w-80 focus:ring-1 focus:ring-secondary/50 text-on-surface"
+                    placeholder="Tìm kiếm phim, phòng chiếu, phân tích..." type="text" />
+            </div>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 border-r border-[#45484f]/20 pr-6">
+                <button
+                    class="p-2 text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-full relative scale-95 active:scale-90 duration-200">
+                    <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                    <span
+                        class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-background"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+                <button
+                    class="p-2 text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-full scale-95 active:scale-90 duration-200">
+                    <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="text-xs font-bold text-on-surface">Marcus Thorne</p>
+                    <p class="text-[10px] text-outline italic">Quản trị viên</p>
+                </div>
+                <div class="w-10 h-10 rounded-full border-2 border-primary/30 p-0.5">
+                    <img class="w-full h-full rounded-full object-cover"
+                        data-alt="Portrait of a professional male administrator in a modern office environment with cool blue lighting"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeZmG4ucGRekMX9HS9tXQCcOZYfn2eGfqEzL05o-cnvF77NLBMTBJdHDhPZwcMyLiqd_EgpvgPrt_47Kek01XaBMlT5I0mjcQEa-bZsIKOQMLnjYCn8mG3fN6kjpbF9fGDtelbvphfM3EE2655Bd2aBD4D5TN_B-lOmT6PLdmOCDBk0q-529UTfvPtBA6rXZXqppV7VwloiGaNWw3dC8yHSTTyNwQBOrV7l8J8_Fg0AWZPkW3-6In1Ip1NiE2U-waIy_2SwBcTxRk" />
                 </div>
             </div>
-        </nav>
+        </div>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <!-- Main Content -->
+    <main
+        class="ml-64 pt-24 p-8 min-h-screen bg-gradient-to-br from-background via-surface-container-low to-background">
+        @RenderBody()
+    </main>
+    <!-- Global Toast Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Global Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] hidden flex flex-col items-center justify-center gap-4">
+        <div class="relative w-16 h-16">
+            <div class="absolute inset-0 rounded-full border-4 border-white/10 border-t-[#00f4fe] animate-spin"></div>
+            <div class="absolute inset-2 rounded-full border-4 border-white/5 border-b-[#61b4fe] animate-spin animate-duration-1000"></div>
+        </div>
+        <span class="text-xs font-bold text-[#00f4fe] tracking-widest uppercase animate-pulse">Syncing Timeline...</span>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - CinemaTicketBooking.WebServer - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    <script>
+        // Global Loading Spinner Service
+        window.showLoading = function() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.remove('hidden');
+        };
+
+        window.hideLoading = function() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.add('hidden');
+        };
+
+        // Global Toast Service
+        window.showToast = function(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border backdrop-blur-md shadow-2xl transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-auto max-w-sm`;
+            
+            if (type === 'success') {
+                toast.classList.add('bg-slate-900/90', 'border-[#00f4fe]/30', 'text-slate-100');
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined text-[#00f4fe]">check_circle</span>
+                    <p class="text-xs font-semibold">${message}</p>
+                `;
+            } else {
+                toast.classList.add('bg-slate-900/90', 'border-red-500/30', 'text-red-200');
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined text-red-400">error</span>
+                    <p class="text-xs font-semibold">${message}</p>
+                `;
+            }
+
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 50);
+
+            // Animate out
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4000);
+        };
+    </script>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

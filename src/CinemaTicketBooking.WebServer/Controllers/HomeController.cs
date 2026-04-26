@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using CinemaTicketBooking.WebServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace CinemaTicketBooking.WebServer.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Identity.Application")]
     public class HomeController : Controller
     {
         public IActionResult Index()

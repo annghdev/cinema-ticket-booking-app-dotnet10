@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Showtime Management | Cinematic Horizon</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#282c36",
+                        "tertiary-dim": "#5c5eff",
+                        "primary-fixed-dim": "#4fa3ed",
+                        "on-surface-variant": "#a9abb3",
+                        "inverse-surface": "#f9f9ff",
+                        "inverse-primary": "#00639f",
+                        "primary-fixed": "#5eb1fc",
+                        "primary-container": "#52a6f0",
+                        "on-tertiary": "#090079",
+                        "surface": "#0b0e14",
+                        "outline-variant": "#45484f",
+                        "on-primary": "#003152",
+                        "surface-container-highest": "#22262f",
+                        "on-tertiary-fixed": "#060061",
+                        "on-primary-fixed": "#001222",
+                        "surface-container-high": "#1c2028",
+                        "secondary-fixed": "#00f4fe",
+                        "on-tertiary-container": "#ffffff",
+                        "secondary-fixed-dim": "#00e5ee",
+                        "tertiary": "#9093ff",
+                        "surface-container-lowest": "#000000",
+                        "background": "#0b0e14",
+                        "on-secondary": "#00575b",
+                        "tertiary-fixed-dim": "#9799ff",
+                        "secondary-container": "#00696e",
+                        "on-primary-fixed-variant": "#00385d",
+                        "error-dim": "#d7383b",
+                        "on-secondary-container": "#dffdff",
+                        "on-error": "#490006",
+                        "on-background": "#ecedf6",
+                        "tertiary-container": "#4949fc",
+                        "inverse-on-surface": "#52555c",
+                        "surface-tint": "#61b4fe",
+                        "surface-dim": "#0b0e14",
+                        "on-secondary-fixed-variant": "#006266",
+                        "on-secondary-fixed": "#004346",
+                        "tertiary-fixed": "#a7a9ff",
+                        "primary": "#61b4fe",
+                        "outline": "#73757d",
+                        "secondary-dim": "#00e5ee",
+                        "secondary": "#00f4fe",
+                        "surface-variant": "#22262f",
+                        "on-error-container": "#ffa8a3",
+                        "error": "#ff716c",
+                        "surface-container": "#161a21",
+                        "error-container": "#9f0519",
+                        "on-primary-container": "#00243f",
+                        "primary-dim": "#4fa3ed",
+                        "on-surface": "#ecedf6",
+                        "on-tertiary-fixed-variant": "#1600c3",
+                        "surface-container-low": "#10131a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "display": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .glass-panel {
+            background: rgba(34, 38, 47, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .neon-glow-primary {
+            text-shadow: 0 0 8px rgba(97, 180, 254, 0.4);
+        }
+
+        .neon-glow-secondary {
+            text-shadow: 0 0 8px rgba(0, 244, 254, 0.6);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body selection:bg-secondary/30">
+    <!-- SideNavBar Shell -->
+    <aside
+        class="h-screen w-72 fixed left-0 top-0 border-r border-white/5 bg-[#10131a]/90 backdrop-blur-2xl flex flex-col py-8 z-50">
+        <div class="px-8 mb-12">
+            <div class="flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-[0_0_20px_rgba(0,244,254,0.3)]">
+                    <span class="material-symbols-outlined text-on-primary text-2xl" data-weight="fill"
+                        style="font-variation-settings: 'FILL' 1;">movie</span>
+                </div>
+                <div>
+                    <h1 class="font-headline text-secondary text-sm font-bold uppercase tracking-widest leading-none">
+                        Auteur Admin</h1>
+                    <p class="text-[10px] text-on-surface-variant font-medium tracking-tight mt-1 opacity-60">Management
+                        Console</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center gap-4 text-slate-500 px-6 py-4 font-body font-medium hover:bg-white/5 hover:text-slate-200 transition-colors"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-4 text-slate-500 px-6 py-4 font-body font-medium hover:bg-white/5 hover:text-slate-200 transition-colors"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="movie">movie</span>
+                <span>Movie Library</span>
+            </a>
+            <a class="flex items-center gap-4 bg-gradient-to-r from-[#61b4fe]/20 to-transparent text-[#00f4fe] border-l-4 border-[#00f4fe] px-6 py-4 font-body font-medium"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+                <span>Showtimes</span>
+            </a>
+            <a class="flex items-center gap-4 text-slate-500 px-6 py-4 font-body font-medium hover:bg-white/5 hover:text-slate-200 transition-colors"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+                <span>Box Office</span>
+            </a>
+            <a class="flex items-center gap-4 text-slate-500 px-6 py-4 font-body font-medium hover:bg-white/5 hover:text-slate-200 transition-colors"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+                <span>System Logs</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <button
+                class="w-full py-4 px-6 rounded-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-[0_10px_20px_rgba(97,180,254,0.2)] hover:shadow-[0_15px_30px_rgba(97,180,254,0.4)] transition-all duration-300 flex items-center justify-center gap-2 active:scale-95">
+                <span class="material-symbols-outlined">add</span>
+                <span>New Premiere</span>
+            </button>
+        </div>
+    </aside>
+    <main class="ml-72 min-h-screen">
+        <!-- TopAppBar Shell -->
+        <header
+            class="flex justify-between items-center w-full px-8 py-3 sticky top-0 z-40 bg-[#0b0e14]/80 backdrop-blur-xl border-b border-white/10 font-['Space_Grotesk'] tracking-tight">
+            <div class="flex items-center gap-6">
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <input
+                        class="bg-surface-container-low border-b-2 border-outline-variant focus:border-secondary focus:ring-0 text-sm py-2 pl-10 pr-4 w-64 transition-all duration-300 text-on-surface"
+                        placeholder="Search events..." type="text" />
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4 border-r border-white/10 pr-6">
+                    <button class="text-slate-400 hover:text-secondary transition-all active:scale-95">
+                        <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                    </button>
+                    <button class="text-slate-400 hover:text-secondary transition-all active:scale-95">
+                        <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-on-surface">Alex Rivera</p>
+                        <p class="text-[10px] text-on-surface-variant">Lead Projectionist</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full border-2 border-primary/30 p-0.5">
+                        <img class="w-full h-full rounded-full object-cover"
+                            data-alt="Close-up professional portrait of a male cinema administrator with glasses in soft cinematic lighting"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJ5miQwtJ4OeBQSMm1SAE2I3yOYDqUIdBvvqv6-v1Ky9wSAH3Z9CLHpOnZCrP_s1v2oh7_VhA3n5qLqTk11BmKxNvXvmiUPkV_nGDnVJ_lo7N77c90GPTtRgG3urTnQQr8mFaIucKMJYiLAoJnqFRwVaR6PHmaWr5vk69QAZMG-1z8H6u8DI_wFkYknwr9Z8OC6lj9sn4RNXDx5Ei2UfCDCwiv9Uq6t4D6CuU7Xv9LzXr0oYGfx8LGQGzx6lz69wJ_LtsRGG1fo6k" />
+                    </div>
+                </div>
+            </div>
+        </header>
+        <section class="p-8">
+            <!-- Header & Date Filter -->
+            <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h2 class="text-display-lg text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">
+                        Showtime Schedules</h2>
+                    <p class="text-on-surface-variant font-body max-w-md">Orchestrate the visual symphony. Manage
+                        screenings, seat availability, and venue logistics across all theaters.</p>
+                </div>
+                <div class="glass-panel p-2 rounded-2xl flex items-center gap-2 border border-white/5 shadow-2xl">
+                    <button
+                        class="w-12 h-14 rounded-xl flex flex-col items-center justify-center text-slate-500 hover:bg-white/5 transition-colors">
+                        <span class="text-[10px] font-bold uppercase">Mon</span>
+                        <span class="text-lg font-headline">12</span>
+                    </button>
+                    <button
+                        class="w-12 h-14 rounded-xl flex flex-col items-center justify-center text-slate-500 hover:bg-white/5 transition-colors">
+                        <span class="text-[10px] font-bold uppercase">Tue</span>
+                        <span class="text-lg font-headline">13</span>
+                    </button>
+                    <button
+                        class="w-12 h-14 rounded-xl flex flex-col items-center justify-center bg-primary text-on-primary shadow-[0_0_15px_rgba(97,180,254,0.4)]">
+                        <span class="text-[10px] font-bold uppercase">Wed</span>
+                        <span class="text-lg font-headline">14</span>
+                    </button>
+                    <button
+                        class="w-12 h-14 rounded-xl flex flex-col items-center justify-center text-slate-500 hover:bg-white/5 transition-colors">
+                        <span class="text-[10px] font-bold uppercase">Thu</span>
+                        <span class="text-lg font-headline">15</span>
+                    </button>
+                    <button
+                        class="w-12 h-14 rounded-xl flex flex-col items-center justify-center text-slate-500 hover:bg-white/5 transition-colors">
+                        <span class="text-[10px] font-bold uppercase">Fri</span>
+                        <span class="text-lg font-headline">16</span>
+                    </button>
+                    <div class="mx-2 w-[1px] h-8 bg-white/10"></div>
+                    <button class="p-3 text-secondary-fixed hover:bg-white/5 rounded-xl transition-colors">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Bento Content Area -->
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <!-- Status Cards -->
+                <div class="xl:col-span-1 space-y-6">
+                    <div class="glass-panel p-6 rounded-3xl border border-white/5 relative overflow-hidden group">
+                        <div
+                            class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700">
+                        </div>
+                        <p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Total
+                            Screenings</p>
+                        <h3 class="text-4xl font-headline font-bold text-on-surface mb-4">42</h3>
+                        <div class="flex items-center gap-2 text-secondary text-xs font-bold">
+                            <span class="material-symbols-outlined text-sm">trending_up</span>
+                            <span>+4 from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-3xl border border-white/5 relative overflow-hidden group">
+                        <div
+                            class="absolute -right-4 -top-4 w-24 h-24 bg-secondary/10 rounded-full blur-3xl group-hover:bg-secondary/20 transition-all duration-700">
+                        </div>
+                        <p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Peak
+                            Utilization</p>
+                        <h3 class="text-4xl font-headline font-bold text-on-surface mb-4">89%</h3>
+                        <div class="flex items-center gap-2 text-primary text-xs font-bold">
+                            <span class="material-symbols-outlined text-sm">bolt</span>
+                            <span>Theater 04 (IMAX)</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Main Data Table Container -->
+                <div class="xl:col-span-3">
+                    <div class="glass-panel rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl">
+                        <div class="px-8 py-6 flex items-center justify-between border-b border-white/5">
+                            <h4 class="font-headline font-bold text-xl text-on-surface flex items-center gap-3">
+                                <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
+                                Active Screenings
+                            </h4>
+                            <div class="flex items-center gap-4">
+                                <select
+                                    class="bg-surface-container-high border-none text-xs rounded-lg text-slate-300 focus:ring-1 focus:ring-primary">
+                                    <option>Filter by Hall</option>
+                                    <option>IMAX Experience</option>
+                                    <option>Digital Cinema</option>
+                                </select>
+                                <button class="text-slate-400 hover:text-on-surface transition-colors">
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-white/2">
+                                    <tr>
+                                        <th
+                                            class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">
+                                            Movie Title</th>
+                                        <th
+                                            class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">
+                                            Theater Hall</th>
+                                        <th
+                                            class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-center">
+                                            Timing</th>
+                                        <th
+                                            class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">
+                                            Capacity</th>
+                                        <th
+                                            class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">
+                                            Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    <tr class="hover:bg-white/[0.03] transition-colors group">
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img class="w-full h-full object-cover"
+                                                        data-alt="Dramatic high-contrast film poster with deep blue and neon cyan colors featuring a futuristic silhouette"
+                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd0lroTiczcVmQV_Kxo0RkcVLuv_pOY-lco5aoF6jZd2lgk0FFbEeLB4d8nWkjZCIrKBHsZ2E5l3k4Zr5FNDCFIBGFyDw-ffNMVx8vHJBN5fy2Yyq0K2hrqIh1fynFJccZNOuNyMXZsEwuJ5sXG-30fuX-NtKb3g5edq2-GUFtyYRIqBIbGEpPFoU-rmYPhF3gyUQVBJhOffMAhN0KdinizOlRXFlRPgaRrTdpZRmFH5SpJxt6Ij38xLHEvlv43Ac9nP0-3_wRr38" />
+                                                </div>
+                                                <div>
+                                                    <p
+                                                        class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">
+                                                        Neon Drifters</p>
+                                                    <p class="text-[10px] text-on-surface-variant/60 font-medium">PG-13
+                                                        • 124m</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <span
+                                                class="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold border border-primary/20 uppercase">IMAX
+                                                Laser</span>
+                                        </td>
+                                        <td class="px-8 py-6 text-center">
+                                            <div class="inline-flex flex-col">
+                                                <span class="text-sm font-bold text-on-surface">19:30 — 21:34</span>
+                                                <span
+                                                    class="text-[10px] text-secondary font-medium uppercase tracking-tighter">Prime
+                                                    Time</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <div class="w-full max-w-[120px]">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="text-[10px] font-bold text-on-surface">94% Full</span>
+                                                    <span class="text-[10px] text-on-surface-variant">216/230</span>
+                                                </div>
+                                                <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                                    <div class="bg-secondary h-full rounded-full shadow-[0_0_8px_#00f4fe]"
+                                                        style="width: 94%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6 text-right">
+                                            <button class="p-2 text-slate-500 hover:text-primary transition-colors">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-white/[0.03] transition-colors group">
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img class="w-full h-full object-cover"
+                                                        data-alt="Abstract atmospheric movie poster with red and dark gray palette showing a mysterious hallway with light at the end"
+                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAPggzjHp0p5Wzfh-Gl5j59hPSd9iiZ0XHntukSxEprIwbW7K4WVdF_rbx8kyGIWbUmkfwQIyIacFGETCL2vW7qs6uCj8bMBjJleX4qjJujDiYc1TQvK_3jkxWRkFRUHqnnuA5Dp51U9nFRqsMyYgcVVRCKkG8Jkd9nu03Y1ZjR4TIlddYB6kXDYRIu7mB4cH8PvWD6cb461Pj3FmSX67Ok5t47uHzt-Skny-pUzITNStUHrWlK4QYhLnckijdqlgmeJMBQQS2ZlQ" />
+                                                </div>
+                                                <div>
+                                                    <p
+                                                        class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">
+                                                        The Void Below</p>
+                                                    <p class="text-[10px] text-on-surface-variant/60 font-medium">R •
+                                                        142m</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <span
+                                                class="px-3 py-1 rounded-full bg-white/5 text-slate-400 text-[10px] font-bold border border-white/10 uppercase">Digital
+                                                4</span>
+                                        </td>
+                                        <td class="px-8 py-6 text-center">
+                                            <div class="inline-flex flex-col">
+                                                <span class="text-sm font-bold text-on-surface">20:45 — 23:07</span>
+                                                <span
+                                                    class="text-[10px] text-on-surface-variant font-medium uppercase tracking-tighter">Late
+                                                    Night</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <div class="w-full max-w-[120px]">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="text-[10px] font-bold text-on-surface">42% Full</span>
+                                                    <span class="text-[10px] text-on-surface-variant">54/128</span>
+                                                </div>
+                                                <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                                    <div class="bg-primary h-full rounded-full" style="width: 42%">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6 text-right">
+                                            <button class="p-2 text-slate-500 hover:text-primary transition-colors">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-white/[0.03] transition-colors group">
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img class="w-full h-full object-cover"
+                                                        data-alt="Classic cinematic movie poster aesthetic with warm golden tones and soft bokeh effects featuring an elegant actress"
+                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFS9mO1lm20on57IHEyOMNIPbLpYunpEK1IwsX7knYkz_8OogeBAOHZghD4oOG3X6SpbX-kByTutI9qH6PqdyWfpRd_avH3LBqwUM_8OvLWZYAiCJPdw56mfBd0OhXrRGARGOTP_MUGSNO6vG58ftFHWfsozv4VO9p8OS2_DNBOD4k2AXO1SOXc6STVW8kmwLEDR3qqU6IfQYP6Bbot5KoQ03dRXTDacHl8hsjznH1c5WSWhH-h86NKTv9zjwhuNdWmd_niDMMtrE" />
+                                                </div>
+                                                <div>
+                                                    <p
+                                                        class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">
+                                                        Midnight Paris</p>
+                                                    <p class="text-[10px] text-on-surface-variant/60 font-medium">G •
+                                                        98m</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <span
+                                                class="px-3 py-1 rounded-full bg-white/5 text-slate-400 text-[10px] font-bold border border-white/10 uppercase">Digital
+                                                1</span>
+                                        </td>
+                                        <td class="px-8 py-6 text-center">
+                                            <div class="inline-flex flex-col">
+                                                <span class="text-sm font-bold text-on-surface">18:15 — 19:53</span>
+                                                <span
+                                                    class="text-[10px] text-on-surface-variant font-medium uppercase tracking-tighter">Matinee</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <div class="w-full max-w-[120px]">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="text-[10px] font-bold text-on-surface">65% Full</span>
+                                                    <span class="text-[10px] text-on-surface-variant">104/160</span>
+                                                </div>
+                                                <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                                    <div class="bg-primary h-full rounded-full" style="width: 65%">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6 text-right">
+                                            <button class="p-2 text-slate-500 hover:text-primary transition-colors">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-8 py-4 bg-white/[0.02] flex items-center justify-between">
+                            <p class="text-[10px] text-on-surface-variant font-medium">Showing <span
+                                    class="text-on-surface">3 of 42</span> scheduled screenings for Wednesday, Sep 14
+                            </p>
+                            <div class="flex items-center gap-2">
+                                <button class="p-1 rounded bg-white/5 text-slate-400 hover:bg-white/10">
+                                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                                </button>
+                                <button class="p-1 rounded bg-white/5 text-slate-400 hover:bg-white/10">
+                                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Contextual Action (Secondary Area) -->
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div
+                    class="relative overflow-hidden group rounded-[2rem] p-8 bg-surface-container-low border border-white/5">
+                    <div class="flex items-start justify-between mb-6">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
+                            <span class="material-symbols-outlined" data-weight="fill"
+                                style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
+                        </div>
+                        <span
+                            class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">Automated</span>
+                    </div>
+                    <h5 class="font-headline text-xl font-bold text-on-surface mb-2">Dynamic Pricing</h5>
+                    <p class="text-sm text-on-surface-variant leading-relaxed mb-6">Secondary hall prices will
+                        auto-adjust by +15% if capacity exceeds 80% during evening slots.</p>
+                    <button
+                        class="text-secondary font-bold text-xs flex items-center gap-2 group-hover:gap-3 transition-all">
+                        Configure Logic <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </button>
+                </div>
+                <div
+                    class="relative overflow-hidden group rounded-[2rem] p-8 bg-surface-container-low border border-white/5">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined" data-weight="fill"
+                                style="font-variation-settings: 'FILL' 1;">analytics</span>
+                        </div>
+                        <span
+                            class="text-[10px] font-bold text-secondary uppercase tracking-widest bg-secondary/5 px-3 py-1 rounded-full border border-secondary/10">Live</span>
+                    </div>
+                    <h5 class="font-headline text-xl font-bold text-on-surface mb-2">Theater Occupancy</h5>
+                    <p class="text-sm text-on-surface-variant leading-relaxed mb-6">Theater 04 (IMAX) is reaching
+                        critical capacity for the 22:00 slot. Consider opening overflow screen Digital 2.</p>
+                    <button
+                        class="text-primary font-bold text-xs flex items-center gap-2 group-hover:gap-3 transition-all">
+                        View Real-time Map <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </button>
+                </div>
+                <div
+                    class="relative overflow-hidden group rounded-[2rem] p-8 bg-gradient-to-br from-surface-container-high to-surface-container-highest border border-white/10">
+                    <div
+                        class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_50%_120%,#61b4fe,transparent_70%)]">
+                    </div>
+                    <div class="relative z-10">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-on-surface mb-6 border border-white/10">
+                            <span class="material-symbols-outlined" data-weight="fill"
+                                style="font-variation-settings: 'FILL' 1;">terminal</span>
+                        </div>
+                        <h5 class="font-headline text-xl font-bold text-on-surface mb-2">Projector Health</h5>
+                        <p class="text-sm text-on-surface-variant leading-relaxed mb-6">All systems nominal. Digital 4
+                            lamp life at 82%. Maintenance suggested in 14 days.</p>
+                        <div class="flex items-center gap-3">
+                            <div class="h-1 flex-1 bg-white/10 rounded-full">
+                                <div class="h-full w-[82%] bg-green-500/50 rounded-full"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-green-400">82%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Contextual FAB (Hidden on management lists normally, but kept for UX context if needed - Here as a "Back to Top" or "Quick Log") -->
+    <button
+        class="fixed bottom-10 right-10 w-16 h-16 rounded-full bg-secondary text-on-secondary shadow-[0_15px_35px_rgba(0,244,254,0.3)] hover:scale-110 active:scale-95 transition-all z-50 flex items-center justify-center group">
+        <span class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform">add</span>
+    </button>
+</body>
+
+</html>
