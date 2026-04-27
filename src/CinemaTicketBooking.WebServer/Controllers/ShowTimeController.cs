@@ -23,7 +23,7 @@ public class ShowTimeController(IMessageBus bus) : Controller
         DateOnly selectedDate;
         if (string.IsNullOrEmpty(date) || !DateOnly.TryParse(date, out selectedDate))
         {
-            selectedDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            selectedDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime);
         }
 
         var model = new ShowTimeCalendarViewModel
@@ -42,22 +42,20 @@ public class ShowTimeController(IMessageBus bus) : Controller
     /// Processes a request to schedule a new Showtime via AJAX.
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> Create(Guid movieId, Guid screenId, DateTime startAt)
+    public async Task<IActionResult> Create(Guid movieId, Guid screenId, DateTimeOffset startAt)
     {
-        var startAtUtc = DateTime.SpecifyKind(startAt, DateTimeKind.Utc);
-        
         var command = new AddShowTimeCommand
         {
             MovieId = movieId,
             ScreenId = screenId,
-            StartAt = new DateTimeOffset(startAtUtc)
+            StartAt = startAt.ToUniversalTime()
         };
 
         try
         {
             var showtimeId = await bus.InvokeAsync<Guid>(command);
-            var dateString = DateOnly.FromDateTime(startAtUtc).ToString("yyyy-MM-dd");
-            return Json(new { success = true, message = "Showtime scheduled successfully!", id = showtimeId, date = dateString });
+            var dateString = startAt.ToUniversalTime().ToString("yyyy-MM-dd");
+            return Json(new { success = true, message = "Showtime scheduled successfully!", id = showtimeId });
         }
         catch (Exception ex)
         {
@@ -125,7 +123,7 @@ public class ShowTimeController(IMessageBus bus) : Controller
         DateOnly selectedDate;
         if (string.IsNullOrEmpty(date) || !DateOnly.TryParse(date, out selectedDate))
         {
-            selectedDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            selectedDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime);
         }
 
         var cinemasTask = bus.InvokeAsync<IReadOnlyList<CinemaDto>>(new GetCinemasQuery());
