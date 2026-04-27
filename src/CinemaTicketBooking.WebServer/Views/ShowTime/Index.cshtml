@@ -167,10 +167,6 @@
                 var isNextDay = hour >= 24;
                 <div class="border-r border-white/5 text-center py-4 font-body font-bold text-xs text-slate-400 flex flex-col justify-center">
                     <span>@($"{displayHour:D2}:00")</span>
-                    @if (isNextDay)
-                    {
-                        <span class="text-[7px] text-secondary font-medium tracking-tighter uppercase mt-0.5">Ngày mai</span>
-                    }
                 </div>
             }
         </div>
@@ -219,7 +215,6 @@
                                     ${cinema.name}
                                 </h4>
                                 <p class="text-[10px] text-on-surface-variant mt-1">${cinema.address}</p>
-                                <span class="mt-2 text-[9px] bg-white/5 border border-white/10 px-2 py-0.5 rounded-md w-fit text-slate-400 font-bold">${cinemaScreens.length} Phòng chiếu</span>
                             </div>
                         `;
                         
@@ -228,7 +223,6 @@
                             screenColHtml += `
                                 <div class="h-20 flex flex-col items-center justify-center font-bold text-xs text-[#00f4fe] font-headline tracking-wider">
                                     <span>${screen.code}</span>
-                                    <span class="text-[8px] text-slate-500 font-normal mt-1 uppercase">${screen.type || ''}</span>
                                 </div>
                             `;
                         });
@@ -297,7 +291,7 @@
                                 const widthPercent = (duration / (28 * 60)) * 100;
                                 
                                 const card = document.createElement('div');
-                                card.className = `absolute top-0 h-full p-2 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-secondary/30 shadow-[0_4px_15px_rgba(0,244,254,0.1)] flex flex-col justify-between overflow-hidden group hover:scale-105 hover:bg-white/10 hover:border-secondary transition-all duration-300 z-10 cursor-pointer`;
+                                card.className = `absolute top-0 p-2 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-secondary/30 shadow-[0_4px_15px_rgba(0,244,254,0.1)] flex flex-col justify-between overflow-hidden group hover:scale-105 hover:bg-white/10 hover:border-secondary transition-all duration-300 z-10 cursor-pointer`;
                                 card.style.left = `${leftPercent.toFixed(2)}%`;
                                 card.style.width = `${widthPercent.toFixed(2)}%`;
                                 card.onclick = () => openShowtimeDetails(st);
@@ -438,6 +432,15 @@
             
             try {
                 const formData = new FormData(form);
+                const localStartAt = form.querySelector('[name="startAt"]').value;
+                let localDate = '';
+
+                if (localStartAt) {
+                    const utcDate = new Date(localStartAt);
+                    formData.set('startAt', utcDate.toISOString());
+                    localDate = localStartAt.split('T')[0];
+                }
+
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData
@@ -450,9 +453,8 @@
                     document.getElementById('showtimeModal').classList.add('hidden');
                     form.reset();
                     
-                    // Soft reload via AJAX instead of reloading window
-                    if (result.date) {
-                        loadShowtimes(result.date);
+                    if (localDate) {
+                        loadShowtimes(localDate);
                     }
                 } else {
                     window.showToast(result.message, 'error');
