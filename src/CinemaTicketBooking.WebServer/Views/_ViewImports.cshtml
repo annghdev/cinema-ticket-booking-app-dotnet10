@@ -1,6 +1,9 @@
 @using CinemaTicketBooking.WebServer
 @using CinemaTicketBooking.WebServer.Models
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using CinemaTicketBooking.Infrastructure.Auth
 @using CinemaTicketBooking.Application.Common.Auth
 @inject IAuthorizationService AuthorizationService
+@inject UserManager<Account> UserManager
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

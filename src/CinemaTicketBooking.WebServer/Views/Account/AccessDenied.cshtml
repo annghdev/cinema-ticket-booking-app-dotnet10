@@ -1,0 +1,63 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Truy cập bị từ chối - Aether Cinema</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#0b0e14] text-[#ecedf6] font-body min-h-screen flex items-center justify-center p-6 relative overflow-hidden selection:bg-red-500 selection:text-white">
+    
+    <!-- Background Effects -->
+    <div class="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-500/10 via-background to-background"></div>
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-red-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-md w-full bg-[#10131a]/60 backdrop-blur-2xl border border-red-500/20 p-10 rounded-[2.5rem] shadow-[0_0_50px_rgba(239,68,68,0.15)] text-center">
+        
+        <!-- Glowing Shield Icon -->
+        <div class="w-20 h-20 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+            <span class="material-symbols-outlined text-red-400 text-4xl" style="font-variation-settings: 'FILL' 1;">gpp_maybe</span>
+        </div>
+
+        <h1 class="text-3xl font-headline font-bold text-red-400 mb-2 tracking-tight">403 Forbidden</h1>
+        <h2 class="text-xl font-headline font-bold text-[#ecedf6] mb-3 tracking-tight">Truy cập bị từ chối</h2>
+        <p class="text-slate-400 text-xs font-medium leading-relaxed mb-8 max-w-sm mx-auto">
+            Bạn không có đủ quyền hạn để thực hiện thao tác này. Vui lòng liên hệ quản trị viên cấp cao hoặc đăng nhập bằng tài khoản khác.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col gap-3">
+            <a asp-controller="Home" asp-action="Index" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-xs font-bold shadow-[0_4px_20px_rgba(239,68,68,0.3)] hover:shadow-[0_4px_30px_rgba(239,68,68,0.5)] transition-all duration-300 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">home</span>
+                Quay lại Trang chủ
+            </a>
+            
+            <a asp-controller="Account" asp-action="Logout" class="w-full py-3.5 px-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">logout</span>
+                Đăng xuất tài khoản
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

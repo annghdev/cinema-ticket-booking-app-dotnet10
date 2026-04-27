@@ -106,6 +106,12 @@
     @{
         var controller = ViewContext.RouteData.Values["Controller"]?.ToString() ?? "";
         var action = ViewContext.RouteData.Values["Action"]?.ToString() ?? "";
+        
+        Account? currentUser = null;
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            currentUser = await UserManager.GetUserAsync(User);
+        }
     }
     <!-- SideNavBar -->
     <aside
@@ -197,15 +203,33 @@
                     <span class="material-symbols-outlined" data-icon="settings">settings</span>
                 </button>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right">
-                    <p class="text-xs font-bold text-on-surface">Marcus Thorne</p>
-                    <p class="text-[10px] text-outline italic">Quản trị viên</p>
-                </div>
-                <div class="w-10 h-10 rounded-full border-2 border-primary/30 p-0.5">
-                    <img class="w-full h-full rounded-full object-cover"
-                        data-alt="Portrait of a professional male administrator in a modern office environment with cool blue lighting"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeZmG4ucGRekMX9HS9tXQCcOZYfn2eGfqEzL05o-cnvF77NLBMTBJdHDhPZwcMyLiqd_EgpvgPrt_47Kek01XaBMlT5I0mjcQEa-bZsIKOQMLnjYCn8mG3fN6kjpbF9fGDtelbvphfM3EE2655Bd2aBD4D5TN_B-lOmT6PLdmOCDBk0q-529UTfvPtBA6rXZXqppV7VwloiGaNWw3dC8yHSTTyNwQBOrV7l8J8_Fg0AWZPkW3-6In1Ip1NiE2U-waIy_2SwBcTxRk" />
+            <div class="relative group">
+                <button class="flex items-center gap-3 focus:outline-none">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-on-surface">@(currentUser?.UserName ?? User.Identity?.Name ?? "Nhân viên")</p>
+                        <p class="text-[10px] text-outline italic">@(currentUser?.Email ?? "staff@cinema.com")</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full border-2 border-primary/30 p-0.5 shadow-[0_0_10px_rgba(97,180,254,0.2)]">
+                        <img class="w-full h-full rounded-full object-cover" 
+                             src="@(currentUser?.AvatarUrl ?? "https://api.dicebear.com/7.x/adventurer/svg?seed=staff")" 
+                             alt="Avatar" />
+                    </div>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div class="absolute right-0 mt-2 w-48 bg-[#10131a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50">
+                    <div class="p-4 border-b border-white/5 bg-white/[0.02]">
+                        <p class="text-xs font-bold text-slate-200">@(currentUser?.UserName ?? "Nhân viên")</p>
+                        <p class="text-[10px] text-slate-500 truncate mt-0.5">@(currentUser?.Email ?? "")</p>
+                    </div>
+                    <a href="#" class="flex items-center gap-2 px-4 py-3 text-xs text-slate-300 hover:bg-white/5 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-sm">account_circle</span>
+                        Thông tin tài khoản
+                    </a>
+                    <a asp-controller="Account" asp-action="Logout" class="flex items-center gap-2 px-4 py-3 text-xs text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/5">
+                        <span class="material-symbols-outlined text-sm">logout</span>
+                        Đăng xuất
+                    </a>
                 </div>
             </div>
         </div>

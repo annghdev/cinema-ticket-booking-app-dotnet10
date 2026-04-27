@@ -11,13 +11,6 @@ namespace CinemaTicketBooking.Infrastructure.Auth;
 /// </summary>
 public static class IdentityDataSeeder
 {
-    private static readonly Claim[] AdminPermissionClaims =
-    [
-        new(AuthClaimTypes.Permission, Permissions.BookingsViewAll),
-        new(AuthClaimTypes.Permission, Permissions.AccountsLock),
-        new(AuthClaimTypes.Permission, Permissions.AccountsUnlock)
-    ];
-
     /// <summary>
     /// Ensures roles exist, admin role has static permission claims, and default accounts are seeded.
     /// </summary>
@@ -100,7 +93,9 @@ public static class IdentityDataSeeder
             { RoleNames.TicketStaff, new List<string> 
                 { 
                     Permissions.BookingsViewAll, Permissions.BookingsManage,
-                    Permissions.ConcessionsView, Permissions.ConcessionsManage 
+                    Permissions.ConcessionsView, Permissions.ConcessionsManage,
+                    Permissions.ShowTimesView,
+                    Permissions.MoviesView
                 } 
             }
         };
@@ -135,7 +130,8 @@ public static class IdentityDataSeeder
                 Id = Guid.CreateVersion7(),
                 UserName = "sysadmin",
                 Email = sysEmail,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=sysadmin"
             };
             var result = await userManager.CreateAsync(sysUser, "SysAdmin@123!");
             if (result.Succeeded)
@@ -153,7 +149,8 @@ public static class IdentityDataSeeder
                 Id = Guid.CreateVersion7(),
                 UserName = "admin",
                 Email = adminEmail,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=admin"
             };
             var result = await userManager.CreateAsync(adminUser, "Admin@123!");
             if (result.Succeeded)
@@ -177,7 +174,8 @@ public static class IdentityDataSeeder
                 Id = Guid.CreateVersion7(),
                 UserName = "manager",
                 Email = managerEmail,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=manager"
             };
             var result = await userManager.CreateAsync(managerUser, "Manager@123!");
             if (result.Succeeded)
@@ -201,7 +199,8 @@ public static class IdentityDataSeeder
                 Id = Guid.CreateVersion7(),
                 UserName = "coordinator",
                 Email = coordinatorEmail,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=coordinator"
             };
             var result = await userManager.CreateAsync(coordinatorUser, "Coo@123!");
             if (result.Succeeded)
@@ -221,7 +220,8 @@ public static class IdentityDataSeeder
                 Id = Guid.CreateVersion7(),
                 UserName = "staff",
                 Email = staffEmail,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=staff"
             };
             var result = await userManager.CreateAsync(staffUser, "Staff@123!");
             if (result.Succeeded)
