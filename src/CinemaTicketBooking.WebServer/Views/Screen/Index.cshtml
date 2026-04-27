@@ -1,0 +1,872 @@
+@using CinemaTicketBooking.Application
+@using CinemaTicketBooking.Application.Features
+@using CinemaTicketBooking.Domain
+@model PagedResult<ScreenDto>
+
+@{
+    ViewData["Title"] = "Quản lý phòng chiếu";
+}
+
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div>
+        <h2 class="text-display-lg text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Quản lý phòng chiếu</h2>
+        <p class="text-on-surface-variant font-body max-w-md">Tùy chỉnh sơ đồ chỗ ngồi, bố cục rạp chiếu chuẩn quốc tế.</p>
+    </div>
+    <div class="flex items-center gap-4">
+        <form method="get" class="flex items-center gap-2">
+            <select name="cinemaId" onchange="this.form.submit()" class="bg-surface-container border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-3 px-4">
+                <option value="">-- Tất cả rạp --</option>
+                @if (ViewBag.Cinemas != null)
+                {
+                    foreach (var c in (IReadOnlyList<CinemaDropdownDto>)ViewBag.Cinemas)
+                    {
+                        <!option value="@c.Id" @(ViewBag.SelectedCinemaId == c.Id ? "selected" : "")>@c.Name</!option>
+                    }
+                }
+            </select>
+        </form>
+        <button onclick="openAddScreenModal()" class="py-3 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-[0_4px_20px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_30px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined">add</span>
+            <span>Thêm phòng</span>
+        </button>
+    </div>
+</div>
+
+<div class="glass-panel rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl">
+    <div class="px-8 py-6 flex items-center justify-between border-b border-white/5 bg-white/[0.01]">
+        <h4 class="font-headline font-bold text-xl text-on-surface flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
+            Danh sách phòng chiếu
+        </h4>
+        <form method="get" class="flex items-center gap-4">
+            <input type="hidden" name="cinemaId" value="@ViewBag.SelectedCinemaId" />
+            <input type="text" name="searchTerm" placeholder="Tìm mã phòng..." class="bg-surface-container-high border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-2 px-4 w-60" value="@Context.Request.Query["searchTerm"]" />
+            <button type="submit" class="p-2 bg-surface-container-high text-slate-400 hover:text-on-surface transition-colors rounded-xl">
+                <span class="material-symbols-outlined text-sm">search</span>
+            </button>
+        </form>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-white/[0.02]">
+                <tr>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">Phòng chiếu</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">Loại phòng</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">Bố cục (Dòng x Cột)</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">Số ghế khả dụng</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                @if (Model.Items == null || !Model.Items.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="px-8 py-10 text-center text-sm text-on-surface-variant">Không tìm thấy dữ liệu phòng.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var s in Model.Items)
+                    {
+                        <tr class="hover:bg-white/[0.03] transition-colors group">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-xl text-primary">sensors</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">Phòng @s.Code</p>
+                                        <p class="text-[10px] text-slate-500">ID: @s.Id</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="px-3 py-1 rounded-full bg-white/5 text-slate-300 text-[10px] font-bold border border-white/10">@s.Type</span>
+                            </td>
+                            <td class="px-8 py-6 text-sm text-slate-300 font-mono">@s.RowOfSeats x @s.ColumnOfSeats</td>
+                            <td class="px-8 py-6 text-sm font-bold text-on-surface">@s.ActiveSeatCount / @s.TotalSeats ghế</td>
+                            <td class="px-8 py-6 text-right flex justify-end gap-1">
+                                <button 
+                                    data-code="@s.Code"
+                                    data-rows="@s.RowOfSeats"
+                                    data-cols="@s.ColumnOfSeats"
+                                    data-map="@s.SeatMap"
+                                    onclick="openViewSeatMapModal(this)" 
+                                    class="p-2 text-slate-500 hover:text-secondary transition-colors" title="Xem sơ đồ ghế">
+                                    <span class="material-symbols-outlined text-sm">grid_on</span>
+                                </button>
+                                <button 
+                                    data-id="@s.Id"
+                                    data-code="@s.Code"
+                                    data-cinema="@s.CinemaId"
+                                    data-rows="@s.RowOfSeats"
+                                    data-cols="@s.ColumnOfSeats"
+                                    data-type="@((int)s.Type)"
+                                    data-map="@s.SeatMap"
+                                    onclick="openUpdateScreenModal(this)" 
+                                    class="p-2 text-slate-500 hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-sm">edit</span>
+                                </button>
+                                @if (s.IsActive)
+                                {
+                                    <button onclick="toggleScreenStatus('@s.Id', false)" class="p-2 text-slate-500 hover:text-error transition-colors" title="Ngưng hoạt động">
+                                        <span class="material-symbols-outlined">toggle_on</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button onclick="toggleScreenStatus('@s.Id', true)" class="p-2 text-slate-500 hover:text-secondary transition-colors" title="Kích hoạt">
+                                        <span class="material-symbols-outlined">toggle_off</span>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Full Modal Add Screen -->
+<div id="addScreenModal" class="fixed inset-0 bg-slate-950 z-50 hidden flex flex-col overflow-hidden">
+    <!-- Header -->
+    <div class="px-8 py-4 bg-slate-900 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+        <h3 class="font-headline font-bold text-2xl text-on-surface flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_#61b4fe]"></span>
+            Thiết kế phòng chiếu mới
+        </h3>
+        <button onclick="document.getElementById('addScreenModal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Configuration Form -->
+        <div class="glass-panel rounded-2xl border border-white/5 p-6 bg-slate-900/50 self-start">
+            <h4 class="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2 border-b border-white/5 pb-2">
+                <span class="material-symbols-outlined text-sm">settings</span>
+                Thông số cơ bản
+            </h4>
+            <form id="addScreenForm" class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thuộc rạp</label>
+                    <select name="cinemaId" required class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                        <option value="">-- Chọn rạp --</option>
+                        @if (ViewBag.Cinemas != null)
+                        {
+                            foreach (var c in (IReadOnlyList<CinemaDropdownDto>)ViewBag.Cinemas)
+                            {
+                                <!option value="@c.Id" @(ViewBag.SelectedCinemaId == c.Id ? "selected" : "")>@c.Name</!option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Mã phòng chiếu</label>
+                    <input type="text" name="code" required placeholder="Ví dụ: 01, GoldClass..." class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Loại phòng</label>
+                    <select name="type" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                        <option value="0">2D</option>
+                        <option value="1">3D</option>
+                        <option value="2">IMAX</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Số hàng ghế</label>
+                        <input type="number" id="addRows" value="10" min="1" max="25" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Số cột ghế</label>
+                        <input type="number" id="addCols" value="12" min="1" max="25" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                </div>
+
+                <button type="button" onclick="initializeGrid()" class="w-full py-2.5 px-4 mt-2 rounded-xl bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary/20 font-bold text-xs transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    Khởi tạo lại sơ đồ
+                </button>
+
+                <div class="border-t border-white/5 pt-4 mt-6">
+                    <h4 class="text-xs font-bold text-slate-200 mb-2">Công cụ tạo ghế</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="selectTool(1)" id="tool1" class="py-2 px-3 rounded-xl bg-slate-800 border-2 border-primary text-slate-200 text-xs flex items-center gap-2 hover:bg-slate-700 transition-all">
+                            <span class="w-3 h-3 rounded-md bg-slate-600"></span> Regular
+                        </button>
+                        <button type="button" onclick="selectTool(2)" id="tool2" class="py-2 px-3 rounded-xl bg-slate-800 border border-white/5 text-slate-400 text-xs flex items-center gap-2 hover:bg-slate-700 transition-all">
+                            <span class="w-3 h-3 rounded-md bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.5)]"></span> VIP
+                        </button>
+                        <button type="button" onclick="selectTool(3)" id="tool3" class="py-2 px-3 rounded-xl bg-slate-800 border border-white/5 text-slate-400 text-xs flex items-center gap-2 hover:bg-slate-700 transition-all">
+                            <span class="w-3 h-3 rounded-md bg-pink-500 shadow-[0_0_5px_rgba(236,72,153,0.5)]"></span> Sweetbox
+                        </button>
+                        <button type="button" onclick="selectTool(0)" id="tool0" class="py-2 px-3 rounded-xl bg-slate-800 border border-white/5 text-slate-400 text-xs flex items-center gap-2 hover:bg-slate-700 transition-all">
+                            <span class="w-3 h-3 rounded-md border border-dashed border-slate-500"></span> Lối đi (Aisle)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-t border-white/5 pt-4 mt-4 space-y-2">
+                    <h4 class="text-xs font-bold text-slate-200 mb-2">Tiện ích đổ nhanh</h4>
+                    <div class="flex items-center gap-2 text-xs">
+                        <input type="number" id="fillRowIdx" min="1" placeholder="Hàng (1...)" class="w-24 py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        <button type="button" onclick="fillFullRow()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-white/5 transition-all text-xs">Đổ full hàng</button>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <input type="number" id="fillColIdx" min="1" placeholder="Cột (1...)" class="w-24 py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        <button type="button" onclick="fillFullCol()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-white/5 transition-all text-xs">Đổ full cột</button>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-low rounded-xl p-4 mt-4 space-y-1">
+                    <p class="text-[10px] text-slate-400">⚡ Mẹo: Nhấp chuột vào các ô trống sơ đồ rạp bên phải để đặt ghế theo chế độ đang chọn.</p>
+                    <p class="text-[10px] text-slate-400">❤️ Ghế Sweetbox cần 2 ô liền nhau, hệ thống sẽ tự sinh gap spacer.</p>
+                </div>
+
+                <div class="border-t border-white/5 pt-4 flex items-center gap-4 justify-end">
+                    <button type="button" onclick="document.getElementById('addScreenModal').classList.add('hidden')" class="py-2.5 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                        Đóng
+                    </button>
+                    <button type="submit" class="py-2.5 px-8 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-lg hover:shadow-primary/30 transition-all">
+                        Lưu phòng
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Interactive Grid Designer -->
+        <div class="lg:col-span-2 flex flex-col glass-panel rounded-2xl border border-white/5 p-8 bg-slate-900/50 justify-between">
+            <div>
+                <div class="relative flex h-12 w-full max-w-xl mx-auto shrink-0 items-center justify-center overflow-hidden rounded-t-[50%] border-t-4 border-secondary bg-gradient-to-t from-transparent to-secondary/10 shadow-[0_-15px_30px_rgba(0,244,254,0.2)] mb-12">
+                    <span class="mt-2 font-headline text-xs uppercase tracking-[0.3em] text-secondary">Màn hình chiếu</span>
+                </div>
+                
+                <div class="flex items-center justify-center p-4 overflow-x-auto">
+                    <div id="gridContainer" class="grid gap-2 select-none">
+                        <!-- Seats get generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-4 flex items-center justify-between text-xs text-slate-400">
+                <span>Tổng số dòng: <span id="lblRows" class="text-on-surface font-mono">0</span></span>
+                <span>Tổng số cột: <span id="lblCols" class="text-on-surface font-mono">0</span></span>
+                <span>Tổng số ghế khả dụng: <span id="lblTotalSeats" class="text-primary font-mono font-bold">0</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Screen Modal -->
+<div id="updateScreenModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-md rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
+        <button onclick="document.getElementById('updateScreenModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        
+        <h3 class="font-headline font-bold text-2xl text-on-surface mb-6 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_10px_#00f4fe]"></span>
+            Cập nhật phòng chiếu
+        </h3>
+        
+        <form id="updateScreenForm" class="space-y-4 text-sm">
+            <input type="hidden" name="id" id="updScreenId" />
+            <input type="hidden" name="seatMap" id="updSeatMap" />
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Mã phòng chiếu</label>
+                    <input type="text" id="updCode" name="code" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Loại phòng</label>
+                    <select id="updType" name="type" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                        <option value="0">2D</option>
+                        <option value="1">3D</option>
+                        <option value="2">IMAX</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Số dòng ghế</label>
+                        <input type="number" id="updRows" name="rowOfSeats" readonly class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/20 text-slate-400 focus:outline-none font-mono" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Số cột ghế</label>
+                        <input type="number" id="updCols" name="columnOfSeats" readonly class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/20 text-slate-400 focus:outline-none font-mono" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Tổng số ghế</label>
+                    <input type="number" id="updTotalSeats" name="totalSeats" readonly class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/20 text-slate-400 focus:outline-none font-mono font-bold" />
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/5 mt-6">
+                <button type="button" onclick="document.getElementById('updateScreenModal').classList.add('hidden')" class="py-2.5 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                    Đóng
+                </button>
+                <button type="submit" class="py-2.5 px-6 rounded-xl bg-gradient-to-r from-secondary to-secondary text-on-secondary text-xs font-bold shadow-lg hover:shadow-secondary/30 transition-all">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View Seat Map Modal -->
+<div id="viewSeatMapModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-7xl rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
+        <button onclick="document.getElementById('viewSeatMapModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        
+        <h3 class="font-headline font-bold text-2xl text-on-surface mb-6 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_10px_#00f4fe]"></span>
+            Sơ đồ ghế phòng <span id="viewScreenCode" class="text-secondary"></span>
+        </h3>
+        
+        <div class="flex flex-col items-center w-full max-h-[60vh] overflow-y-auto p-4">
+            <div class="relative flex h-12 w-full max-w-xl shrink-0 items-center justify-center overflow-hidden rounded-t-[50%] border-t-4 border-secondary bg-gradient-to-t from-transparent to-secondary/10 shadow-[0_-15px_30px_rgba(0,244,254,0.2)] mb-12">
+                <span class="mt-2 font-headline text-xs uppercase tracking-[0.3em] text-secondary">Màn hình chiếu</span>
+            </div>
+
+            <div id="seatMapContainer" class="overflow-x-auto flex justify-center py-4 w-full">
+                <div id="viewGridContainer" class="grid gap-2 select-none">
+                    <!-- Seats get rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-white/5 pt-4 mt-6 flex justify-between items-center text-xs text-slate-400">
+            <div class="flex items-center gap-4 flex-wrap">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-700"></span> Thường</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-600/20 border border-amber-500/50"></span> VIP</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-pink-600/20 border border-pink-500/50"></span> Sweetbox</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded border border-dashed border-white/5"></span> Lối đi</span>
+            </div>
+            <button type="button" onclick="document.getElementById('viewSeatMapModal').classList.add('hidden')" class="py-2.5 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentTool = 1; 
+        let currentGrid = []; 
+        let totalRows = 10;
+        let totalCols = 12;
+
+        function openViewSeatMapModal(btn) {
+            const code = btn.getAttribute('data-code');
+            const rows = parseInt(btn.getAttribute('data-rows'));
+            const cols = parseInt(btn.getAttribute('data-cols'));
+            const mapStr = btn.getAttribute('data-map');
+
+            document.getElementById('viewScreenCode').innerText = code;
+
+            const container = document.getElementById('viewGridContainer');
+            container.innerHTML = '';
+            
+            const gridCols = cols + 2;
+            container.style.gridTemplateColumns = `repeat(${gridCols}, minmax(0, 1fr))`;
+
+            try {
+                const parsed = JSON.parse(mapStr);
+
+                // 1. Column Labels
+                const topLeft = document.createElement('div');
+                topLeft.className = 'w-10 h-10 flex items-center justify-center text-xs font-bold text-slate-500';
+                container.appendChild(topLeft);
+
+                for (let c = cols; c >= 1; c--) {
+                    const colLabel = document.createElement('div');
+                    colLabel.className = 'w-10 h-10 flex items-center justify-center text-xs font-bold text-slate-400 font-mono';
+                    colLabel.innerText = c;
+                    container.appendChild(colLabel);
+                }
+
+                const topRight = document.createElement('div');
+                topRight.className = 'w-10 h-10 flex items-center justify-center text-xs font-bold text-slate-500';
+                container.appendChild(topRight);
+
+                // 2. Row Data
+                let sweetboxCodes = Array(rows).fill(null).map(() => Array(cols).fill(""));
+                let normalCodes = Array(rows).fill(null).map(() => Array(cols).fill(""));
+                let sweetBoxCounter = 1;
+
+                for (let r = 0; r < rows; r++) {
+                    let seatNumber = 1;
+                    for (let c = cols - 1; c >= 0; c--) {
+                        const seatType = parsed[r][c];
+                        if (seatType === 0 || seatType === 4) continue;
+                        if (seatType === 3) {
+                            sweetboxCodes[r][c] = `Sweet${sweetBoxCounter++}`;
+                        } else {
+                            normalCodes[r][c] = `${String.fromCharCode(65 + r)}${seatNumber++}`;
+                        }
+                    }
+                }
+
+                for (let r = 0; r < rows; r++) {
+                    const leftLabel = document.createElement('div');
+                    leftLabel.className = 'w-10 h-10 flex items-center justify-center text-sm font-bold text-slate-400 font-mono';
+                    leftLabel.innerText = String.fromCharCode(65 + r);
+                    container.appendChild(leftLabel);
+
+                    for (let c = 0; c < cols; c++) {
+                        const cellValue = parsed[r][c];
+
+                        if (cellValue === 0) {
+                            const empty = document.createElement('div');
+                            empty.className = 'w-10 h-10';
+                            container.appendChild(empty);
+                            continue;
+                        }
+
+                        if (cellValue === 4 && c + 1 < cols && parsed[r][c+1] === 3) {
+                            const el = document.createElement('div');
+                            el.className = "col-span-2 h-10 rounded-xl flex items-center justify-center font-bold text-fuchsia-200 bg-fuchsia-500/10 border border-fuchsia-300/40 text-[10px]";
+                            const seatCode = sweetboxCodes[r][c+1];
+                            el.innerText = seatCode;
+                            container.appendChild(el);
+                            c++;
+                            continue;
+                        }
+                        if (cellValue === 3 && c + 1 < cols && parsed[r][c+1] === 4) {
+                            const el = document.createElement('div');
+                            el.className = "col-span-2 h-10 rounded-xl flex items-center justify-center font-bold text-fuchsia-200 bg-fuchsia-500/10 border border-fuchsia-300/40 text-[10px]";
+                            const seatCode = sweetboxCodes[r][c];
+                            el.innerText = seatCode;
+                            container.appendChild(el);
+                            c++;
+                            continue;
+                        }
+                        
+                        if (cellValue === 4) {
+                            const empty = document.createElement('div');
+                            empty.className = 'w-10 h-10';
+                            container.appendChild(empty);
+                            continue;
+                        }
+
+                        const el = document.createElement('div');
+                        const seatCode = normalCodes[r][c] || sweetboxCodes[r][c];
+                        el.innerText = seatCode;
+
+                        if (cellValue === 1) {
+                            el.className = "w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold bg-slate-800 border border-white/10 text-slate-300";
+                        } else if (cellValue === 2) {
+                            el.className = "w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold bg-amber-500/10 border border-amber-300/40 text-amber-200";
+                        } else if (cellValue === 3) {
+                            el.className = "w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold bg-fuchsia-500/10 border border-fuchsia-300/40 text-fuchsia-200";
+                        }
+
+                        container.appendChild(el);
+                    }
+
+                    const rightLabel = document.createElement('div');
+                    rightLabel.className = 'w-10 h-10 flex items-center justify-center text-sm font-bold text-slate-400 font-mono';
+                    rightLabel.innerText = String.fromCharCode(65 + r);
+                    container.appendChild(rightLabel);
+                }
+            } catch(e) {
+                container.innerHTML = '<p class="text-error text-xs">Không thể parse sơ đồ ghế!</p>';
+            }
+
+            document.getElementById('viewSeatMapModal').classList.remove('hidden');
+        }
+
+        function getCellClassNoHover(val) {
+            switch (val) {
+                case 1:
+                    return "bg-slate-700 border border-slate-500/30";
+                case 2:
+                    return "bg-amber-600/20 text-amber-400 border border-amber-500/50 shadow-[inset_0_0_8px_rgba(245,158,11,0.2)]";
+                case 3:
+                    return "bg-pink-600/20 text-pink-400 border border-pink-500/50 shadow-[inset_0_0_8px_rgba(236,72,153,0.2)]";
+                case 4:
+                    return "bg-pink-900/10 border border-dashed border-pink-500/20 opacity-30 pointer-events-none"; 
+                default:
+                    return "bg-transparent border border-dashed border-white/5"; 
+            }
+        }
+
+        function openAddScreenModal() {
+            document.getElementById('addScreenForm').reset();
+            document.getElementById('addScreenModal').classList.remove('hidden');
+            initializeGrid();
+        }
+
+        function openUpdateScreenModal(btn) {
+            document.getElementById('updateScreenForm').reset();
+            
+            document.getElementById('updScreenId').value = btn.getAttribute('data-id');
+            document.getElementById('updCode').value = btn.getAttribute('data-code');
+            document.getElementById('updType').value = btn.getAttribute('data-type');
+            document.getElementById('updRows').value = btn.getAttribute('data-rows');
+            document.getElementById('updCols').value = btn.getAttribute('data-cols');
+            document.getElementById('updSeatMap').value = btn.getAttribute('data-map');
+            
+            try {
+                const mapStr = btn.getAttribute('data-map');
+                const parsed = JSON.parse(mapStr);
+                let total = 0;
+                for(let r=0; r<parsed.length; r++){
+                    for(let c=0; c<parsed[r].length; c++){
+                        if (parsed[r][c] > 0 && parsed[r][c] < 4) total++;
+                    }
+                }
+                document.getElementById('updTotalSeats').value = total;
+            } catch(e) {
+                document.getElementById('updTotalSeats').value = 0;
+            }
+
+            document.getElementById('updateScreenModal').classList.remove('hidden');
+        }
+
+        function selectTool(toolCode) {
+            currentTool = toolCode;
+            document.querySelectorAll('[id^="tool"]').forEach(btn => {
+                btn.classList.remove('border-primary');
+                btn.classList.add('border-white/5');
+            });
+            document.getElementById('tool' + toolCode).classList.remove('border-white/5');
+            document.getElementById('tool' + toolCode).classList.add('border-primary');
+        }
+
+        function initializeGrid() {
+            totalRows = parseInt(document.getElementById('addRows').value) || 10;
+            totalCols = parseInt(document.getElementById('addCols').value) || 12;
+
+            currentGrid = Array.from({ length: totalRows }, () => Array(totalCols).fill(1)); 
+
+            renderDesigner();
+        }
+
+        function renderDesigner() {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+            
+            const gridCols = totalCols + 2;
+            container.style.gridTemplateColumns = `repeat(${gridCols}, minmax(0, 1fr))`;
+
+            document.getElementById('lblRows').innerText = totalRows;
+            document.getElementById('lblCols').innerText = totalCols;
+
+            let totalSeats = 0;
+            let sweetboxCodes = Array(totalRows).fill(null).map(() => Array(totalCols).fill(""));
+            let normalCodes = Array(totalRows).fill(null).map(() => Array(totalCols).fill(""));
+            let sweetBoxCounter = 1;
+
+            for (let r = 0; r < totalRows; r++) {
+                let seatNumber = 1;
+                for (let c = totalCols - 1; c >= 0; c--) {
+                    const seatType = currentGrid[r][c];
+                    if (seatType === 0 || seatType === 4) continue;
+                    if (seatType === 3) {
+                        sweetboxCodes[r][c] = `Sweet${sweetBoxCounter++}`;
+                        totalSeats++;
+                    } else {
+                        normalCodes[r][c] = `${String.fromCharCode(65 + r)}${seatNumber++}`;
+                        totalSeats++;
+                    }
+                }
+            }
+
+            // 1. Column Labels
+            const topLeft = document.createElement('div');
+            topLeft.className = 'w-10 h-10 flex items-center justify-center text-xs font-bold text-slate-500';
+            container.appendChild(topLeft);
+
+            for (let c = totalCols; c >= 1; c--) {
+                const colLabel = document.createElement('div');
+                colLabel.className = 'w-10 h-10 flex items-center justify-center text-xs font-bold text-slate-400 font-mono';
+                colLabel.innerText = c;
+                container.appendChild(colLabel);
+            }
+
+            const topRight = document.createElement('div');
+            topRight.className = 'w-10 h-10 flex items-center justify-center text-xs font-bold text-slate-500';
+            container.appendChild(topRight);
+
+            // 2. Rows
+            for (let r = 0; r < totalRows; r++) {
+                const leftLabel = document.createElement('div');
+                leftLabel.className = 'w-10 h-10 flex items-center justify-center text-sm font-bold text-slate-400 font-mono';
+                leftLabel.innerText = String.fromCharCode(65 + r);
+                container.appendChild(leftLabel);
+
+                for (let c = 0; c < totalCols; c++) {
+                    const cellValue = currentGrid[r][c];
+
+                    if (cellValue === 0) {
+                        const empty = document.createElement('div');
+                        empty.className = 'w-10 h-10 cursor-pointer hover:bg-white/5 rounded-xl transition-all';
+                        empty.onclick = () => toggleCell(r, c);
+                        container.appendChild(empty);
+                        continue;
+                    }
+
+                    if (cellValue === 4 && c + 1 < totalCols && currentGrid[r][c+1] === 3) {
+                        const el = document.createElement('div');
+                        el.className = "col-span-2 h-10 rounded-md cursor-pointer flex items-center justify-center font-bold text-fuchsia-200 bg-fuchsia-500/10 border border-fuchsia-300/40 text-[10px]";
+                        el.onclick = () => toggleCell(r, c+1);
+                        const seatCode = sweetboxCodes[r][c+1];
+                        el.innerText = seatCode;
+                        container.appendChild(el);
+                        c++;
+                        continue;
+                    }
+                    if (cellValue === 3 && c + 1 < totalCols && currentGrid[r][c+1] === 4) {
+                        const el = document.createElement('div');
+                        el.className = "col-span-2 h-10 rounded-md cursor-pointer flex items-center justify-center font-bold text-fuchsia-200 bg-fuchsia-500/10 border border-fuchsia-300/40 text-[10px]";
+                        el.onclick = () => toggleCell(r, c);
+                        const seatCode = sweetboxCodes[r][c];
+                        el.innerText = seatCode;
+                        container.appendChild(el);
+                        c++;
+                        continue;
+                    }
+
+                    if (cellValue === 4) {
+                        const empty = document.createElement('div');
+                        empty.className = 'w-10 h-10 cursor-pointer hover:bg-white/5 rounded-xl transition-all';
+                        empty.onclick = () => toggleCell(r, c);
+                        container.appendChild(empty);
+                        continue;
+                    }
+
+                    const el = document.createElement('div');
+                    el.className = "w-10 h-10 " + getCellClass(cellValue);
+                    el.onclick = () => toggleCell(r, c);
+                    
+                    if (cellValue > 0 && cellValue < 4) {
+                        const seatCode = normalCodes[r][c] || sweetboxCodes[r][c];
+                        el.innerText = seatCode;
+                    }
+
+                    container.appendChild(el);
+                }
+
+                const rightLabel = document.createElement('div');
+                rightLabel.className = 'w-10 h-10 flex items-center justify-center text-sm font-bold text-slate-400 font-mono';
+                rightLabel.innerText = String.fromCharCode(65 + r);
+                container.appendChild(rightLabel);
+            }
+
+            document.getElementById('lblTotalSeats').innerText = totalSeats;
+        }
+
+        function getCellClass(val) {
+            let base = "w-10 h-10 rounded-md cursor-pointer flex items-center justify-center font-bold text-[10px] transition-all duration-150 text-slate-300 ";
+            switch (val) {
+                case 1:
+                    return base + "bg-slate-700 hover:bg-slate-600 border border-slate-500/30";
+                case 2:
+                    return base + "bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 border border-amber-500/50 shadow-[inset_0_0_8px_rgba(245,158,11,0.2)]";
+                case 3:
+                    return base + "bg-pink-600/20 text-pink-400 hover:bg-pink-600/30 border border-pink-500/50 shadow-[inset_0_0_8px_rgba(236,72,153,0.2)]";
+                case 4:
+                    return base + "bg-pink-900/10 border border-dashed border-pink-500/20 opacity-30 pointer-events-none"; 
+                default:
+                    return base + "bg-transparent border border-dashed border-white/5 hover:border-white/20"; 
+            }
+        }
+
+        function toggleCell(r, c) {
+            if (currentTool === 0) {
+                // Aisle: fills full column
+                for (let i = 0; i < totalRows; i++) {
+                    currentGrid[i][c] = 0;
+                }
+            } else if (currentTool === 3) {
+                // Sweetbox: gap on left (4-3 or 0-3 if aisle)
+                if (c - 1 >= 0) {
+                    if (currentGrid[r][c-1] !== 0) {
+                        currentGrid[r][c-1] = 4; // Gap spacer
+                    }
+                    currentGrid[r][c] = 3; 
+                } else if (c + 1 < totalCols) {
+                    // Clicked column 0, place gap at 0 and seat at 1
+                    if (currentGrid[r][c] !== 0) {
+                        currentGrid[r][c] = 4;
+                    }
+                    currentGrid[r][c+1] = 3;
+                } else {
+                    window.showToast('Không đủ khoảng trống để tạo Sweetbox!', 'error');
+                    return;
+                }
+            } else {
+                // Regular/VIP
+                if (currentGrid[r][c] === 3 && c - 1 >= 0 && currentGrid[r][c-1] === 4) {
+                    currentGrid[r][c-1] = 1; // restore gap
+                }
+                if (currentGrid[r][c] === 4 && c + 1 < totalCols && currentGrid[r][c+1] === 3) {
+                    currentGrid[r][c+1] = 1; // restore seat
+                }
+                currentGrid[r][c] = currentTool;
+            }
+            renderDesigner();
+        }
+
+        function fillFullRow() {
+            const rowIdx = parseInt(document.getElementById('fillRowIdx').value) - 1;
+            if (isNaN(rowIdx) || rowIdx < 0 || rowIdx >= totalRows) {
+                window.showToast('Chỉ số hàng không hợp lệ!', 'error');
+                return;
+            }
+
+            if (currentTool === 0) {
+                window.showToast('Không thể đổ full hàng với Lối đi (Aisle chỉ áp dụng theo cột)!', 'warning');
+                return;
+            }
+
+            if (currentTool === 3) {
+                // Fill full row with sweetboxes: gap-3 pairs
+                for (let c = 1; c < totalCols; c += 2) {
+                    if (currentGrid[rowIdx][c-1] !== 0) currentGrid[rowIdx][c-1] = 4;
+                    currentGrid[rowIdx][c] = 3;
+                }
+            } else {
+                for (let c = 0; c < totalCols; c++) {
+                    currentGrid[rowIdx][c] = currentTool;
+                }
+            }
+            renderDesigner();
+        }
+
+        function fillFullCol() {
+            const colIdx = parseInt(document.getElementById('fillColIdx').value) - 1;
+            if (isNaN(colIdx) || colIdx < 0 || colIdx >= totalCols) {
+                window.showToast('Chỉ số cột không hợp lệ!', 'error');
+                return;
+            }
+
+            if (currentTool === 0) {
+                for (let r = 0; r < totalRows; r++) {
+                    currentGrid[r][colIdx] = 0;
+                }
+            } else if (currentTool === 3) {
+                if (colIdx - 1 < 0) {
+                    window.showToast('Không thể xếp Sweetbox tại cột đầu tiên!', 'error');
+                    return;
+                }
+                for (let r = 0; r < totalRows; r++) {
+                    if (currentGrid[r][colIdx-1] !== 0) currentGrid[r][colIdx-1] = 4;
+                    currentGrid[r][colIdx] = 3;
+                }
+            } else {
+                for (let r = 0; r < totalRows; r++) {
+                    currentGrid[r][colIdx] = currentTool;
+                }
+            }
+            renderDesigner();
+        }
+
+        document.getElementById('addScreenForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const payload = Object.fromEntries(formData.entries());
+
+            payload.rowOfSeats = totalRows;
+            payload.columnOfSeats = totalCols;
+            payload.type = parseInt(payload.type);
+
+            payload.seatMap = JSON.stringify(currentGrid);
+            
+            let actualSeats = 0;
+            for(let r=0; r<totalRows; r++){
+                for(let c=0; c<totalCols; c++){
+                    if (currentGrid[r][c] > 0 && currentGrid[r][c] < 4) actualSeats++;
+                }
+            }
+            payload.totalSeats = actualSeats;
+
+            if (window.showLoading) window.showLoading();
+            try {
+                const response = await fetch('/Screen/Create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                window.showToast('Có lỗi xảy ra khi tạo phòng chiếu.', 'error');
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        });
+
+        document.getElementById('updateScreenForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const payload = Object.fromEntries(formData.entries());
+
+            payload.rowOfSeats = parseInt(payload.rowOfSeats);
+            payload.columnOfSeats = parseInt(payload.columnOfSeats);
+            payload.totalSeats = parseInt(payload.totalSeats);
+            payload.type = parseInt(payload.type);
+
+            if (window.showLoading) window.showLoading();
+            try {
+                const response = await fetch('/Screen/Update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                window.showToast('Có lỗi xảy ra khi cập nhật phòng chiếu.', 'error');
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        });
+
+        async function toggleScreenStatus(id, activate) {
+            const url = activate ? '/Screen/Activate' : '/Screen/Deactivate';
+            if (window.showLoading) window.showLoading();
+            try {
+                const response = await fetch(`${url}?id=${id}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                window.showToast('Có lỗi xảy ra.', 'error');
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        }
+    </script>
+}
