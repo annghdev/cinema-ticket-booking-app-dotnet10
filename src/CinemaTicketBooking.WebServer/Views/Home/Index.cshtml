@@ -1,8 +1,322 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Tổng quan";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Summary Cards (KPIs) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-2 rounded-lg bg-primary/10 text-primary">
+                <span class="material-symbols-outlined" data-icon="payments">payments</span>
+            </div>
+            <span class="text-secondary text-xs font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                +12.5%
+            </span>
+        </div>
+        <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Doanh thu hàng ngày</p>
+        <h3 class="text-3xl font-headline font-bold">$24,592.00</h3>
+        <div
+            class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent">
+        </div>
+    </div>
+    <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
+                <span class="material-symbols-outlined" data-icon="local_activity">local_activity</span>
+            </div>
+            <span class="text-secondary text-xs font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                +8.2%
+            </span>
+        </div>
+        <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Vé đã bán</p>
+        <h3 class="text-3xl font-headline font-bold">1,842</h3>
+        <div
+            class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-secondary/30 to-transparent">
+        </div>
+    </div>
+    <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-2 rounded-lg bg-tertiary/10 text-tertiary">
+                <span class="material-symbols-outlined" data-icon="event_seat">event_seat</span>
+            </div>
+            <span class="text-error text-xs font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]"
+                    data-icon="trending_down">trending_down</span>
+                -2.1%
+            </span>
+        </div>
+        <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Tỉ lệ lấp đầy TB</p>
+        <h3 class="text-3xl font-headline font-bold">76.4%</h3>
+        <div
+            class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-tertiary/30 to-transparent">
+        </div>
+    </div>
+    <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-2 rounded-lg bg-surface-tint/10 text-surface-tint">
+                <span class="material-symbols-outlined" data-icon="theaters">theaters</span>
+            </div>
+            <span class="text-on-surface-variant text-xs font-bold">Live</span>
+        </div>
+        <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Phim đang chiếu</p>
+        <h3 class="text-3xl font-headline font-bold">14</h3>
+        <div
+            class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-surface-tint/30 to-transparent">
+        </div>
+    </div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+    <!-- Revenue Analytics Section -->
+    <div class="xl:col-span-2 glass-card rounded-2xl p-8 relative">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h4 class="text-xl font-headline font-bold text-on-surface">Phân tích doanh thu</h4>
+                <p class="text-sm text-on-surface-variant">Hiệu suất tài chính 30 ngày qua</p>
+            </div>
+            <div class="flex gap-2">
+                <button
+                    class="px-4 py-2 text-xs font-bold rounded-lg bg-surface-container-highest text-on-surface border border-outline-variant/30">WEEK</button>
+                <button
+                    class="px-4 py-2 text-xs font-bold rounded-lg bg-secondary/10 text-secondary border border-secondary/30">MONTH</button>
+            </div>
+        </div>
+        <!-- Mockup Chart -->
+        <div class="h-64 w-full relative flex items-end gap-2 px-2">
+            <div class="absolute inset-0 flex flex-col justify-between py-2 text-[10px] text-outline">
+                <div class="border-b border-outline-variant/10 w-full pb-1">$50k</div>
+                <div class="border-b border-outline-variant/10 w-full pb-1">$40k</div>
+                <div class="border-b border-outline-variant/10 w-full pb-1">$30k</div>
+                <div class="border-b border-outline-variant/10 w-full pb-1">$20k</div>
+                <div class="border-b border-outline-variant/10 w-full pb-1">$10k</div>
+            </div>
+            <!-- Neon Data Points (Visualization using divs) -->
+            <div class="flex-1 flex items-end justify-between h-full relative z-10 pt-4">
+                <div class="w-1.5 h-1/3 bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-1/2 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-2/3">
+                    </div>
+                </div>
+                <div class="w-1.5 h-1/2 bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-2/3 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-3/4">
+                    </div>
+                </div>
+                <div class="w-1.5 h-2/3 bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-3/4 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
+                    </div>
+                </div>
+                <div class="w-1.5 h-1/2 bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-1/3 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-1/2">
+                    </div>
+                </div>
+                <div class="w-1.5 h-3/4 bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-4/5 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
+                    </div>
+                </div>
+                <div class="w-1.5 h-full bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-5/6 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
+                    </div>
+                </div>
+                <!-- More bars would go here... -->
+                <div class="w-1.5 h-2/3 bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-1/2 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-2/3">
+                    </div>
+                </div>
+                <div class="w-1.5 h-3/4 bg-primary/20 rounded-t-full relative group">
+                    <div
+                        class="absolute bottom-0 w-full h-4/5 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-between mt-4 px-2 text-[10px] text-outline font-label uppercase">
+            <span>Oct 01</span>
+            <span>Oct 10</span>
+            <span>Oct 20</span>
+            <span>Oct 30</span>
+        </div>
+    </div>
+    <!-- Real-time Status Grid -->
+    <div class="glass-card rounded-2xl p-6">
+        <h4 class="text-lg font-headline font-bold text-on-surface mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary" data-icon="sensors">sensors</span>
+            Trạng thái phòng chiếu
+        </h4>
+        <div class="space-y-4">
+            <div
+                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse neon-glow"></div>
+                    <span class="text-sm font-medium">Hall 01</span>
+                </div>
+                <span
+                    class="text-[10px] px-2 py-1 rounded bg-secondary/10 text-secondary uppercase font-bold tracking-tighter">Đang chiếu</span>
+            </div>
+            <div
+                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse neon-glow"></div>
+                    <span class="text-sm font-medium">Hall 02</span>
+                </div>
+                <span
+                    class="text-[10px] px-2 py-1 rounded bg-secondary/10 text-secondary uppercase font-bold tracking-tighter">Đang chiếu</span>
+            </div>
+            <div
+                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-outline"></div>
+                    <span class="text-sm font-medium">Hall 03</span>
+                </div>
+                <span
+                    class="text-[10px] px-2 py-1 rounded bg-outline/10 text-outline uppercase font-bold tracking-tighter">Đang trống</span>
+            </div>
+            <div
+                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+                    <span class="text-sm font-medium">Hall 04</span>
+                </div>
+                <span
+                    class="text-[10px] px-2 py-1 rounded bg-error/10 text-error uppercase font-bold tracking-tighter">Bảo trì</span>
+            </div>
+            <div
+                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse neon-glow"></div>
+                    <span class="text-sm font-medium">Hall 05</span>
+                </div>
+                <span
+                    class="text-[10px] px-2 py-1 rounded bg-secondary/10 text-secondary uppercase font-bold tracking-tighter">Screening</span>
+            </div>
+        </div>
+        <button
+            class="w-full mt-6 py-3 text-xs font-bold text-primary hover:bg-primary/5 rounded-xl border border-primary/20 transition-all">VIEW
+            SYSTEM MAP</button>
+    </div>
+</div>
+<!-- Top Performing Movies -->
+<div class="glass-card rounded-2xl overflow-hidden">
+    <div class="p-8 border-b border-outline-variant/20 flex justify-between items-center">
+        <h4 class="text-xl font-headline font-bold text-on-surface">Top Performing Movies</h4>
+        <button class="text-secondary text-sm font-bold flex items-center gap-2 hover:underline">
+            FULL REPORT
+            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead
+                class="bg-surface-container-lowest text-on-surface-variant text-[10px] uppercase tracking-widest font-label">
+                <tr>
+                    <th class="px-8 py-4">Movie</th>
+                    <th class="px-8 py-4">Release Date</th>
+                    <th class="px-8 py-4">Box Office</th>
+                    <th class="px-8 py-4">Target Reach</th>
+                    <th class="px-8 py-4">Trend</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
+                <!-- Movie 1 -->
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-8 py-4">
+                        <div class="flex items-center gap-4">
+                            <img class="w-12 h-16 rounded-lg object-cover"
+                                data-alt="Cinematic movie poster with vibrant neon colors and dramatic shadows, depicting a sci-fi city landscape"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzHzEI5prk9snZCti3CWtg-7FyxJvBflmZLbJKUsRIdHaHdrtzakpbMpCNuRXFws6t3GI7N9CapG8mUCryr8nbAMBZMDjyxh0R3JsM8vWYRmVbnaDvJQp4XU1QVbW6tsJFPZHoVaTPb_tPzlBOlSKAsCeFWtJZAAEu4ACkefVAOpXECiZ1hKqGJTjU4zoyHdTtGbmaV2aXxi3Ogzth9kExXsIF0zlpBMSKnAzGRxzYLAZ4JBViPhv3XqAyTbJG4FvMevN01TNJ9EA" />
+                            <div>
+                                <p class="font-bold">Aether: Genesis</p>
+                                <p class="text-xs text-on-surface-variant">Sci-Fi / Action</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-4 text-sm text-on-surface-variant">Oct 12, 2023</td>
+                    <td class="px-8 py-4 font-headline font-bold">$1.2M</td>
+                    <td class="px-8 py-4">
+                        <div class="w-32">
+                            <div class="flex justify-between text-[10px] mb-1">
+                                <span>88%</span>
+                                <span>$1.5M Goal</span>
+                            </div>
+                            <div class="w-full bg-surface-container rounded-full h-1.5">
+                                <div class="bg-secondary h-1.5 rounded-full neon-glow" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-4">
+                        <span class="material-symbols-outlined text-secondary"
+                            data-icon="trending_up">trending_up</span>
+                    </td>
+                </tr>
+                <!-- Movie 2 -->
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-8 py-4">
+                        <div class="flex items-center gap-4">
+                            <img class="w-12 h-16 rounded-lg object-cover"
+                                data-alt="Artistic movie poster showing a dark silhouettes against a glowing ember background, dramatic noir aesthetic"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaoUCVXE-tYP8xQlUeN9jUelcAtbm9vXYSX8DZjvSmHw25wZscxJKMdyxzf6g4V-2DIL05F8Fg2Em-rxo9IhIUeb1zLpF0waMQmZcUk4WHRoTLIVYdmHnOSty2SXU0JvlS54_3zkQzB76Q-qncLCuAc3iaiXRye30TK_4oKoZYS8T6h1GWItdaF4pQvcVYN82HfXZ4WEyrOSr1VF4f-h_xAh5LRI-N23oc5c7Jo4iHWdy0uJ_Z9Gz2CLUVpd5SidFYkMWspWqdgy4" />
+                            <div>
+                                <p class="font-bold">Midnight Echo</p>
+                                <p class="text-xs text-on-surface-variant">Thriller / Noir</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-4 text-sm text-on-surface-variant">Oct 05, 2023</td>
+                    <td class="px-8 py-4 font-headline font-bold">$840k</td>
+                    <td class="px-8 py-4">
+                        <div class="w-32">
+                            <div class="flex justify-between text-[10px] mb-1">
+                                <span>70%</span>
+                                <span>$1.2M Goal</span>
+                            </div>
+                            <div class="w-full bg-surface-container rounded-full h-1.5">
+                                <div class="bg-secondary h-1.5 rounded-full neon-glow" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-4">
+                        <span class="material-symbols-outlined text-secondary"
+                            data-icon="trending_up">trending_up</span>
+                    </td>
+                </tr>
+                <!-- Movie 3 -->
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-8 py-4">
+                        <div class="flex items-center gap-4">
+                            <img class="w-12 h-16 rounded-lg object-cover"
+                                data-alt="Abstract movie poster with liquid chrome textures and blue lighting, futuristic and minimal"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAexnVfsT3gRje8xqZOuXoaGGWrdkhv7z2emfR2qIABkuGZ0OsZXzFnDCeHcDTyUf18MvO7RxqN24_NSKH2EHuf7pvCNzKe0AnCk7HyO_I1GpMgX2bCsfIKkeFZaxp1QYh4dKhvaIaJHRyHjHZRsN0SkRcLgtyjcQhtQtBrQjDT91reYHiBFWmccHCf9uTAuWv9HTrRIUQJlLm7XklvgDrYUhdGrVR87Mx2uNYbj7vvNYs8Xh461Zzj8j4RghI_lxpBOV7TsOcdc_4" />
+                            <div>
+                                <p class="font-bold">Silicon Dreams</p>
+                                <p class="text-xs text-on-surface-variant">Documentary</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-4 text-sm text-on-surface-variant">Sep 28, 2023</td>
+                    <td class="px-8 py-4 font-headline font-bold">$420k</td>
+                    <td class="px-8 py-4">
+                        <div class="w-32">
+                            <div class="flex justify-between text-[10px] mb-1">
+                                <span>105%</span>
+                                <span>$400k Goal</span>
+                            </div>
+                            <div class="w-full bg-surface-container rounded-full h-1.5">
+                                <div class="bg-primary h-1.5 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-4">
+                        <span class="material-symbols-outlined text-outline"
+                            data-icon="trending_flat">trending_flat</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
