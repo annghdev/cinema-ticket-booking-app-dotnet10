@@ -1,0 +1,472 @@
+@using CinemaTicketBooking.Application
+@using CinemaTicketBooking.Application.Features
+@model CinemaTicketBooking.WebServer.Controllers.ShowTimeCalendarViewModel
+
+@{
+    ViewData["Title"] = "Lịch chiếu";
+}
+
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div>
+        <h2 class="text-display-lg text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Quản lý lịch chiếu</h2>
+        <p class="text-on-surface-variant font-body max-w-md">Điều phối suất chiếu, kiểm soát khung giờ hoạt động và bố cục phòng chiếu tại các rạp.</p>
+    </div>
+    
+    <div class="flex items-center gap-4 flex-wrap md:flex-nowrap">
+        <!-- Add Showtime Button -->
+        <button onclick="document.getElementById('showtimeModal').classList.remove('hidden'); loadDropdowns();" class="py-3 px-6 rounded-xl bg-gradient-to-r from-[#61b4fe] to-[#00f4fe] text-[#090079] font-bold text-sm shadow-[0_4px_20px_rgba(0,244,254,0.3)] hover:shadow-[0_4px_30px_rgba(0,244,254,0.5)] active:scale-95 transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined">add</span>
+            <span>Tạo suất chiếu</span>
+        </button>
+
+        <!-- Date Picker Filter -->
+        <form method="get" onsubmit="event.preventDefault(); loadShowtimes(this.date.value);" class="glass-panel p-2 rounded-2xl flex items-center gap-2 border border-white/5 shadow-2xl">
+            <input type="date" id="selectedDateInput" name="date" class="bg-surface-container-high border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-3 px-4 w-44" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="loadShowtimes(this.value)" />
+            <button type="submit" class="p-3 text-secondary-fixed hover:bg-white/5 rounded-xl transition-colors">
+                <span class="material-symbols-outlined">calendar_today</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+
+
+<!-- Add Showtime Modal -->
+<div id="showtimeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-lg rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
+        <button onclick="document.getElementById('showtimeModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        
+        <h3 class="font-headline font-bold text-2xl text-on-surface mb-1 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-[#00f4fe] shadow-[0_0_10px_#00f4fe]"></span>
+            Lên lịch suất chiếu mới
+        </h3>
+        <p class="text-xs text-on-surface-variant font-body mb-6">Chỉ định mốc thời gian, cấu hình hiển thị và phân bổ phòng chiếu.</p>
+        
+        @if (TempData["Error"] != null)
+        {
+            <div class="mb-4 p-3 bg-red-500/20 text-red-300 text-xs font-semibold rounded-xl border border-red-500/30">
+                @TempData["Error"]
+            </div>
+        }
+
+        <form id="createShowtimeForm" method="post" action="@Url.Action("Create", "ShowTime")" class="space-y-6">
+            <!-- Movie Selection -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn phim</label>
+                <select id="movieSelect" name="movieId" required class="w-full bg-surface-container border-white/5 rounded-xl text-slate-300 text-xs focus:ring-1 focus:ring-primary py-3 px-4">
+                    <option value="">-- Chọn phim --</option>
+                </select>
+            </div>
+            
+            <!-- Screen Selection -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn phòng chiếu</label>
+                <select id="screenSelect" name="screenId" required class="w-full bg-surface-container border-white/5 rounded-xl text-slate-300 text-xs focus:ring-1 focus:ring-primary py-3 px-4">
+                    <option value="">-- Chọn phòng chiếu --</option>
+                </select>
+            </div>
+            
+            <!-- StartAt Selection -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Thời gian bắt đầu</label>
+                <input type="datetime-local" name="startAt" required class="w-full bg-surface-container border-white/5 rounded-xl text-slate-300 text-xs focus:ring-1 focus:ring-primary py-3 px-4" />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/5">
+                <button type="button" onclick="document.getElementById('showtimeModal').classList.add('hidden')" class="py-3 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="py-3 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_20px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_30px_rgba(97,180,254,0.5)] transition-all">
+                    Xác nhận lịch chiếu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Showtime Info Modal -->
+<div id="showtimeInfoModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-md rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
+        <button onclick="document.getElementById('showtimeInfoModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        
+        <h3 class="font-headline font-bold text-2xl text-on-surface mb-2 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_10px_#00f4fe]"></span>
+            Thông tin suất chiếu
+        </h3>
+        
+        <div class="space-y-4 my-6 text-sm text-slate-300">
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                <span class="text-xs text-slate-400 uppercase tracking-wider">Phim</span>
+                <span id="dtlMovieName" class="font-bold text-[#00f4fe]"></span>
+            </div>
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                <span class="text-xs text-slate-400 uppercase tracking-wider">Cụm rạp</span>
+                <span id="dtlCinemaName" class="font-medium text-slate-100"></span>
+            </div>
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                <span class="text-xs text-slate-400 uppercase tracking-wider">Phòng chiếu</span>
+                <span id="dtlScreenCode" class="font-medium text-slate-100"></span>
+            </div>
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                <span class="text-xs text-slate-400 uppercase tracking-wider">Thời gian</span>
+                <span id="dtlTime" class="font-medium text-slate-100"></span>
+            </div>
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                <span class="text-xs text-slate-400 uppercase tracking-wider">Trạng thái</span>
+                <span id="dtlStatus" class="font-bold"></span>
+            </div>
+            <div class="flex justify-between items-center pb-3">
+                <span class="text-xs text-slate-400 uppercase tracking-wider">Số vé khả dụng</span>
+                <span id="dtlTicket" class="font-bold text-[#00f4fe]"></span>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-4 border-t border-white/5">
+            <a id="viewSeatsBtn" href="#" class="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-center text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] hover:brightness-110 transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">event_seat</span>
+                Xem tình trạng ghế
+            </a>
+            <div class="flex items-center justify-end gap-3 mt-2">
+                <button type="button" onclick="document.getElementById('showtimeInfoModal').classList.add('hidden')" class="py-3 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                    Đóng
+                </button>
+                <button id="cancelShowtimeBtn" type="button" class="py-3 px-6 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-bold border border-red-500/30 shadow-[0_4px_15px_rgba(239,68,68,0.2)] transition-all hidden">
+                    Hủy suất chiếu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar / Timeline Grid -->
+<div class="glass-panel rounded-xl border border-white/5 overflow-hidden shadow-2xl bg-white/[0.01]">
+    
+    <!-- Header Timeline (Sticky at top) -->
+    <div class="flex border-b border-white/5 bg-white/[0.02]">
+        
+        <!-- Cinema Header -->
+        <div class="w-48 px-6 py-4 font-headline font-bold text-sm text-slate-400 text-center flex-shrink-0">
+            Cụm rạp
+        </div>
+
+        <!-- Screens Header -->
+        <div class="w-32 px-4 py-4 font-headline font-bold text-sm text-slate-400 border-l border-r border-white/5 text-center flex-shrink-0">
+            Phòng chiếu
+        </div>
+
+        <!-- Time Slots (2h intervals on the right - extended past midnight) -->
+        <div class="flex-1 grid grid-cols-[repeat(14,minmax(0,1fr))] relative">
+            @for (int hour = 0; hour < 28; hour += 2)
+            {
+                var displayHour = hour % 24;
+                var isNextDay = hour >= 24;
+                <div class="border-r border-white/5 text-center py-4 font-body font-bold text-xs text-slate-400 flex flex-col justify-center">
+                    <span>@($"{displayHour:D2}:00")</span>
+                    @if (isNextDay)
+                    {
+                        <span class="text-[7px] text-secondary font-medium tracking-tighter uppercase mt-0.5">Ngày mai</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    
+    <!-- Rows for Cinema Locations rendered via AJAX -->
+    <div id="timelineContainer" class="divide-y divide-white/5">
+        <div class="p-10 text-center text-xs text-slate-400">Đang tải lịch chiếu...</div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        async function loadShowtimes(date) {
+            // Set date input value
+            const dateInput = document.getElementById('selectedDateInput');
+            if (dateInput) dateInput.value = date;
+
+            // Show loading spinner via global service
+            if (window.showLoading) window.showLoading();
+
+            try {
+                const res = await fetch(`/ShowTime/GetCalendarData?date=${date}`);
+                const result = await res.json();
+                
+                if (result.success) {
+                    const container = document.getElementById('timelineContainer');
+                    container.innerHTML = '';
+                    
+                    if (!result.cinemas || result.cinemas.length === 0) {
+                        container.innerHTML = '<div class="p-10 text-center text-sm text-on-surface-variant">Không có cụm rạp nào khả dụng.</div>';
+                        return;
+                    }
+
+                    result.cinemas.forEach(cinema => {
+                        const cinemaScreens = result.screens.filter(s => s.cinemaId === cinema.id).sort((a,b) => a.code.localeCompare(b.code));
+                        
+                        const row = document.createElement('div');
+                        row.className = "flex hover:bg-white/[0.01] transition-colors border-b border-white/5 last:border-b-0";
+                        
+                        const leftCol = `
+                            <div class="w-48 px-6 py-6 flex flex-col justify-center bg-white/[0.02] flex-shrink-0">
+                                <h4 class="font-headline font-bold text-sm text-on-surface flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
+                                    ${cinema.name}
+                                </h4>
+                                <p class="text-[10px] text-on-surface-variant mt-1">${cinema.address}</p>
+                                <span class="mt-2 text-[9px] bg-white/5 border border-white/10 px-2 py-0.5 rounded-md w-fit text-slate-400 font-bold">${cinemaScreens.length} Phòng chiếu</span>
+                            </div>
+                        `;
+                        
+                        let screenColHtml = '';
+                        cinemaScreens.forEach(screen => {
+                            screenColHtml += `
+                                <div class="h-20 flex flex-col items-center justify-center font-bold text-xs text-[#00f4fe] font-headline tracking-wider">
+                                    <span>${screen.code}</span>
+                                    <span class="text-[8px] text-slate-500 font-normal mt-1 uppercase">${screen.type || ''}</span>
+                                </div>
+                            `;
+                        });
+                        
+                        const screenCol = `
+                            <div class="w-32 py-4 border-l border-r border-white/5 flex flex-col justify-around bg-white/[0.01] flex-shrink-0">
+                                ${screenColHtml}
+                            </div>
+                        `;
+                        
+                        let tracksHtml = '';
+                        if (cinemaScreens.length === 0) {
+                            tracksHtml = '<div class="text-center text-xs text-slate-600 my-auto py-4">Chưa có phòng chiếu nào tại rạp này</div>';
+                        } else {
+                            let tracksRowsHtml = '';
+                            cinemaScreens.forEach(screen => {
+                                tracksRowsHtml += `
+                                    <div id="track-${screen.id}" class="relative h-20 w-full border-b border-white/[0.02] last:border-b-0 pointer-events-auto"></div>
+                                `;
+                            });
+                            
+                            tracksHtml = `
+                                <div class="space-y-4 relative w-full h-full">
+                                    ${tracksRowsHtml}
+                                </div>
+                            `;
+                        }
+                        
+                        const timelineArea = `
+                            <div class="flex-1 relative py-4">
+                                <div class="absolute inset-0 grid grid-cols-[repeat(14,minmax(0,1fr))] pointer-events-none">
+                                    ${cinemaScreens.length > 0 ? Array(14).fill('<div class="border-r border-white/[0.03] h-full"></div>').join('') : ''}
+                                </div>
+                                ${tracksHtml}
+                            </div>
+                        `;
+                        
+                        row.innerHTML = leftCol + screenCol + timelineArea;
+                        container.appendChild(row);
+                    });
+
+                    // Group showtimes by screen
+                    const grouped = {};
+                    result.showtimes.forEach(st => {
+                        if (!grouped[st.screenId]) grouped[st.screenId] = [];
+                        grouped[st.screenId].push(st);
+                    });
+                    
+                    // Populate tracks
+                    for (const screenId in grouped) {
+                        const track = document.getElementById(`track-${screenId}`);
+                        if (track) {
+                            grouped[screenId].forEach(st => {
+                                const startAt = new Date(st.startAt);
+                                const endAt = new Date(st.endAt);
+                                
+                                let startMinutes = startAt.getHours() * 60 + startAt.getMinutes();
+                                let endMinutes = endAt.getHours() * 60 + endAt.getMinutes();
+                                
+                                if (endMinutes < startMinutes) {
+                                    endMinutes += 1440;
+                                }
+                                
+                                const duration = endMinutes - startMinutes;
+                                const leftPercent = (startMinutes / (28 * 60)) * 100;
+                                const widthPercent = (duration / (28 * 60)) * 100;
+                                
+                                const card = document.createElement('div');
+                                card.className = `absolute top-0 h-full p-2 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-secondary/30 shadow-[0_4px_15px_rgba(0,244,254,0.1)] flex flex-col justify-between overflow-hidden group hover:scale-105 hover:bg-white/10 hover:border-secondary transition-all duration-300 z-10 cursor-pointer`;
+                                card.style.left = `${leftPercent.toFixed(2)}%`;
+                                card.style.width = `${widthPercent.toFixed(2)}%`;
+                                card.onclick = () => openShowtimeDetails(st);
+                                
+                                const formatTime = (dateObj) => {
+                                    return dateObj.getHours().toString().padStart(2, '0') + ':' + dateObj.getMinutes().toString().padStart(2, '0');
+                                };
+                                
+                                card.innerHTML = `
+                                    <p class="text-xs font-bold text-on-surface truncate group-hover:text-secondary transition-colors">${st.movieName}</p>
+                                    <p class="text-[9px] text-secondary font-medium">${formatTime(startAt)} — ${formatTime(endAt)}</p>
+                                `;
+                                
+                                track.appendChild(card);
+                            });
+                        }
+                    }
+
+                    // Populate Form Dropdowns if not yet loaded
+                    const movieSelect = document.getElementById('movieSelect');
+                    if (movieSelect && movieSelect.children.length <= 1 && result.movies) {
+                        movieSelect.innerHTML = '<option value="">-- Choose Movie --</option>';
+                        result.movies.forEach(m => {
+                            movieSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+                        });
+                    }
+
+                    const screenSelect = document.getElementById('screenSelect');
+                    if (screenSelect && screenSelect.children.length <= 1 && result.cinemas) {
+                        screenSelect.innerHTML = '<option value="">-- Choose Screen --</option>';
+                        result.cinemas.forEach(cinema => {
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = cinema.name;
+                            
+                            const cinemaScreens = result.screens.filter(s => s.cinemaId === cinema.id);
+                            cinemaScreens.forEach(screen => {
+                                const opt = document.createElement('option');
+                                opt.value = screen.id;
+                                opt.textContent = `${screen.code}`;
+                                optgroup.appendChild(opt);
+                            });
+                            
+                            screenSelect.appendChild(optgroup);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to refresh timeline data", err);
+                window.showToast("Không thể tải lại lịch chiếu.", "error");
+            } finally {
+                // Hide loading spinner via global service
+                if (window.hideLoading) window.hideLoading();
+            }
+        }
+
+        function openShowtimeDetails(st) {
+            document.getElementById('dtlMovieName').innerText = st.movieName;
+            document.getElementById('dtlCinemaName').innerText = st.cinemaName;
+            document.getElementById('dtlScreenCode').innerText = st.screenCode;
+            
+            const startAt = new Date(st.startAt);
+            const endAt = new Date(st.endAt);
+            const formatTime = (dateObj) => dateObj.getHours().toString().padStart(2, '0') + ':' + dateObj.getMinutes().toString().padStart(2, '0');
+            const formatDate = (dateObj) => dateObj.getDate().toString().padStart(2, '0') + '/' + (dateObj.getMonth() + 1).toString().padStart(2, '0') + '/' + dateObj.getFullYear();
+            
+            document.getElementById('dtlTime').innerText = `${formatTime(startAt)} — ${formatTime(endAt)} (${formatDate(startAt)})`;
+            
+            // Map Status
+            const statusEl = document.getElementById('dtlStatus');
+            const cancelBtn = document.getElementById('cancelShowtimeBtn');
+            
+            let statusText = 'Chưa diễn ra';
+            let statusColor = 'text-slate-300';
+            
+            // st.status: 0 = Created, 1 = OnGoing, 2 = Completed, 3 = Cancelled
+            if (st.status === 1) {
+                statusText = 'Đang chiếu';
+                statusColor = 'text-[#00f4fe]';
+            } else if (st.status === 2) {
+                statusText = 'Đã hoàn thành';
+                statusColor = 'text-slate-500';
+            } else if (st.status === 3) {
+                statusText = 'Đã hủy';
+                statusColor = 'text-red-500';
+            }
+            
+            statusEl.innerText = statusText;
+            statusEl.className = `font-bold ${statusColor}`;
+            document.getElementById('dtlTicket').innerText = `${st.availableTicketCount} / ${st.ticketCount}`;
+            
+            // Enable cancellation if upcoming and not started yet
+            const now = new Date();
+            if (st.status === 0 && startAt > now) {
+                cancelBtn.classList.remove('hidden');
+                cancelBtn.onclick = () => cancelShowtime(st.id);
+            } else {
+                cancelBtn.classList.add('hidden');
+            }
+            
+            document.getElementById('viewSeatsBtn').href = '/ShowTime/SeatSelection/' + st.id + '?date=' + document.getElementById('selectedDateInput').value;
+            document.getElementById('showtimeInfoModal').classList.remove('hidden');
+        }
+
+        async function cancelShowtime(id) {
+            if (!confirm('Bạn có chắc chắn muốn hủy suất chiếu này không?')) return;
+            
+            if (window.showLoading) window.showLoading();
+            try {
+                const response = await fetch('/ShowTime/Cancel?id=' + id, { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    document.getElementById('showtimeInfoModal').classList.add('hidden');
+                    // Reload timeline
+                    const dateInput = document.getElementById('selectedDateInput');
+                    loadShowtimes(dateInput.value);
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (error) {
+                window.showToast('Không thể kết nối đến máy chủ.', 'error');
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        }
+
+        document.getElementById('createShowtimeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Đang lưu...";
+            
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    document.getElementById('showtimeModal').classList.add('hidden');
+                    form.reset();
+                    
+                    // Soft reload via AJAX instead of reloading window
+                    if (result.date) {
+                        loadShowtimes(result.date);
+                    }
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (error) {
+                window.showToast('Failed to reach the server. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+            }
+        });
+        // Initial load
+        document.addEventListener("DOMContentLoaded", () => {
+            loadShowtimes('@Model.SelectedDate.ToString("yyyy-MM-dd")');
+        });
+    </script>
+}
