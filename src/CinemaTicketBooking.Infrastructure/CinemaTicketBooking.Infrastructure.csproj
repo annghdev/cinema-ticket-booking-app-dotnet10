@@ -30,8 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Auth\Authentication\" />
-    <Folder Include="Auth\Authorization\" />
     <Folder Include="FileStorages\" />
     <Folder Include="Notifications\" />
     <Folder Include="Payments\Vnpay\" />

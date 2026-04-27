@@ -12,10 +12,13 @@
         <p class="text-on-surface-variant font-body max-w-md">Danh sách hệ thống rạp chiếu phim, hỗ trợ cập nhật vị trí, trạng thái hoạt động.</p>
     </div>
     <div class="flex items-center gap-4">
-        <button onclick="openAddCinemaModal()" class="py-3 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-[0_4px_20px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_30px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center gap-2">
-            <span class="material-symbols-outlined">add</span>
-            <span>Thêm rạp</span>
-        </button>
+        @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.CinemasManage)).Succeeded)
+        {
+            <button onclick="openAddCinemaModal()" class="py-3 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-[0_4px_20px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_30px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined">add</span>
+                <span>Thêm rạp</span>
+            </button>
+        }
     </div>
 </div>
 

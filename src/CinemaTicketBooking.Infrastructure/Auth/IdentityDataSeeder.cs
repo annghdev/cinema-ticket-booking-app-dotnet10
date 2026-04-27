@@ -28,17 +28,38 @@ public static class IdentityDataSeeder
         CancellationToken cancellationToken = default)
     {
         // 1. Seed Roles
-        foreach (var roleName in new[] { RoleNames.Customer, RoleNames.Admin, RoleNames.Manager })
+        var rolesToSeed = new Dictionary<string, string>
         {
+            { RoleNames.SystemAdmin, "Quản trị hệ thống" },
+            { RoleNames.Admin, "Quản trị viên" },
+            { RoleNames.Manager, "Quản lý" },
+            { RoleNames.MovieCoordinator, "Điều phối viên phim" },
+            { RoleNames.TicketStaff, "Nhân viên quầy vé" },
+            { RoleNames.Customer, "Khách hàng" }
+        };
+
+        foreach (var kvp in rolesToSeed)
+        {
+            var roleName = kvp.Key;
+            var displayName = kvp.Value;
+
             if (await roleManager.RoleExistsAsync(roleName))
+            {
+                var existingRole = await roleManager.FindByNameAsync(roleName);
+                if (existingRole != null && (string.IsNullOrEmpty(existingRole.DisplayName) || existingRole.DisplayName == roleName))
+                {
+                    existingRole.DisplayName = displayName;
+                    await roleManager.UpdateAsync(existingRole);
+                }
                 continue;
+            }
 
             var role = new Role
             {
                 Id = Guid.CreateVersion7(),
                 Name = roleName,
                 NormalizedName = roleName.ToUpperInvariant(),
-                DisplayName = roleName
+                DisplayName = displayName
             };
             var result = await roleManager.CreateAsync(role);
             if (!result.Succeeded)
@@ -50,32 +71,80 @@ public static class IdentityDataSeeder
             logger.LogInformation("Created Identity role {Role}.", roleName);
         }
 
-        // 2. Grant Claims to Admin
-        var adminRole = await roleManager.Roles.FirstOrDefaultAsync(
-            x => x.NormalizedName == RoleNames.Admin.ToUpperInvariant(),
-            cancellationToken);
-        if (adminRole is not null)
-        {
-            var existingClaims = await roleManager.GetClaimsAsync(adminRole);
-            foreach (var claim in AdminPermissionClaims)
-            {
-                if (existingClaims.Any(c => c.Type == claim.Type && c.Value == claim.Value))
-                    continue;
+        // 2. Grant Claims dynamically
+        var availablePermissions = typeof(Permissions)
+            .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.FlattenHierarchy)
+            .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.FieldType == typeof(string))
+            .Select(fi => (string)fi.GetValue(null)!)
+            .ToList();
 
-                var add = await roleManager.AddClaimAsync(adminRole, claim);
-                if (!add.Succeeded)
+        var roleMappings = new Dictionary<string, List<string>>
+        {
+            { RoleNames.Admin, availablePermissions },
+            { RoleNames.Manager, new List<string> 
+                { 
+                    Permissions.MoviesView, Permissions.MoviesManage,
+                    Permissions.ShowTimesView, Permissions.ShowTimesManage,
+                    Permissions.PricingPoliciesView, Permissions.PricingPoliciesManage,
+                    Permissions.SeatSelectionPoliciesView, Permissions.SeatSelectionPoliciesManage,
+                    Permissions.ConcessionsView, Permissions.ConcessionsManage,
+                    Permissions.BookingsViewAll, Permissions.ReportsView, Permissions.AnalysisView
+                } 
+            },
+            { RoleNames.MovieCoordinator, new List<string> 
+                { 
+                    Permissions.MoviesView, Permissions.MoviesManage,
+                    Permissions.ShowTimesView, Permissions.ShowTimesManage 
+                } 
+            },
+            { RoleNames.TicketStaff, new List<string> 
+                { 
+                    Permissions.BookingsViewAll, Permissions.BookingsManage,
+                    Permissions.ConcessionsView, Permissions.ConcessionsManage 
+                } 
+            }
+        };
+
+        foreach (var mapping in roleMappings)
+        {
+            var r = await roleManager.FindByNameAsync(mapping.Key);
+            if (r == null) continue;
+
+            var existingClaims = await roleManager.GetClaimsAsync(r);
+            var existingPerms = existingClaims
+                .Where(c => c.Type == AuthClaimTypes.Permission)
+                .Select(c => c.Value)
+                .ToList();
+
+            foreach (var perm in mapping.Value)
+            {
+                if (!existingPerms.Contains(perm))
                 {
-                    logger.LogError(
-                        "Failed to add claim {Type}={Value} to Admin: {Errors}",
-                        claim.Type,
-                        claim.Value,
-                        string.Join(", ", add.Errors.Select(e => e.Description)));
+                    await roleManager.AddClaimAsync(r, new Claim(AuthClaimTypes.Permission, perm));
                 }
             }
         }
 
-        // 3. Seed Admin User
-        var adminEmail = "admin@aethercinema.com";
+        // 2.5 Seed System Admin User
+        var sysEmail = "sysadmin@cinema.com";
+        var sysUser = await userManager.FindByEmailAsync(sysEmail);
+        if (sysUser is null)
+        {
+            sysUser = new Account
+            {
+                Id = Guid.CreateVersion7(),
+                UserName = "sysadmin",
+                Email = sysEmail,
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(sysUser, "SysAdmin@123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(sysUser, RoleNames.SystemAdmin);
+                logger.LogInformation("Seeded System Admin user.");
+            }
+        }
+        var adminEmail = "admin@cinema.com";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser is null)
         {
@@ -99,7 +168,7 @@ public static class IdentityDataSeeder
         }
 
         // 4. Seed Manager User
-        var managerEmail = "manager@aethercinema.com";
+        var managerEmail = "manager@cinema.com";
         var managerUser = await userManager.FindByEmailAsync(managerEmail);
         if (managerUser is null)
         {
@@ -119,6 +188,46 @@ public static class IdentityDataSeeder
             else
             {
                 logger.LogError("Failed to seed Manager user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
+
+        // 5. Seed Movie Coordinator User
+        var coordinatorEmail = "coordinator@cinema.com";
+        var coordinatorUser = await userManager.FindByEmailAsync(coordinatorEmail);
+        if (coordinatorUser is null)
+        {
+            coordinatorUser = new Account
+            {
+                Id = Guid.CreateVersion7(),
+                UserName = "coordinator",
+                Email = coordinatorEmail,
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(coordinatorUser, "Coo@123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(coordinatorUser, RoleNames.MovieCoordinator);
+                logger.LogInformation("Seeded Movie Coordinator user.");
+            }
+        }
+
+        // 6. Seed Ticket Staff User
+        var staffEmail = "staff@cinema.com";
+        var staffUser = await userManager.FindByEmailAsync(staffEmail);
+        if (staffUser is null)
+        {
+            staffUser = new Account
+            {
+                Id = Guid.CreateVersion7(),
+                UserName = "staff",
+                Email = staffEmail,
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(staffUser, "Staff@123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(staffUser, RoleNames.TicketStaff);
+                logger.LogInformation("Seeded Ticket Staff user.");
             }
         }
     }

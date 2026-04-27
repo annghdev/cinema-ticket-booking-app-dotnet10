@@ -12,6 +12,7 @@ public class Account : IdentityUser<Guid>, IAggregateRoot
     public string? CreatedBy { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     public string? UpdatedBy { get; set; }
+    public string? AvatarUrl { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
     public bool IsDeleted => DeletedAt.HasValue;
 

@@ -1,4 +1,5 @@
 using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.Common.Auth;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,7 @@ public class ShowTimeController(IMessageBus bus) : Controller
     /// <summary>
     /// Displays a calendar list of showtimes.
     /// </summary>
+    [Authorize(Policy = Permissions.ShowTimesView)]
     public IActionResult Index(string? date = null)
     {
         ViewData["Title"] = "Showtime Calendar";
@@ -42,6 +44,7 @@ public class ShowTimeController(IMessageBus bus) : Controller
     /// Processes a request to schedule a new Showtime via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.ShowTimesManage)]
     public async Task<IActionResult> Create(Guid movieId, Guid screenId, DateTimeOffset startAt)
     {
         var command = new AddShowTimeCommand
@@ -67,6 +70,7 @@ public class ShowTimeController(IMessageBus bus) : Controller
     /// Cancels an upcoming showtime via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.ShowTimesManage)]
     public async Task<IActionResult> Cancel(Guid id)
     {
         try
@@ -118,6 +122,7 @@ public class ShowTimeController(IMessageBus bus) : Controller
     /// Gets layout and showtimes for a specific date in JSON.
     /// </summary>
     [HttpGet]
+    [Authorize(Policy = Permissions.ShowTimesView)]
     public async Task<IActionResult> GetCalendarData(string date)
     {
         DateOnly selectedDate;

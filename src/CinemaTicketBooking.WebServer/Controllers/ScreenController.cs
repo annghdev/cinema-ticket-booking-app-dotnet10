@@ -1,4 +1,5 @@
 using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.Common.Auth;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,7 @@ public class ScreenController(IMessageBus bus) : Controller
     /// <summary>
     /// Displays a paged list of cinema screens.
     /// </summary>
+    [Authorize(Policy = Permissions.ScreensView)]
     public async Task<IActionResult> Index(Guid? cinemaId, int pageNumber = 1, int pageSize = 10, string? searchTerm = null)
     {
         ViewData["Title"] = "Quản lý phòng chiếu";
@@ -41,6 +43,7 @@ public class ScreenController(IMessageBus bus) : Controller
     /// Creates a new screen via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.ScreensManage)]
     public async Task<IActionResult> Create([FromBody] AddScreenCommand command)
     {
         try
@@ -58,6 +61,7 @@ public class ScreenController(IMessageBus bus) : Controller
     /// Updates screen basic info via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.ScreensManage)]
     public async Task<IActionResult> Update([FromBody] UpdateScreenBasicInfoCommand command)
     {
         try
@@ -75,6 +79,7 @@ public class ScreenController(IMessageBus bus) : Controller
     /// Deactivates a screen via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.ScreensManage)]
     public async Task<IActionResult> Deactivate(Guid id)
     {
         try
@@ -92,6 +97,7 @@ public class ScreenController(IMessageBus bus) : Controller
     /// Activates a screen via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.ScreensManage)]
     public async Task<IActionResult> Activate(Guid id)
     {
         try

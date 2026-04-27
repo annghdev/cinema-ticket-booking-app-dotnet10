@@ -115,27 +115,47 @@
             <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản lý</p>
         </div>
         <nav class="flex-1 mt-4">
-            <!-- Dashboard Active -->
-            <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Home" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                asp-controller="Home" asp-action="Index">
-                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-                Trang tổng quan
-            </a>
-            <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Movie" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                asp-controller="Movie" asp-action="Index">
-                <span class="material-symbols-outlined" data-icon="movie">movie</span>
-                Thư viện phim
-            </a>
-            <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "ShowTime" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                asp-controller="ShowTime" asp-action="Index">
-                <span class="material-symbols-outlined" data-icon="schedule">schedule</span>
-                Lịch chiếu
-            </a>
-            <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Cinema" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                asp-controller="Cinema" asp-action="Index">
-                <span class="material-symbols-outlined" data-icon="store">store</span>
-                Quản lý rạp
-            </a>
+            @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin) || (await AuthorizationService.AuthorizeAsync(User, Permissions.ReportsView)).Succeeded)
+            {
+                <!-- Dashboard Active -->
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Home" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                    asp-controller="Home" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Trang tổng quan
+                </a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.MoviesView)).Succeeded)
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Movie" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                    asp-controller="Movie" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="movie">movie</span>
+                    Thư viện phim
+                </a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.ShowTimesView)).Succeeded)
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "ShowTime" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                    asp-controller="ShowTime" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+                    Lịch chiếu
+                </a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.CinemasView)).Succeeded)
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Cinema" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                    asp-controller="Cinema" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="store">store</span>
+                    Quản lý rạp
+                </a>
+            }
+            @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin))
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Role" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                    asp-controller="Role" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="security">security</span>
+                    Phân quyền
+                </a>
+            }
             <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
                 href="#">
                 <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>

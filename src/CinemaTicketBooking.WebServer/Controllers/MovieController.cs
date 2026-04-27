@@ -1,4 +1,5 @@
 using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.Common.Auth;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,7 @@ public class MovieController(IMessageBus bus) : Controller
     /// <summary>
     /// Displays a paged list of movies.
     /// </summary>
+    [Authorize(Policy = Permissions.MoviesView)]
     public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10, string? searchTerm = null, string? status = null, string? genre = null)
     {
         ViewData["Title"] = "Movie Library";
@@ -50,6 +52,7 @@ public class MovieController(IMessageBus bus) : Controller
     /// Creates a new movie via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.MoviesManage)]
     public async Task<IActionResult> Create([FromBody] CreateMovieCommand command)
     {
         try
@@ -67,6 +70,7 @@ public class MovieController(IMessageBus bus) : Controller
     /// Updates movie basic info via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.MoviesManage)]
     public async Task<IActionResult> Update([FromBody] UpdateMovieBasicInfoCommand command)
     {
         try
@@ -84,6 +88,7 @@ public class MovieController(IMessageBus bus) : Controller
     /// Deletes a movie via AJAX.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = Permissions.MoviesManage)]
     public async Task<IActionResult> Delete(Guid id)
     {
         try
