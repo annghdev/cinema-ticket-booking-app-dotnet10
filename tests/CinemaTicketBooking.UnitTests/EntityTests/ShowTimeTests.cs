@@ -228,6 +228,23 @@ public class ShowTimeTests
     }
 
     [Fact]
+    public void Cancel_Should_Throw_When_TicketsAreBookedOrPendingPayment()
+    {
+        var showTime = new ShowTime
+        {
+            Status = ShowTimeStatus.Upcoming,
+            Tickets =
+            [
+                new Ticket { Status = TicketStatus.Sold },
+                new Ticket { Status = TicketStatus.Available }
+            ]
+        };
+
+        var act = () => showTime.Cancel();
+        act.Should().Throw<InvalidOperationException>().WithMessage("*already has booked or pending*");
+    }
+
+    [Fact]
     public void Cancel_Should_SetCancelledWithEvent_When_StatusIsOngoing()
     {
         var movie = DomainTestBuilders.MovieNowShowing();

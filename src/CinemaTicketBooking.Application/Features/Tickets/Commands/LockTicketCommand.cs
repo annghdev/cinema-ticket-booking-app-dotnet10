@@ -45,6 +45,13 @@ public class LockTicketHandler(
             throw new InvalidOperationException($"Ticket with ID '{cmd.TicketId}' not found.");
         }
 
+        var showTime = await uow.ShowTimes.LoadFullAsync(ticket.ShowTimeId, ct);
+        if (showTime is null || showTime.Status == ShowTimeStatus.Cancelled)
+        {
+            await locker.ReleaseAsync(cmd.TicketId, cmd.LockBy, ct);
+            throw new InvalidOperationException("Cannot lock tickets for a canceled showtime.");
+        }
+
         // 4. Apply domain transition to Locking state and persist through unit of work.
         ticket.Lock(cmd.LockBy, lockExpiresAt);
         uow.Tickets.Update(ticket);

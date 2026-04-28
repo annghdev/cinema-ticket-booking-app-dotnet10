@@ -44,6 +44,11 @@ public class CreateBookingHandler(
         // 1. Load aggregate graph and policy.
         var showTime = await uow.ShowTimes.LoadFullAsync(command.ShowTimeId, ct)
             ?? throw new InvalidOperationException($"ShowTime with ID '{command.ShowTimeId}' was not found.");
+
+        if (showTime.Status == ShowTimeStatus.Cancelled)
+        {
+            throw new InvalidOperationException("ShowTime is cancelled. Cannot create booking.");
+        }
         var policy = await uow.SeatSelectionPolicies.GetActiveGlobalAsync(ct)
             ?? SeatSelectionPolicy.CreateDefault();
 

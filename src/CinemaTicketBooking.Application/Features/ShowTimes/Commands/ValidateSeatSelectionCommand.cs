@@ -29,6 +29,11 @@ public class ValidateSeatSelectionHandler(
         var showTime = await uow.ShowTimes.LoadFullAsync(command.ShowTimeId, ct)
             ?? throw new InvalidOperationException($"ShowTime with ID '{command.ShowTimeId}' was not found.");
 
+        if (showTime.Status == ShowTimeStatus.Cancelled)
+        {
+            throw new InvalidOperationException("ShowTime is cancelled. Cannot select seats.");
+        }
+
         // 2. Resolve active global policy, fallback to default in-memory policy.
         var policy = await uow.SeatSelectionPolicies.GetActiveGlobalAsync(ct)
             ?? SeatSelectionPolicy.CreateDefault();

@@ -173,6 +173,10 @@ public class ShowTime : AggregateRoot
             throw new InvalidOperationException(
                 "Cannot cancel a showtime that is showing or already completed.");
 
+        if (Tickets.Any(t => t.Status is TicketStatus.Sold or TicketStatus.PendingPayment))
+            throw new InvalidOperationException(
+                "Cannot cancel a showtime that already has booked or pending payment tickets.");
+
         Status = ShowTimeStatus.Cancelled;
 
         RaiseEvent(new ShowTimeCancelled(
