@@ -162,7 +162,7 @@ try
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
     var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
-    await IdentityDataSeeder.SeedAsync(roleManager, userManager, loggerFactory.CreateLogger("IdentitySeed"));
+    await IdentityDataSeeder.SeedAsync(roleManager, userManager, loggerFactory.CreateLogger("IdentitySeed"), app.Configuration);
 
     // Seed data
     var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();

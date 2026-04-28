@@ -84,7 +84,8 @@ public sealed class AuthAlbaFixture : IAsyncLifetime
         var users = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
         var roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AuthAlbaFixture");
-        await IdentityDataSeeder.SeedAsync(roles, users, logger);
+        var configuration = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
+        await IdentityDataSeeder.SeedAsync(roles, users, logger, configuration);
 
         var email = $"admin-{Guid.CreateVersion7():N}@test.local";
         const string password = "Aa123456!";

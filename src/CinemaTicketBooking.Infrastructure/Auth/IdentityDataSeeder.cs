@@ -2,6 +2,7 @@ using System.Security.Claims;
 using CinemaTicketBooking.Application.Common.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace CinemaTicketBooking.Infrastructure.Auth;
@@ -17,7 +18,8 @@ public static class IdentityDataSeeder
     public static async Task SeedAsync(
         RoleManager<Role> roleManager, 
         UserManager<Account> userManager, 
-        ILogger logger, 
+        ILogger logger,
+        IConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
         // 1. Seed Roles
@@ -120,114 +122,58 @@ public static class IdentityDataSeeder
             }
         }
 
-        // 2.5 Seed System Admin User
-        var sysEmail = "sysadmin@cinema.com";
-        var sysUser = await userManager.FindByEmailAsync(sysEmail);
-        if (sysUser is null)
+        // 3. Seed Default Users
+        await SeedDefaultUserAsync(userManager, configuration, "SysAdmin", RoleNames.SystemAdmin, "sysadmin", "sysadmin@cinema.com", "SysAdmin@123!", logger);
+        await SeedDefaultUserAsync(userManager, configuration, "Admin", RoleNames.Admin, "admin", "admin@cinema.com", "Admin@123!", logger);
+        await SeedDefaultUserAsync(userManager, configuration, "Manager", RoleNames.Manager, "manager", "manager@cinema.com", "Manager@123!", logger);
+        await SeedDefaultUserAsync(userManager, configuration, "Coordinator", RoleNames.MovieCoordinator, "coordinator", "coordinator@cinema.com", "Coo@123!", logger);
+        await SeedDefaultUserAsync(userManager, configuration, "TicketStaff", RoleNames.TicketStaff, "staff", "staff@cinema.com", "Staff@123!", logger);
+        await SeedDefaultUserAsync(userManager, configuration, "Customer", RoleNames.Customer, "customer", "customer@cinema.com", "Customer@123!", logger);
+    }
+
+    // =============================================
+    // Helper Methods for Data Seeding
+    // =============================================
+
+    /// <summary>
+    /// Seeds a default user if they do not already exist based on the configuration.
+    /// </summary>
+    private static async Task SeedDefaultUserAsync(
+        UserManager<Account> userManager,
+        IConfiguration configuration,
+        string configKey,
+        string roleName,
+        string fallbackUsername,
+        string fallbackEmail,
+        string fallbackPassword,
+        ILogger logger)
+    {
+        var section = configuration.GetSection($"DefaultAccount:{configKey}");
+        var email = section["Email"] ?? fallbackEmail;
+        var username = section["DefaultUserName"] ?? fallbackUsername;
+        var password = section["DefaultPassword"] ?? fallbackPassword;
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
         {
-            sysUser = new Account
+            user = new Account
             {
                 Id = Guid.CreateVersion7(),
-                UserName = "sysadmin",
-                Email = sysEmail,
+                UserName = username,
+                Email = email,
                 EmailConfirmed = true,
-                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=sysadmin"
+                AvatarUrl = $"https://api.dicebear.com/7.x/adventurer/svg?seed={username}"
             };
-            var result = await userManager.CreateAsync(sysUser, "SysAdmin@123!");
+
+            var result = await userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(sysUser, RoleNames.SystemAdmin);
-                logger.LogInformation("Seeded System Admin user.");
-            }
-        }
-        var adminEmail = "admin@cinema.com";
-        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-        if (adminUser is null)
-        {
-            adminUser = new Account
-            {
-                Id = Guid.CreateVersion7(),
-                UserName = "admin",
-                Email = adminEmail,
-                EmailConfirmed = true,
-                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=admin"
-            };
-            var result = await userManager.CreateAsync(adminUser, "Admin@123!");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(adminUser, RoleNames.Admin);
-                logger.LogInformation("Seeded Admin user.");
+                await userManager.AddToRoleAsync(user, roleName);
+                logger.LogInformation("Seeded {Role} user.", roleName);
             }
             else
             {
-                logger.LogError("Failed to seed Admin user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
-            }
-        }
-
-        // 4. Seed Manager User
-        var managerEmail = "manager@cinema.com";
-        var managerUser = await userManager.FindByEmailAsync(managerEmail);
-        if (managerUser is null)
-        {
-            managerUser = new Account
-            {
-                Id = Guid.CreateVersion7(),
-                UserName = "manager",
-                Email = managerEmail,
-                EmailConfirmed = true,
-                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=manager"
-            };
-            var result = await userManager.CreateAsync(managerUser, "Manager@123!");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(managerUser, RoleNames.Manager);
-                logger.LogInformation("Seeded Manager user.");
-            }
-            else
-            {
-                logger.LogError("Failed to seed Manager user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
-            }
-        }
-
-        // 5. Seed Movie Coordinator User
-        var coordinatorEmail = "coordinator@cinema.com";
-        var coordinatorUser = await userManager.FindByEmailAsync(coordinatorEmail);
-        if (coordinatorUser is null)
-        {
-            coordinatorUser = new Account
-            {
-                Id = Guid.CreateVersion7(),
-                UserName = "coordinator",
-                Email = coordinatorEmail,
-                EmailConfirmed = true,
-                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=coordinator"
-            };
-            var result = await userManager.CreateAsync(coordinatorUser, "Coo@123!");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(coordinatorUser, RoleNames.MovieCoordinator);
-                logger.LogInformation("Seeded Movie Coordinator user.");
-            }
-        }
-
-        // 6. Seed Ticket Staff User
-        var staffEmail = "staff@cinema.com";
-        var staffUser = await userManager.FindByEmailAsync(staffEmail);
-        if (staffUser is null)
-        {
-            staffUser = new Account
-            {
-                Id = Guid.CreateVersion7(),
-                UserName = "staff",
-                Email = staffEmail,
-                EmailConfirmed = true,
-                AvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed=staff"
-            };
-            var result = await userManager.CreateAsync(staffUser, "Staff@123!");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(staffUser, RoleNames.TicketStaff);
-                logger.LogInformation("Seeded Ticket Staff user.");
+                logger.LogError("Failed to seed {Role} user: {Errors}", roleName, string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
     }

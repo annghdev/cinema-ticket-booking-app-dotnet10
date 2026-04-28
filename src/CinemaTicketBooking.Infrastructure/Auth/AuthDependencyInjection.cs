@@ -46,10 +46,13 @@ public static class AuthDependencyInjection
         services
             .AddIdentity<Account, Role>(options =>
             {
+                var accountOptions = configuration.GetSection(AccountOptions.SectionName).Get<AccountOptions>();
                 options.User.RequireUniqueEmail = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireDigit = true;
-                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = accountOptions.RequiredLength;
+                options.Password.RequireDigit = accountOptions.RequireDigit;
+                options.Password.RequireLowercase = accountOptions.RequireLowercase;
+                options.Password.RequireUppercase = accountOptions.RequireUppercase;
+                options.Password.RequireNonAlphanumeric = accountOptions.RequireNonAlphanumeric;
                 options.Lockout.AllowedForNewUsers = true;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.MaxFailedAccessAttempts = 5;
