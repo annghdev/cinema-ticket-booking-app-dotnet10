@@ -25,6 +25,13 @@ public class DeleteMovieCommandHandler(IUnitOfWork uow)
             throw new InvalidOperationException($"Movie with ID '{command.Id}' not found.");
         }
 
+        var hasShowTimes = await uow.ShowTimes.ExistsAsync(st => st.MovieId == command.Id
+            && (st.Status == ShowTimeStatus.Upcoming || st.Status == ShowTimeStatus.Showing), ct);
+        if (hasShowTimes)
+        {
+            throw new InvalidOperationException($"Cannot delete Movie with ID '{command.Id}' because it currently has active showtimes.");
+        }
+
         movie.MarkAsDeleted();
         uow.Movies.Delete(movie);
         await uow.CommitAsync(ct);
