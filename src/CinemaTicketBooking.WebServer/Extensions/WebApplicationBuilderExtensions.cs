@@ -3,11 +3,14 @@ using CinemaTicketBooking.Application.Common.PipelineMiddlewares;
 using CinemaTicketBooking.Domain;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using JasperFx;
+using JasperFx.CodeGeneration;
 using JasperFx.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.Configuration;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.ErrorHandling;
 using Wolverine.FluentValidation;
@@ -34,7 +37,8 @@ public static class WebApplicationBuilderExtensions
 
             opts.UseFluentValidation();
 
-            opts.Policies.AutoApplyTransactions();
+            opts.UseEntityFrameworkCoreTransactions();
+            opts.Policies.Add(new CommandTransactionPolicy());
             opts.Policies.UseDurableLocalQueues();
 
             // Message pipeline: logging, optional query cache, exception logging (non-HTTP paths).
@@ -77,5 +81,35 @@ public static class WebApplicationBuilderExtensions
                     .UseDurableInbox();
             });
         });
+    }
+
+    /// <summary>
+    /// Applies Wolverine transactional middleware only to command handlers.
+    /// </summary>
+    private sealed class CommandTransactionPolicy : IChainPolicy
+    {
+        /// <summary>
+        /// Configures command handler chains as transactional while leaving query handlers read-only.
+        /// </summary>
+        public void Apply(IReadOnlyList<IChain> chains, GenerationRules rules, IServiceContainer container)
+        {
+            var transactional = new TransactionalAttribute();
+
+            foreach (var chain in chains)
+            {
+                var messageType = chain.InputType();
+                if (messageType is null || !typeof(ICommand).IsAssignableFrom(messageType))
+                {
+                    continue;
+                }
+
+                if (chain.IsTransactional || chain.HasAttribute<NonTransactionalAttribute>())
+                {
+                    continue;
+                }
+
+                transactional.Modify(chain, rules, container);
+            }
+        }
     }
 }
