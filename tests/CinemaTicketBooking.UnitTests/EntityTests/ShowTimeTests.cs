@@ -26,11 +26,11 @@ public class ShowTimeTests
     }
 
     [Fact]
-    public void Create_Should_Throw_When_MovieIsNotNowShowing()
+    public void Create_Should_Throw_When_MovieIsNoShow()
     {
         var cinemaId = Guid.CreateVersion7();
         var movie = DomainTestBuilders.MovieNowShowing();
-        movie.Status = MovieStatus.Upcoming;
+        movie.Status = MovieStatus.NoShow;
         var screen = DomainTestBuilders.ScreenWithSeatMap(cinemaId);
         var policies = DomainTestBuilders.PoliciesForRegularAndVip(cinemaId, screen.Type);
 

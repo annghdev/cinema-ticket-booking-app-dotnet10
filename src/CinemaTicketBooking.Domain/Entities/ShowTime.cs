@@ -32,7 +32,7 @@ public class ShowTime : AggregateRoot
         List<PricingPolicy> pricingPolicies)
     {
         // 1. Validate Movie status
-        if (movie.Status != MovieStatus.NowShowing)
+        if (movie.Status != MovieStatus.NowShowing && movie.Status != MovieStatus.Upcoming)
             throw new InvalidOperationException(
                 $"Movie '{movie.Name}' is not available for scheduling (Status: {movie.Status}).");
 
