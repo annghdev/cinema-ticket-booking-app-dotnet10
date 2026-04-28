@@ -1,0 +1,132 @@
+# Observability stack: build images locally (Coolify: point each service at these Dockerfiles, context = this directory).
+# Prerequisite: deploy docker-composes/production first so network ${ESHOP_APP_NETWORK_NAME} exists.
+services:
+  prometheus:
+    build:
+      context: .
+      dockerfile: images/prometheus/Dockerfile
+    image: ${MONITORING_PROMETHEUS_IMAGE:-eshop/monitoring-prometheus:local}
+    container_name: eshop-monitoring-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    networks:
+      - monitoring_internal
+      - eshop_app
+
+  loki:
+    build:
+      context: .
+      dockerfile: images/loki/Dockerfile
+    image: ${MONITORING_LOKI_IMAGE:-eshop/monitoring-loki:local}
+    container_name: eshop-monitoring-loki
+    command: -config.file=/etc/loki/loki-config.yml
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - loki_data:/loki
+    restart: unless-stopped
+    networks:
+      - monitoring_internal
+      - eshop_app
+
+  jaeger:
+    image: ${JAEGER_IMAGE:-jaegertracing/all-in-one:1.62.0}
+    container_name: eshop-monitoring-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"
+      - "${JAEGER_OTLP_GRPC_PORT:-4317}:4317"
+      - "${JAEGER_OTLP_HTTP_PORT:-4318}:4318"
+    restart: unless-stopped
+    networks:
+      - monitoring_internal
+      - eshop_app
+
+  tempo:
+    build:
+      context: .
+      dockerfile: images/tempo/Dockerfile
+    image: ${MONITORING_TEMPO_IMAGE:-eshop/monitoring-tempo:local}
+    container_name: eshop-monitoring-tempo
+    command: -config.file=/etc/tempo/tempo.yml
+    ports:
+      - "${TEMPO_PORT:-3200}:3200"
+      - "${TEMPO_OTLP_GRPC_PORT:-4319}:4319"
+    volumes:
+      - tempo_data:/var/tempo
+    restart: unless-stopped
+    networks:
+      - monitoring_internal
+      - eshop_app
+
+  postgres-exporter:
+    image: ${POSTGRES_EXPORTER_IMAGE:-quay.io/prometheuscommunity/postgres-exporter:v0.16.0}
+    container_name: eshop-monitoring-postgres-exporter
+    environment:
+      DATA_SOURCE_URI: postgres:5432/postgres?sslmode=disable
+      DATA_SOURCE_USER: ${POSTGRES_USER}
+      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_EXPORTER_PORT:-9187}:9187"
+    restart: unless-stopped
+    networks:
+      - monitoring_internal
+      - eshop_app
+
+  redis-exporter:
+    image: ${REDIS_EXPORTER_IMAGE:-oliver006/redis_exporter:v1.67.0}
+    container_name: eshop-monitoring-redis-exporter
+    command:
+      - --redis.addr=redis://:${REDIS_PASSWORD}@redis:6379
+    ports:
+      - "${REDIS_EXPORTER_PORT:-9121}:9121"
+    restart: unless-stopped
+    networks:
+      - monitoring_internal
+      - eshop_app
+
+  grafana:
+    build:
+      context: .
+      dockerfile: images/grafana/Dockerfile
+    image: ${MONITORING_GRAFANA_IMAGE:-eshop/monitoring-grafana:local}
+    container_name: eshop-monitoring-grafana
+    depends_on:
+      - prometheus
+      - loki
+      - jaeger
+      - tempo
+      - postgres-exporter
+      - redis-exporter
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - monitoring_internal
+
+networks:
+  monitoring_internal:
+    driver: bridge
+  eshop_app:
+    external: true
+    name: ${ESHOP_APP_NETWORK_NAME:-eshop-production-net}
+
+volumes:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  grafana_data:

@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ServiceDiscovery;
-using OpenTelemetry;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
+using System.Reflection;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -21,6 +24,7 @@ public static class Extensions
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.ConfigureOpenTelemetry();
+        builder.ConfigureStructuredLogging();
 
         builder.AddDefaultHealthChecks();
 
@@ -44,8 +48,43 @@ public static class Extensions
         return builder;
     }
 
+    private static TBuilder ConfigureStructuredLogging<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    {
+        var lokiEndpoint = builder.Configuration["LOKI_ENDPOINT"];
+
+        builder.Services.AddSerilog((services, loggerConfiguration) =>
+        {
+            loggerConfiguration
+                .ReadFrom.Configuration(builder.Configuration)
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext()
+                .Enrich.WithProperty("service_name", builder.Environment.ApplicationName)
+                .Enrich.WithProperty("deployment_environment", builder.Environment.EnvironmentName)
+                .WriteTo.Console();
+
+            if (!string.IsNullOrWhiteSpace(lokiEndpoint))
+            {
+                loggerConfiguration.WriteTo.GrafanaLoki(
+                    lokiEndpoint,
+                    labels:
+                    [
+                        new LokiLabel { Key = "app", Value = "cinema-ticket-booking" }
+                    ],
+                    propertiesAsLabels:
+                    [
+                        "service_name",
+                        "deployment_environment"
+                    ]);
+            }
+        });
+
+        return builder;
+    }
+
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
+        var serviceVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
+
         builder.Logging.AddOpenTelemetry(logging =>
         {
             logging.IncludeFormattedMessage = true;
@@ -53,11 +92,39 @@ public static class Extensions
         });
 
         builder.Services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource
+                .AddService(
+                    serviceName: builder.Environment.ApplicationName,
+                    serviceVersion: serviceVersion,
+                    serviceInstanceId: Environment.MachineName)
+                .AddAttributes(
+                [
+                    new KeyValuePair<string, object>("deployment.environment", builder.Environment.EnvironmentName),
+                    new KeyValuePair<string, object>("service.namespace", "cinema-ticket-booking")
+                ]))
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddProcessInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddMeter("Wolverine")
+                    .AddPrometheusExporter();
+
+                var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+                if (Uri.TryCreate(otlpEndpoint, UriKind.Absolute, out var otlpEndpointUri))
+                {
+                    var otlpProtocolValue = builder.Configuration["OTEL_EXPORTER_OTLP_PROTOCOL"];
+                    var otlpProtocol = string.Equals(otlpProtocolValue, "grpc", StringComparison.OrdinalIgnoreCase)
+                        ? OtlpExportProtocol.Grpc
+                        : OtlpExportProtocol.HttpProtobuf;
+
+                    metrics.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = otlpEndpointUri;
+                        options.Protocol = otlpProtocol;
+                    });
+                }
             })
             .WithTracing(tracing =>
             {
@@ -71,28 +138,32 @@ public static class Extensions
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
+
+                var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+                if (Uri.TryCreate(otlpEndpoint, UriKind.Absolute, out var otlpEndpointUri))
+                {
+                    var otlpProtocolValue = builder.Configuration["OTEL_EXPORTER_OTLP_PROTOCOL"];
+                    var otlpProtocol = string.Equals(otlpProtocolValue, "grpc", StringComparison.OrdinalIgnoreCase)
+                        ? OtlpExportProtocol.Grpc
+                        : OtlpExportProtocol.HttpProtobuf;
+
+                    tracing.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = otlpEndpointUri;
+                        options.Protocol = otlpProtocol;
+                    });
+                }
+
+                var tempoEndpoint = builder.Configuration["TEMPO_OTLP_ENDPOINT"];
+                if (Uri.TryCreate(tempoEndpoint, UriKind.Absolute, out var tempoEndpointUri))
+                {
+                    tracing.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = tempoEndpointUri;
+                        options.Protocol = OtlpExportProtocol.Grpc;
+                    });
+                }
             });
-
-        builder.AddOpenTelemetryExporters();
-
-        return builder;
-    }
-
-    private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    {
-        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
-
-        if (useOtlpExporter)
-        {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
-        }
-
-        // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-        //if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-        //{
-        //    builder.Services.AddOpenTelemetry()
-        //       .UseAzureMonitor();
-        //}
 
         return builder;
     }
@@ -108,6 +179,9 @@ public static class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
+        // Prometheus metrics endpoint — Prometheus scrape at /metrics
+        app.MapPrometheusScrapingEndpoint();
+
         // Adding health checks endpoints to applications in non-development environments has security implications.
         // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
         if (app.Environment.IsDevelopment())

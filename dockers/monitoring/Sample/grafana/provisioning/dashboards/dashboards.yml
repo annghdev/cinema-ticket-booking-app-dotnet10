@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: "EShopDashboards"
+    orgId: 1
+    folder: "EShop"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

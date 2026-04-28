@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
+  <PropertyGroup Label="Globals">
+    <ProjectVersion>2.1</ProjectVersion>
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <ProjectGuid>{9D25A46B-9F5F-468C-95D4-11D32ABF0C96}</ProjectGuid>
+    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
+    <DockerServiceName>webapp</DockerServiceName>
+    <DockerServiceUrl>http://localhost:5173</DockerServiceUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include=".env.example" />
+    <None Include="docker-compose.yml" />
+    <None Include="run.ps1" />
+    <None Include="down-clean.ps1" />
+    <None Include="README.md" />
+    <None Include="prometheus\prometheus.yml" />
+    <None Include="loki\loki-config.yml" />
+    <None Include="tempo\tempo.yml" />
+    <None Include="grafana\provisioning\datasources\datasources.yml" />
+    <None Include="grafana\provisioning\dashboards\dashboards.yml" />
+    <None Include="grafana\dashboards\cinema-overview.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CinemaTicketBooking.WebServer\CinemaTicketBooking.WebServer.csproj" />
+    <ProjectReference Include="..\..\src\CinemaTicketBooking.WebApp\cinematicketbooking.webapp.esproj" />
+  </ItemGroup>
+</Project>
