@@ -38,25 +38,42 @@ public sealed class OrphanSeatRule : ISeatSelectionRule
 
             foreach (var segment in segments)
             {
-                // Need at least 3 seats to form occupied-empty-occupied pattern.
-                if (segment.Count < 3)
+                // 3. Sliding window over triplets to detect 1-seat orphan gaps.
+                if (segment.Count >= 3)
                 {
-                    continue;
+                    for (var index = 1; index < segment.Count - 1; index++)
+                    {
+                        var leftOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index - 1], context);
+                        var centerOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index], context);
+                        var rightOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index + 1], context);
+                        if (leftOccupied && !centerOccupied && rightOccupied)
+                        {
+                            violations.Add(new SeatSelectionViolation(
+                                Type: SeatSelectionViolationType.OrphanSeat,
+                                Level: level,
+                                Message: $"Selection leaves an orphan seat at {segment[index].Code}.",
+                                AffectedSeats: [segment[index].Code]));
+                        }
+                    }
                 }
 
-                // 3. Sliding window over triplets to detect orphan seats.
-                for (var index = 1; index < segment.Count - 1; index++)
+                // 4. Sliding window over quadruplets to detect 2-seat orphan gaps.
+                if (segment.Count >= 4)
                 {
-                    var leftOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index - 1], context);
-                    var centerOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index], context);
-                    var rightOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index + 1], context);
-                    if (leftOccupied && !centerOccupied && rightOccupied)
+                    for (var index = 1; index < segment.Count - 2; index++)
                     {
-                        violations.Add(new SeatSelectionViolation(
-                            Type: SeatSelectionViolationType.OrphanSeat,
-                            Level: level,
-                            Message: $"Selection leaves an orphan seat at {segment[index].Code}.",
-                            AffectedSeats: [segment[index].Code]));
+                        var leftOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index - 1], context);
+                        var center1Occupied = SeatSelectionRuleHelpers.IsOccupied(segment[index], context);
+                        var center2Occupied = SeatSelectionRuleHelpers.IsOccupied(segment[index + 1], context);
+                        var rightOccupied = SeatSelectionRuleHelpers.IsOccupied(segment[index + 2], context);
+                        if (leftOccupied && !center1Occupied && !center2Occupied && rightOccupied)
+                        {
+                            violations.Add(new SeatSelectionViolation(
+                                Type: SeatSelectionViolationType.OrphanSeat,
+                                Level: level,
+                                Message: $"Selection leaves a 2-seat gap between {segment[index - 1].Code} and {segment[index + 2].Code}.",
+                                AffectedSeats: [segment[index].Code, segment[index + 1].Code]));
+                        }
                     }
                 }
             }

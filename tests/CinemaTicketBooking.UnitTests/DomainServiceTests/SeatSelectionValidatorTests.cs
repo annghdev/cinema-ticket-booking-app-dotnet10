@@ -34,6 +34,20 @@ public class SeatSelectionValidatorTests
     }
 
     [Fact]
+    public void Validate_Should_Block_When_SelectionLeaves2SeatGap()
+    {
+        var screen = BuildScreen("[[1,1,1,1,1,1]]");
+        var showTime = BuildShowTime(screen, ("A1", TicketStatus.Locking, "session-1"), ("A4", TicketStatus.Locking, "session-1"));
+        var policy = SeatSelectionPolicy.CreateDefault();
+        var selectedIds = showTime.Tickets.Where(x => x.SeatCode == "A1" || x.SeatCode == "A4").Select(x => x.Id).ToList();
+
+        var result = SeatSelectionValidator.CreateDefault().Validate(showTime, policy, selectedIds, "session-1");
+
+        result.CanProceed.Should().BeFalse();
+        result.Errors.Should().Contain(x => x.Type == SeatSelectionViolationType.OrphanSeat);
+    }
+
+    [Fact]
     public void Validate_Should_ReturnWarning_When_IsolatedRowEndSingleDetected()
     {
         var screen = BuildScreen("[[1,1,1,1,1,1]]");
