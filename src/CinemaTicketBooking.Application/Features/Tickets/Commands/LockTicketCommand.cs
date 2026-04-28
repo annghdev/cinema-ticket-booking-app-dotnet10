@@ -45,7 +45,7 @@ public class LockTicketHandler(
             throw new InvalidOperationException($"Ticket with ID '{cmd.TicketId}' not found.");
         }
 
-        var showTime = await uow.ShowTimes.LoadFullAsync(ticket.ShowTimeId, ct);
+        var showTime = await uow.ShowTimes.GetByIdAsync(ticket.ShowTimeId, ct);
         if (showTime is null || showTime.Status == ShowTimeStatus.Cancelled)
         {
             await locker.ReleaseAsync(cmd.TicketId, cmd.LockBy, ct);
