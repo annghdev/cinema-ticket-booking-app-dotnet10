@@ -117,8 +117,8 @@
     <aside
         class="fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-[#0b0e14] border-r border-[#45484f]/10 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
         <div class="p-8">
-            <h1 class="text-xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Neon Cinema</h1>
-            <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản lý</p>
+            <h1 class="text-xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Absolute Cinema</h1>
+            <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản trị</p>
         </div>
         <nav class="flex-1 mt-4">
             @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin) || (await AuthorizationService.AuthorizeAsync(User, Permissions.ReportsView)).Succeeded)
