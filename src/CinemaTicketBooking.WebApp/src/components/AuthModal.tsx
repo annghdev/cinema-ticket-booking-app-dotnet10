@@ -114,16 +114,16 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       const authResponse = isSignup
         ? await register({
-            email: authForm.email.trim(),
-            password: authForm.password,
-            name: authForm.name.trim(),
-            phoneNumber: authForm.phoneNumber.trim(),
-            sessionId: getOrCreateCustomerSessionId(),
-          })
+          email: authForm.email.trim(),
+          password: authForm.password,
+          name: authForm.name.trim(),
+          phoneNumber: authForm.phoneNumber.trim(),
+          sessionId: getOrCreateCustomerSessionId(),
+        })
         : await login({
-            email: authForm.email.trim(),
-            password: authForm.password,
-          })
+          email: authForm.email.trim(),
+          password: authForm.password,
+        })
 
       await setAuthFromTokens(authResponse, {
         displayName: isSignup ? authForm.name.trim() : null,
@@ -187,9 +187,8 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div
-              className={`relative hidden flex-col overflow-hidden bg-surface-container-highest p-12 transition-transform duration-500 ease-in-out lg:flex ${
-                isSignup ? "lg:translate-x-full" : "lg:translate-x-0"
-              }`}
+              className={`relative hidden flex-col overflow-hidden bg-surface-container-highest p-12 transition-transform duration-500 ease-in-out lg:flex ${isSignup ? "lg:translate-x-full" : "lg:translate-x-0"
+                }`}
             >
               <img
                 src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80"
@@ -202,7 +201,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
               <div className="relative z-20">
                 <h1 className="mb-2 font-headline text-4xl font-black uppercase tracking-widest text-primary drop-shadow-[0_0_8px_rgba(0,244,254,0.5)]">
-                  ANDROMEDA CINEMA
+                  ABSOLUTE CINEMA
                 </h1>
                 <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant">Trải nghiệm điện ảnh số</p>
               </div>
@@ -219,15 +218,13 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
             </div>
 
             <div
-              className={`relative flex flex-col justify-center overflow-hidden bg-surface-variant/40 p-8 backdrop-blur-xl transition-transform duration-500 ease-in-out md:p-12 lg:p-16 ${
-                isSignup ? "lg:-translate-x-full" : "lg:translate-x-0"
-              }`}
+              className={`relative flex flex-col justify-center overflow-hidden bg-surface-variant/40 p-8 backdrop-blur-xl transition-transform duration-500 ease-in-out md:p-12 lg:p-16 ${isSignup ? "lg:-translate-x-full" : "lg:translate-x-0"
+                }`}
             >
               <div className="relative min-h-[620px] overflow-hidden">
                 <div
-                  className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
-                    isForgotPassword ? "-translate-x-full" : "translate-x-0"
-                  }`}
+                  className={`absolute inset-0 transition-transform duration-500 ease-in-out ${isForgotPassword ? "-translate-x-full" : "translate-x-0"
+                    }`}
                 >
                   <div className="mb-12">
                     <Dialog.Title className="font-headline text-2xl font-bold text-on-surface">
@@ -373,9 +370,8 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                 </div>
 
                 <div
-                  className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
-                    isForgotPassword ? "translate-x-0" : "translate-x-full"
-                  }`}
+                  className={`absolute inset-0 transition-transform duration-500 ease-in-out ${isForgotPassword ? "translate-x-0" : "translate-x-full"
+                    }`}
                 >
                   <h3 className="font-headline text-2xl font-bold text-on-surface">Quên mật khẩu</h3>
                   <p className="mt-2 text-sm text-on-surface-variant">
