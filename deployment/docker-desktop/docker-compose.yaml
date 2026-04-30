@@ -1,0 +1,39 @@
+services:
+  cache:
+    image: "docker.io/library/redis:7.2-alpine"
+    command:
+      - "-c"
+      - "redis-server --requirepass $$REDIS_PASSWORD"
+    entrypoint:
+      - "/bin/sh"
+    environment:
+      REDIS_PASSWORD: "${CACHE_PASSWORD}"
+    expose:
+      - "6379"
+    restart: "always"
+
+  webserver:
+    image: "${WEBSERVER_IMAGE}"
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+      - ConnectionStrings__redis=cache:6379,password=${CACHE_PASSWORD}
+    ports:
+      - "${WEBSERVER_PORT:-5001}:8080"
+    depends_on:
+      cache:
+        condition: "service_started"
+    restart: "always"
+
+  webapp:
+    image: "${WEBAPP_IMAGE}"
+    env_file:
+      - .env
+    ports:
+      - "${WEBAPP_PORT:-5173}:5173"
+    depends_on:
+      webserver:
+        condition: "service_started"
+    restart: "always"

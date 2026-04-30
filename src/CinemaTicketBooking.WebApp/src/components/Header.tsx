@@ -71,7 +71,7 @@ function Header() {
       <header className="fixed top-0 z-50 w-full border-b border-outline-variant/20 bg-background/95 shadow-lg shadow-black/20 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-8 py-4">
           <div className="font-headline text-2xl font-black tracking-tighter text-[#61b4fe]">
-            ANDROMEDA CINEMA
+            ABSOLUTE CINEMA
           </div>
 
           <nav className="hidden items-center space-x-8 font-headline font-bold tracking-tight md:flex">
