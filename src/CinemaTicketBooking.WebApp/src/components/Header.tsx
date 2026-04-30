@@ -128,7 +128,7 @@ function Header() {
                       className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-on-surface transition-colors hover:bg-surface-container-high"
                     >
                       <span className="material-symbols-outlined text-base">confirmation_number</span>
-                      Xem lịch sử đặt vé
+                      Lịch sử đặt vé
                     </button>
                     <button
                       type="button"
