@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Domain;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CinemaTicketBooking.Infrastructure.Payments.Momo;
@@ -13,7 +14,8 @@ namespace CinemaTicketBooking.Infrastructure.Payments.Momo;
 /// </summary>
 public sealed class MomoPaymentService(
     IOptions<MomoOptions> options,
-    IHttpClientFactory httpClientFactory) : IPaymentService
+    IHttpClientFactory httpClientFactory,
+    ILogger<MomoPaymentService> logger) : IPaymentService
 {
     private readonly MomoOptions _options = options.Value;
     private const string GatewayIcon = "/assets/momo-logo.png";
@@ -95,6 +97,9 @@ public sealed class MomoPaymentService(
             Signature: signature);
 
         // 2. Call MoMo create endpoint.
+        logger.LogInformation("[MomoPayment] Creating payment: OrderId={OrderId}, IpnUrl={IpnUrl}, RedirectUrl={RedirectUrl}",
+            orderId, ipnUrl, redirectUrl);
+
         using var client = httpClientFactory.CreateClient(nameof(MomoPaymentService));
         client.Timeout = TimeSpan.FromSeconds(Math.Max(_options.TimeoutSeconds, 5));
         using var response = await client.PostAsJsonAsync(_options.CreateEndpoint, payload, ct);
@@ -128,6 +133,10 @@ public sealed class MomoPaymentService(
         };
 
         var success = body.ResultCode == 0 && !string.IsNullOrWhiteSpace(paymentUrl);
+
+        logger.LogInformation("[MomoPayment] Create response: ResultCode={ResultCode}, Message={Message}, OrderId={OrderId}, PayUrl={PayUrl}",
+            body.ResultCode, body.Message, body.OrderId, body.PayUrl);
+
         if (!success)
         {
             return new CreatePaymentResult(
