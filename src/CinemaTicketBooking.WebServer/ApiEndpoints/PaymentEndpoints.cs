@@ -170,8 +170,12 @@ public static class PaymentEndpoints
     public static async Task<IResult> MomoIpn(
         HttpRequest request,
         IMessageBus bus,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        ILogger<Program> logger)
     {
+        logger.LogInformation("[MomoIPN] Received IPN callback from {RemoteIp}, ContentType={ContentType}",
+            request.HttpContext.Connection.RemoteIpAddress, request.ContentType);
+
         var gatewayParams = await ReadBodyAsStringDictionaryAsync(request);
         if (!gatewayParams.TryGetValue("orderId", out var orderId) || string.IsNullOrWhiteSpace(orderId))
         {
@@ -233,8 +237,12 @@ public static class PaymentEndpoints
     public static async Task<IResult> VnpayIpn(
         HttpRequest request,
         IMessageBus bus,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        ILogger<Program> logger)
     {
+        logger.LogInformation("[VnpayIPN] Received IPN callback from {RemoteIp}, QueryString={QueryString}",
+            request.HttpContext.Connection.RemoteIpAddress, request.QueryString);
+
         var gatewayParams = request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
 
         if (!gatewayParams.TryGetValue("vnp_TxnRef", out var txnRef) || string.IsNullOrWhiteSpace(txnRef))
