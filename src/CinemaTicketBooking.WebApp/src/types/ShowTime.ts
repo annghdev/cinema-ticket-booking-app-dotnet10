@@ -14,6 +14,10 @@ export type ShowTimeDtoRaw = {
   screenCode: string
   cinemaId: string
   cinemaName: string
+  cinemaAddress: string
+  movieThumbnailUrl: string
+  movieGenre: string
+  movieDuration: number
   date: string
   startAt: string
   endAt: string
@@ -49,6 +53,10 @@ export type ShowTimeDetailDtoRaw = {
   screenCode: string
   cinemaId: string
   cinemaName: string
+  cinemaAddress: string
+  movieThumbnailUrl: string
+  movieGenre: string
+  movieDuration: number
   seatMap: string
   date: string
   startAt: string

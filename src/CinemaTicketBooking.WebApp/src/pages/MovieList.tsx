@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { getUpcomingAndNowShowingMovies } from "../apis/movieApi"
 import { getShowTimes } from "../apis/showtimeApi"
 import type { MovieDto } from "../types/Movie"
 import type { ShowTimeDto } from "../types/ShowTime"
+import { MovieTrailerModal } from "../components/MovieTrailerModal"
 
 type MovieWithShowTimes = {
   movie: MovieDto
@@ -51,10 +52,22 @@ function sectionTagByStatus(status: MovieDto["status"]) {
 }
 
 function MovieList() {
+  const location = useLocation()
+  const returnUrl = encodeURIComponent(location.pathname + location.search)
   const [movies, setMovies] = useState<MovieDto[]>([])
   const [showtimes, setShowtimes] = useState<ShowTimeDto[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const [trailerModal, setTrailerModal] = useState<{ isOpen: boolean; movieName: string; trailerUrl: string | null }>({
+    isOpen: false,
+    movieName: "",
+    trailerUrl: null,
+  })
+
+  const openTrailer = (movieName: string, trailerUrl: string | null) => {
+    setTrailerModal({ isOpen: true, movieName, trailerUrl })
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -169,12 +182,11 @@ function MovieList() {
         <div className="mx-auto w-full max-w-screen-2xl px-8">
           <div className="mb-6 border-l-4 border-secondary pl-5">
             <h2 className="font-headline text-4xl font-black tracking-tight text-on-background">PHIM HOT</h2>
-            <p className="text-on-surface-variant">Slide movie card xếp ngang</p>
+            <p className="text-on-surface-variant">Những siêu phẩm được quan tâm nhiều nhất</p>
           </div>
 
-          <div className="flex gap-6 overflow-x-auto pb-2">
-            {hotMovies.map(({ movie, showtimes: movieShowtimes }) => {
-              const firstShowtime = movieShowtimes[0]
+          <div className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar">
+            {hotMovies.map(({ movie }) => {
               return (
                 <article
                   key={movie.id}
@@ -187,25 +199,31 @@ function MovieList() {
                   </div>
                   <div className="absolute bottom-0 w-full p-6">
                     <p className="text-xs font-semibold tracking-[0.16em] text-secondary">{genreLabel(movie.genre)}</p>
-                    <h3 className="mt-2 font-headline text-3xl font-black leading-tight text-on-background">{movie.name}</h3>
+                    <Link to={`/movies/${movie.id}/showtimes`} className="block hover:text-primary transition-colors cursor-pointer">
+                      <h3 className="mt-2 font-headline text-3xl font-black leading-tight text-on-background group-hover:text-primary transition-colors">{movie.name}</h3>
+                    </Link>
                     <div className="mt-3 flex items-center gap-3 text-sm text-on-surface-variant">
                       <span>{formatDuration(movie.duration)}</span>
                       <span>•</span>
                       <span>{movie.studio}</span>
                     </div>
                     <div className="mt-5 flex gap-2">
-                      {firstShowtime ? (
-                        <Link
-                          to={`/showtimes/${firstShowtime.id}/seats`}
-                          className="inline-flex items-center gap-2 rounded bg-gradient-to-r from-primary to-primary-container px-4 py-2 text-sm font-bold text-on-primary transition-all hover:shadow-[0_0_14px_rgba(0,244,254,0.45)]"
+                      <Link
+                        to={`/movies/${movie.id}/showtimes`}
+                        className="inline-flex items-center gap-2 rounded bg-gradient-to-r from-primary to-primary-container px-5 py-2.5 text-sm font-bold text-on-primary transition-all hover:shadow-[0_0_14px_rgba(0,244,254,0.45)]"
+                      >
+                        Lịch chiếu
+                        <span className="material-symbols-outlined text-base">calendar_today</span>
+                      </Link>
+                      {movie.officialTrailerUrl && (
+                        <button
+                          type="button"
+                          onClick={() => openTrailer(movie.name, movie.officialTrailerUrl)}
+                          className="inline-flex items-center gap-2 rounded bg-surface-variant/40 border border-outline-variant/30 px-5 py-2.5 text-sm font-bold text-on-surface-variant transition-all hover:bg-surface-variant/60"
                         >
-                          Chọn ghế
-                          <span className="material-symbols-outlined text-base">arrow_forward</span>
-                        </Link>
-                      ) : (
-                        <span className="inline-flex items-center rounded border border-outline-variant/30 bg-surface-variant/50 px-4 py-2 text-sm font-semibold text-on-surface-variant">
-                          Chưa có suất
-                        </span>
+                          <span className="material-symbols-outlined text-base">play_circle</span>
+                          Trailer
+                        </button>
                       )}
                     </div>
                   </div>
@@ -220,63 +238,97 @@ function MovieList() {
         <div className="mx-auto w-full max-w-screen-2xl px-8">
           <div className="mb-8 border-l-4 border-primary pl-5">
             <h2 className="font-headline text-4xl font-black tracking-tight text-on-background">ĐANG CHIẾU</h2>
-            <p className="text-on-surface-variant">List movie card dọc</p>
+            <p className="text-on-surface-variant">Các phim đang có suất chiếu tại rạp</p>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             {nowShowingMovies.map(({ movie, showtimes: movieShowtimes }) => (
               <article
                 key={movie.id}
-                className="group rounded-xl border border-outline-variant/20 bg-surface-container-low p-4 shadow-[0_10px_28px_rgba(0,0,0,0.25)] md:p-5"
+                className="group relative rounded-xl border border-outline-variant/20 bg-surface-container-low p-4 shadow-[0_10px_28px_rgba(0,0,0,0.25)] md:p-6"
               >
-                <div className="flex flex-col gap-5 md:flex-row">
-                  <div className="h-56 w-full shrink-0 overflow-hidden rounded-lg bg-surface-container-highest md:h-auto md:w-44">
+                {/* Actions at top right */}
+                <div className="absolute right-4 top-4 z-10 flex gap-2 md:right-6 md:top-6">
+                  {movie.officialTrailerUrl && (
+                    <button
+                      type="button"
+                      onClick={() => openTrailer(movie.name, movie.officialTrailerUrl)}
+                      className="flex h-10 items-center gap-2 rounded-md border border-outline-variant/30 bg-surface-variant/40 px-4 text-xs font-bold text-on-surface-variant transition-all hover:bg-surface-variant/60"
+                    >
+                      <span className="material-symbols-outlined text-lg">play_circle</span>
+                      TRAILER
+                    </button>
+                  )}
+                  <Link
+                    to={`/movies/${movie.id}/showtimes`}
+                    className="flex h-10 items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-4 text-xs font-bold text-primary transition-all hover:bg-primary/20"
+                  >
+                    <span className="material-symbols-outlined text-lg">calendar_today</span>
+                    LỊCH CHIẾU
+                  </Link>
+                </div>
+
+                <div className="flex flex-col gap-6 md:flex-row">
+                  <div className="h-64 w-full shrink-0 overflow-hidden rounded-lg bg-surface-container-highest md:h-72 md:w-52">
                     <img src={movie.thumbnailUrl} alt={movie.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
 
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="font-headline text-3xl font-black tracking-tight text-on-background">{movie.name}</h3>
+                  <div className="flex min-w-0 flex-1 flex-col pt-8 md:pt-0">
+                    <div className="flex flex-wrap items-center gap-3 pr-40"> {/* pr-40 to avoid overlap with buttons */}
+                      <Link to={`/movies/${movie.id}/showtimes`} className="hover:text-primary transition-colors cursor-pointer">
+                        <h3 className="font-headline text-3xl font-black tracking-tight text-on-background group-hover:text-primary transition-colors">{movie.name}</h3>
+                      </Link>
                       <span className="rounded border border-secondary/25 bg-secondary/10 px-2 py-1 text-xs font-bold tracking-widest text-secondary">
-                        {sectionTagByStatus(movie.status)}
+                        NOW SHOWING
                       </span>
                     </div>
 
                     <p className="mt-2 text-sm text-on-surface-variant">
                       {genreLabel(movie.genre)} • {formatDuration(movie.duration)} • Đạo diễn: {movie.director}
                     </p>
-                    <p className="mt-3 max-w-3xl leading-relaxed text-on-surface-variant">{movie.description}</p>
+                    <p className="mt-4 max-w-3xl line-clamp-3 leading-relaxed text-on-surface-variant">{movie.description}</p>
 
-                    <div className="mt-5 grid grid-cols-1 gap-3 text-sm text-on-surface-variant sm:grid-cols-3">
-                      <div className="rounded border border-outline-variant/20 bg-surface-container/70 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-secondary">Studio</span>
+                    <div className="mt-6 grid grid-cols-1 gap-4 text-sm text-on-surface-variant sm:grid-cols-3">
+                      <div className="rounded-lg border border-outline-variant/20 bg-surface-container/70 px-4 py-3">
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-secondary opacity-80">Studio</span>
                         <p className="mt-1 font-medium text-on-background">{movie.studio}</p>
                       </div>
-                      <div className="rounded border border-outline-variant/20 bg-surface-container/70 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-secondary">Cập nhật</span>
+                      <div className="rounded-lg border border-outline-variant/20 bg-surface-container/70 px-4 py-3">
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-secondary opacity-80">Khởi chiếu</span>
                         <p className="mt-1 font-medium text-on-background">{formatDateLabel(movie.createdAt)}</p>
                       </div>
-                      <div className="rounded border border-outline-variant/20 bg-surface-container/70 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-secondary">Suất đang mở</span>
+                      <div className="rounded-lg border border-outline-variant/20 bg-surface-container/70 px-4 py-3">
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-secondary opacity-80">Suất đang mở</span>
                         <p className="mt-1 font-medium text-on-background">{movieShowtimes.length}</p>
                       </div>
                     </div>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {movieShowtimes.slice(0, 6).map((showtime) => (
-                        <Link
-                          key={showtime.id}
-                          to={`/showtimes/${showtime.id}/seats`}
-                          className="rounded border border-outline-variant/30 bg-surface-container/80 px-3 py-1.5 text-sm font-semibold text-on-background transition-colors hover:border-primary/50 hover:text-primary"
-                        >
-                          {formatShowTime(showtime)} · {showtime.cinemaName}
-                        </Link>
-                      ))}
-                      {movieShowtimes.length === 0 && (
-                        <span className="rounded border border-outline-variant/30 bg-surface-container/50 px-3 py-1.5 text-sm text-on-surface-variant">
-                          Chưa có suất chiếu khả dụng
-                        </span>
-                      )}
+                    <div className="mt-6">
+                      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Suất chiếu nhanh</p>
+                      <div className="flex flex-wrap gap-2">
+                        {movieShowtimes.slice(0, 8).map((showtime) => (
+                          <Link
+                            key={showtime.id}
+                            to={`/showtimes/${showtime.id}/seats?returnUrl=${returnUrl}`}
+                            className="rounded-lg border border-outline-variant/30 bg-surface-container/80 px-4 py-2 text-sm font-semibold text-on-background transition-all hover:border-primary/50 hover:text-primary hover:bg-surface-container-highest"
+                          >
+                            {formatShowTime(showtime)} · {showtime.cinemaName}
+                          </Link>
+                        ))}
+                        {movieShowtimes.length === 0 && (
+                          <span className="rounded-lg border border-outline-variant/30 bg-surface-container/50 px-4 py-2 text-sm text-on-surface-variant">
+                            Chưa có suất chiếu khả dụng hôm nay
+                          </span>
+                        )}
+                        {movieShowtimes.length > 8 && (
+                          <Link
+                            to={`/movies/${movie.id}/showtimes`}
+                            className="flex items-center gap-1 rounded-lg border border-outline-variant/20 bg-surface-variant/20 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-variant/40"
+                          >
+                            +{movieShowtimes.length - 8} suất khác
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -290,16 +342,16 @@ function MovieList() {
         <div className="mx-auto w-full max-w-screen-2xl px-8">
           <div className="mb-8 border-l-4 border-secondary pl-5">
             <h2 className="font-headline text-4xl font-black tracking-tight text-on-background">SẮP KHỞI CHIẾU</h2>
-            <p className="text-on-surface-variant">List movie card ngang</p>
+            <p className="text-on-surface-variant">Đón chờ những siêu phẩm sắp ra mắt</p>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             {upcomingMovies.map(({ movie, showtimes: movieShowtimes }) => (
               <article
                 key={movie.id}
-                className="group flex flex-col gap-5 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-low p-4 transition-all duration-300 hover:border-secondary/40 md:flex-row md:items-stretch md:p-5"
+                className="group flex flex-col gap-6 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-low p-4 transition-all duration-300 hover:border-secondary/40 md:flex-row md:items-stretch md:p-6"
               >
-                <div className="h-52 w-full shrink-0 overflow-hidden rounded-lg bg-surface-container-highest md:h-auto md:w-60">
+                <div className="h-56 w-full shrink-0 overflow-hidden rounded-lg bg-surface-container-highest md:h-auto md:w-64">
                   <img src={movie.thumbnailUrl} alt={movie.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -311,34 +363,46 @@ function MovieList() {
                       {genreLabel(movie.genre)}
                     </span>
                   </div>
-                  <h3 className="mt-3 font-headline text-3xl font-black tracking-tight text-on-background">{movie.name}</h3>
+                  <Link to={`/movies/${movie.id}/showtimes`} className="hover:text-secondary transition-colors cursor-pointer">
+                    <h3 className="mt-4 font-headline text-3xl font-black tracking-tight text-on-background group-hover:text-secondary transition-colors">{movie.name}</h3>
+                  </Link>
                   <p className="mt-2 text-sm text-on-surface-variant">
                     {formatDuration(movie.duration)} • {movie.studio} • Đạo diễn: {movie.director}
                   </p>
-                  <p className="mt-3 max-w-3xl leading-relaxed text-on-surface-variant">{movie.description}</p>
+                  <p className="mt-4 max-w-4xl line-clamp-2 leading-relaxed text-on-surface-variant">{movie.description}</p>
 
-                  <div className="mt-5 flex flex-wrap items-center gap-4">
-                    <div className="rounded border border-outline-variant/20 bg-surface-container/70 px-3 py-2 text-sm">
-                      <p className="text-xs uppercase tracking-wide text-secondary">Lịch gần nhất</p>
-                      <p className="font-semibold text-on-background">
-                        {movieShowtimes[0] ? formatDateLabel(movieShowtimes[0].date) : "Đang cập nhật"}
+                  <div className="mt-6 flex flex-wrap items-center gap-4">
+                    <div className="rounded-lg border border-outline-variant/20 bg-surface-container/70 px-4 py-3 text-sm">
+                      <p className="text-[10px] uppercase font-bold tracking-widest text-secondary opacity-80">Dự kiến khởi chiếu</p>
+                      <p className="mt-1 font-semibold text-on-background">
+                        {movieShowtimes[0] ? formatDateLabel(movieShowtimes[0].date) : formatDateLabel(movie.createdAt)}
                       </p>
                     </div>
+                    {movie.officialTrailerUrl && (
+                      <button
+                        type="button"
+                        onClick={() => openTrailer(movie.name, movie.officialTrailerUrl)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-outline-variant/30 bg-surface-variant/40 px-6 py-3 text-sm font-bold text-on-surface-variant transition-all hover:bg-surface-variant/60"
+                      >
+                        <span className="material-symbols-outlined text-lg">play_circle</span>
+                        XEM TRAILER
+                      </button>
+                    )}
                     {movieShowtimes[0] ? (
                       <Link
-                        to={`/showtimes/${movieShowtimes[0].id}/seats`}
-                        className="inline-flex items-center gap-2 rounded border border-outline-variant/30 bg-surface-variant/40 px-4 py-2 text-sm font-semibold text-on-background transition-colors hover:bg-surface-variant/60"
+                        to={`/movies/${movie.id}/showtimes`}
+                        className="inline-flex items-center gap-2 rounded-lg bg-secondary px-6 py-3 text-sm font-bold text-on-secondary transition-all hover:shadow-[0_0_15px_rgba(0,244,254,0.4)]"
                       >
-                        <span className="material-symbols-outlined text-base">event_available</span>
-                        Chọn suất sớm
+                        <span className="material-symbols-outlined text-lg">event_available</span>
+                        XEM LỊCH SỚM
                       </Link>
                     ) : (
                       <button
                         type="button"
-                        className="inline-flex cursor-not-allowed items-center gap-2 rounded border border-outline-variant/30 bg-surface-variant/30 px-4 py-2 text-sm font-semibold text-on-surface-variant"
+                        className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-outline-variant/30 bg-surface-variant/30 px-6 py-3 text-sm font-bold text-on-surface-variant opacity-50"
                       >
-                        <span className="material-symbols-outlined text-base">notifications</span>
-                        Nhắc tôi khi mở bán
+                        <span className="material-symbols-outlined text-lg">notifications</span>
+                        NHẮC TÔI
                       </button>
                     )}
                   </div>
@@ -348,6 +412,13 @@ function MovieList() {
           </div>
         </div>
       </section>
+
+      <MovieTrailerModal
+        isOpen={trailerModal.isOpen}
+        onClose={() => setTrailerModal({ ...trailerModal, isOpen: false })}
+        movieName={trailerModal.movieName}
+        trailerUrl={trailerModal.trailerUrl}
+      />
     </main>
   )
 }

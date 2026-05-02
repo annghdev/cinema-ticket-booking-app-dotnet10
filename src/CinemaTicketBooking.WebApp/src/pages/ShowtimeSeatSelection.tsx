@@ -1,6 +1,6 @@
 import type { HubConnection } from "@microsoft/signalr"
 import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { connectTicketStatusHub } from "../apis/ticketRealtime"
 import { getShowTimeById, lockTicket, releaseTicket, validateSeatSelection } from "../apis/showtimeApi"
 import { saveCheckoutDraft } from "../lib/checkoutDraft"
@@ -149,6 +149,9 @@ function formatDateTimeLabel(dateInput: string) {
 
 function ShowtimeSeatSelection() {
   const { showtimeId } = useParams<{ showtimeId: string }>()
+  const [searchParams] = useSearchParams()
+  const returnUrl = searchParams.get("returnUrl") || "/showtimes"
+
   const [showtime, setShowtime] = useState<ShowTimeDetailDto | null>(null)
   const [tickets, setTickets] = useState<ShowTimeDetailDto["tickets"]>([])
   const [selectedSeatCodes, setSelectedSeatCodes] = useState<string[]>([])
@@ -366,12 +369,22 @@ function ShowtimeSeatSelection() {
       <main className="min-h-screen bg-background text-on-background">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-0 px-8 pb-40 pt-20 md:flex-row md:items-start md:gap-8 md:pb-8 md:pt-24">
           <section className="relative min-w-0 flex-1 bg-background">
-            <div className="flex w-full flex-col items-center">
-              <div className="w-full rounded-xl border border-outline-variant/20 bg-surface-container-low/60 p-4 text-sm text-on-surface-variant">
-                <p className="font-semibold text-on-background">{showtime.movieName}</p>
-                <p className="mt-1">
-                  {showtime.cinemaName} • {showtime.screenCode} • {formatDateTimeLabel(showtime.startAt)}
-                </p>
+            <div className="flex w-full flex-col items-center gap-4">
+              <div className="flex w-full items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => navigate(returnUrl)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/30 bg-surface-container-low text-on-surface-variant transition-colors hover:bg-surface-container"
+                  title="Quay lại"
+                >
+                  <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+                </button>
+                <div className="flex-1 rounded-xl border border-outline-variant/20 bg-surface-container-low/60 p-4 text-sm text-on-surface-variant">
+                  <p className="font-semibold text-on-background">{showtime.movieName}</p>
+                  <p className="mt-1">
+                    {showtime.cinemaName} • {showtime.screenCode} • {formatDateTimeLabel(showtime.startAt)}
+                  </p>
+                </div>
               </div>
             </div>
 

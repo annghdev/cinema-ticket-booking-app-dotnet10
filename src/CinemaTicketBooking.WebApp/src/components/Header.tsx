@@ -6,9 +6,9 @@ import AuthModal from "./AuthModal"
 
 const navItems = [
   { label: "Trang chủ", to: "/" },
-  { label: "Phim", to: "/movies" },
+  { label: "Thư viện phim", to: "/movies" },
   { label: "Lịch chiếu", to: "/showtimes" },
-  { label: "Ưu đãi", to: "/promos" },
+  { label: "Sự kiện", to: "/promos" },
   { label: "Hội viên", to: "/member" },
 ]
 
