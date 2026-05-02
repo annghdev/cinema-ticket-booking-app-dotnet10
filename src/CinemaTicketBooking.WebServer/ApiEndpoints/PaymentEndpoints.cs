@@ -42,14 +42,16 @@ public static class PaymentEndpoints
 
     /// <summary>
     /// VNPay return URL: browser is redirected here after payment.
-    /// Resolves the authoritative payment status via the transaction record,
-    /// then issues a normalized redirect to the frontend result page.
+    /// If IPN has not yet arrived (transaction still Pending), performs inline
+    /// verification as a fallback so the user is not stuck waiting.
     /// Frontend contract: ?status=success|pending|failed &amp;bookingId=...&amp;txnRef=...
     /// </summary>
     public static async Task<IResult> VnpayReturn(
         HttpRequest request,
         IConfiguration configuration,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        IMessageBus bus,
+        ILogger<Program> logger)
     {
         var frontendOrigin = configuration["FrontendOrigin"] ?? request.Scheme + "://" + request.Host;
 
@@ -67,20 +69,50 @@ public static class PaymentEndpoints
             return BuildFailedRedirect(frontendOrigin, txnRef, bookingId: null, "Giao dich khong ton tai.");
         }
 
-        // 3. Build normalized redirect based on authoritative DB status (written by IPN handler).
+        // 3. Fallback verification when IPN has not arrived yet.
+        if (transaction.Status == PaymentTransactionStatus.Pending)
+        {
+            logger.LogInformation("[VnpayReturn] Transaction {TxnRef} still Pending — running inline verification as IPN fallback.", txnRef);
+
+            var gatewayParams = request.Query
+                .ToDictionary(q => q.Key, q => q.Value.ToString());
+
+            try
+            {
+                await bus.InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+                {
+                    BookingId = transaction.BookingId,
+                    GatewayTransactionId = txnRef,
+                    PaymentMethod = PaymentMethod.VnPay.ToString(),
+                    GatewayResponseParams = gatewayParams
+                });
+
+                // Re-read transaction after verification to get updated status.
+                transaction = await uow.PaymentTransactions.GetByGatewayTransactionIdAsync(txnRef, default)
+                              ?? transaction;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "[VnpayReturn] Inline verification failed for {TxnRef}.", txnRef);
+            }
+        }
+
+        // 4. Build normalized redirect based on authoritative DB status.
         return BuildGatewayRedirect(frontendOrigin, transaction, txnRef);
     }
 
     /// <summary>
     /// MoMo return URL: browser is redirected here after payment.
-    /// Resolves the authoritative payment status via the transaction record,
-    /// then issues a normalized redirect to the frontend result page.
+    /// If IPN has not yet arrived (transaction still Pending), performs inline
+    /// verification as a fallback so the user is not stuck waiting.
     /// Frontend contract: ?status=success|pending|failed &amp;bookingId=...&amp;txnRef=...
     /// </summary>
     public static async Task<IResult> MomoReturn(
         HttpRequest request,
         IConfiguration configuration,
-        IUnitOfWork uow)
+        IUnitOfWork uow,
+        IMessageBus bus,
+        ILogger<Program> logger)
     {
         var frontendOrigin = configuration["FrontendOrigin"] ?? request.Scheme + "://" + request.Host;
 
@@ -98,7 +130,35 @@ public static class PaymentEndpoints
             return BuildFailedRedirect(frontendOrigin, txnRef, bookingId: null, "Giao dich khong ton tai.");
         }
 
-        // 3. Build normalized redirect.
+        // 3. Fallback verification when IPN has not arrived yet.
+        if (transaction.Status == PaymentTransactionStatus.Pending)
+        {
+            logger.LogInformation("[MomoReturn] Transaction {TxnRef} still Pending — running inline verification as IPN fallback.", txnRef);
+
+            var gatewayParams = request.Query
+                .ToDictionary(q => q.Key, q => q.Value.ToString());
+
+            try
+            {
+                await bus.InvokeAsync<VerifyPaymentResponse>(new VerifyPaymentCommand
+                {
+                    BookingId = transaction.BookingId,
+                    GatewayTransactionId = txnRef,
+                    PaymentMethod = PaymentMethod.Momo.ToString(),
+                    GatewayResponseParams = gatewayParams
+                });
+
+                // Re-read transaction after verification to get updated status.
+                transaction = await uow.PaymentTransactions.GetByGatewayTransactionIdAsync(txnRef, default)
+                              ?? transaction;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "[MomoReturn] Inline verification failed for {TxnRef}.", txnRef);
+            }
+        }
+
+        // 4. Build normalized redirect.
         return BuildGatewayRedirect(frontendOrigin, transaction, txnRef);
     }
 
