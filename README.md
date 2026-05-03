@@ -21,15 +21,14 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 
 | Category | Highlights |
 |---|---|
-| **🔐 Authentication & Authorization** | ASP.NET Core Identity with JWT + HttpOnly refresh-token cookies, role-based access control, Google & Facebook OAuth |
-| **🎟️ Real-time Seat Selection** | SignalR hubs broadcast ticket lock/unlock events instantly — multiple users see the same seat map live |
-| **🎟️ Seat Selection Policies** | Flexible policies to prevent invalid seat selection (gaps between seats, orphaned seats, multiple rows, between aisle, etc...) |
-| **💳 Online Payment Integration** | VNPay & Momo payment gateways with IPN webhook verification, configurable timeouts and retry logic |
-| **📡 Real-time Payment Status** | SignalR `PaymentHub` pushes payment confirmation to the browser the moment the IPN callback arrives |
-| **🏷️ Dynamic Pricing** | Flexible pricing policies per screen, day-of-week, and showtime — managed from the admin panel |
-| **⚡ Performance & Caching** | Redis for seat-lock state mechanism and response caching |
-| **🔒 Recovery jobs** | Background jobs for detecting and recovering from invalid entity states (e.g., showtime not published, payment not completed, ticket not unlocked after timeout) when the system restarts |
-| **🖥️ Admin Panel** | Full MVC admin panel for managing Cinemas, Screens, Movies, Showtimes, Pricing, Access control and Dashboard |
+| **Authentication & Authorization** | ASP.NET Core Identity with JWT + HttpOnly refresh-token cookies, role-based access control, Google & Facebook OAuth |
+| **Real-time Seat Status** | SignalR hubs broadcast ticket lock/unlock events instantly — multiple users see the same seat map live |
+| **Seat Selection Rules** | Flexible rules to prevent invalid seat selection (gaps between seats, orphaned seats, multiple rows, between aisle, etc...) |
+| **Online Payment Integration** | VNPay & Momo payment gateways with IPN webhook verification, configurable timeouts and retry logic |
+| **Dynamic Pricing** | Flexible pricing policies per screen, day-of-week, and showtime — managed from the admin panel |
+| **Performance & Caching** | Redis for seat-lock state mechanism and response caching |
+| **Recovery jobs** | Background jobs for detecting and recovering from invalid entity states (e.g., showtime not published, payment not completed, ticket not unlocked after timeout) when the system restarts |
+| **Admin Panel** | Full MVC admin panel for managing Cinemas, Screens, Movies, Showtimes, Pricing, Access control and Dashboard |
 
 ---
 
@@ -61,7 +60,7 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 | Technology | Purpose |
 |---|---|
 | **PostgreSQL 17** | Primary relational database |
-| **Redis 7.4** | Distributed caching & seat-lock management |
+| **Redis 7** | Distributed caching & seat-lock management |
 
 ### DevOps & Observability
 | Technology | Purpose |
@@ -85,66 +84,11 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 - **Domain-Driven Design (DDD)** — rich domain entities with encapsulated business rules, domain events, and value objects
 - **CQRS** — commands and queries separated via Wolverine message bus
 - **Repository + Unit of Work** — data access abstraction with transactional consistency
-- **Domain Events** — side effects handled through Wolverine messaging pipeline (e.g., `ShowTimePublished → GenerateTickets`)
+- **Domain Events** — side effects handled through Wolverine messaging pipeline (e.g., `BookingConfirmed → SendCheckInQRCode`)
 
 ### System Diagram
 
-```mermaid
-graph TB
-    subgraph Client
-        REACT["React SPA"]
-        ADMIN["Admin MVC"]
-    end
-
-    subgraph WebServer
-        API["Minimal API Endpoints"]
-        MVC["MVC Controllers"]
-        HUB["SignalR Hubs"]
-        MW["Middlewares"]
-    end
-
-    subgraph Application
-        CMD["Commands"]
-        QRY["Queries"]
-        EVT["Event Handlers"]
-    end
-
-    subgraph Domain
-        ENT["Entities"]
-        DEVT["Domain Events"]
-        SVC["Domain Services"]
-        REPO_INT["Repository Interfaces"]
-    end
-
-    subgraph Infrastructure
-        EF["EF Core / Dapper"]
-        AUTH["Identity Auth"]
-        CACHE["Redis Cache"]
-        PAY["Payment Gateways"]
-        QR["QR Code Generator"]
-    end
-
-    subgraph External
-        PG["PostgreSQL"]
-        RD["Redis"]
-        VNPAY["VNPay"]
-        MOMO["Momo"]
-    end
-
-    REACT -->|HTTP / WebSocket| API
-    REACT -->|WebSocket| HUB
-    ADMIN --> MVC
-    API --> CMD & QRY
-    MVC --> CMD & QRY
-    CMD --> ENT & DEVT
-    QRY --> REPO_INT
-    DEVT --> EVT
-    EVT --> REPO_INT
-    REPO_INT -.->|implemented by| EF
-    EF --> PG
-    CACHE --> RD
-    PAY --> VNPAY & MOMO
-```
+![System Diagram](assets/system-diagram.png)
 
 ### Entity Relationship Diagram
 
@@ -160,8 +104,8 @@ graph TB
 ├── Aspire.ServiceDefaults/                # Shared Aspire defaults (logging, tracing config)
 │
 ├── CinemaTicketBooking.Domain/            # Core business logic (zero external dependencies)
-│   ├── Abstractions/                      # Base entity, generic repository interface
-│   ├── Constants/                         # MaxLength constants for validation
+│   ├── Abstractions/                      # Base entity
+│   ├── Constants/                         # MaxLength constants for validation, Seat grid cell values, etc.
 │   ├── Entities/                          # Cinema, Screen, Movie, ShowTime, Booking, Ticket, etc.
 │   ├── Enums/                             # BookingStatus, PaymentMethod, SeatType, etc.
 │   ├── Events/                            # Domain events per aggregate
@@ -177,18 +121,17 @@ graph TB
 │
 ├── CinemaTicketBooking.Infrastructure/    # External concerns implementation
 │   ├── Auth/                              # Identity, JWT, OAuth, role seeding
-│   ├── Cache/                             # Redis cache + NoOp fallback
-│   ├── FileStorages/                      # File storage abstraction
+│   ├── Cache/                             # Redis cache implementations
+│   ├── FileStorages/                      # File storage implementations
 │   ├── Notifications/                     # Email sender
-│   ├── Payments/                          # VNPay & Momo gateway implementations
-│   ├── Persistence/                       # EF Core DbContext, migrations, repositories
-│   └── QrCodes/                           # QR code generation
+│   ├── Payments/                          # Online payment gateway implementations
+│   └── Persistence/                       # EF Core DbContext, migrations, repositories
 │
 ├── CinemaTicketBooking.WebServer/         # ASP.NET Core host
-│   ├── ApiEndpoints/                      # Minimal API endpoints (Auth, Booking, Movie, etc.)
+│   ├── ApiEndpoints/                      # Minimal API endpoints
 │   ├── Controllers/                       # MVC admin controllers
-│   ├── CronJobs/                          # Background hosted services (lock recovery)
-│   ├── Hubs/                              # SignalR hubs (TicketStatusHub, PaymentHub)
+│   ├── CronJobs/                          # Background hosted services
+│   ├── Hubs/                              # Real-time SignalR hubs
 │   ├── Middlewares/                       # Global exception handling
 │   ├── Models/                            # View models for MVC
 │   └── Views/                             # Razor views for admin panel
@@ -314,6 +257,36 @@ Key configuration sections in `appsettings.json`:
 | Backend API Docs | **http://cinemaserver.annghdev.online/scalar/v1** |
 
 ---
+## Screenshots
+
+### Home page
+![Landing page](assets/frontend/home-page.png)
+### Showtime schedules page
+![Showtime schedules page](assets/frontend/showtimes.png)
+### Seat Selection page
+![Seat Selection page](assets/frontend/seat-selection.png)
+### Checkout page
+![Checkout page](assets/frontend/checkout.png)
+### Payment result
+![Payment result](assets/frontend/payment-result.png)
+### Movie list page
+![Movie List page](assets/frontend/movie-list.png)
+
+
+### Admin Dashboard
+![Admin Dashboard](assets/admin/dashboard.png)
+### Admin Manage Movies
+![Admin Manage Movies](assets/admin/movie-management.png)
+### Admin Manage Showtimes
+![Admin Manage Showtime](assets/admin/showtime-schedules.png)
+### Admin Manage Cinemas
+![Admin Manage Booking](assets/admin/cinema-management.png)
+### Admin Design Screen
+![Admin Design Seat](assets/admin/create-screen.png)
+### Admin Manage Permissions
+![Admin Design Seat](assets/admin/access-control.png)
+
+---
 
 ## 📬 Contact
 
@@ -328,3 +301,27 @@ Key configuration sections in `appsettings.json`:
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE.txt).
+
+```
+//                       _oo0oo_
+//                      o8888888o
+//                      88" . "88
+//                      (| -_- |)
+//                      0\  =  /0
+//                    ___/`---'\___
+//                  .' \\|     |// '.
+//                 / \\|||  :  |||// \
+//                / _||||| -:- |||||- \
+//               |   | \\\  -  /// |   |
+//               | \_|  ''\---/''  |_/ |
+//               \  .-\__  '-'  ___/-. /
+//             ___'. .'  /--.--\  `. .'___
+//          ."" '<  `.___\_<|>_/___.' >' "".
+//         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+//         \  \ `_.   \_ __\ /__ _/   .-` /  /
+//     =====`-.____`.___ \_____/___.-`___.-'=====
+//                       `=---='
+//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//       ~ Phật Tổ phù hộ - Không bao giờ Bug ~
+//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
