@@ -2,6 +2,19 @@
 
 > A full-stack, real-time cinema ticket booking platform built with **.NET 10** and **React 19** — designed to demonstrate production-grade Clean Architecture, domain-driven design, and modern DevOps practices.
 
+## 📖 Table of Contents
+
+- [📌 Overview](#-overview)
+- [🚀 Key Features](#-key-features)
+- [🛠 Tech Stack](#-tech-stack)
+- [🏗 Architecture](#-architecture)
+- [📂 Project Structure](#-project-structure)
+- [⚙️ Getting Started](#-getting-started)
+- [📸 Demo](#-demo)
+- [🖼 Screenshots](#screenshots)
+- [📬 Contact](#-contact)
+- [📄 License](#-license)
+
 ---
 
 ## 📌 Overview
@@ -303,25 +316,25 @@ Key configuration sections in `appsettings.json`:
 This project is licensed under the [MIT License](LICENSE.txt).
 
 ```
-//                       _oo0oo_
-//                      o8888888o
-//                      88" . "88
-//                      (| -_- |)
-//                      0\  =  /0
-//                    ___/`---'\___
-//                  .' \\|     |// '.
-//                 / \\|||  :  |||// \
-//                / _||||| -:- |||||- \
-//               |   | \\\  -  /// |   |
-//               | \_|  ''\---/''  |_/ |
-//               \  .-\__  '-'  ___/-. /
-//             ___'. .'  /--.--\  `. .'___
-//          ."" '<  `.___\_<|>_/___.' >' "".
-//         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
-//         \  \ `_.   \_ __\ /__ _/   .-` /  /
-//     =====`-.____`.___ \_____/___.-`___.-'=====
-//                       `=---='
-//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//       ~ Phật Tổ phù hộ - Không bao giờ Bug ~
-//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                                             _oo0oo_
+//                                            o8888888o
+//                                            88" . "88
+//                                            (| -_- |)
+//                                            0\  =  /0
+//                                          ___/`---'\___
+//                                        .' \\|     |// '.
+//                                       / \\|||  :  |||// \
+//                                      / _||||| -:- |||||- \
+//                                     |   | \\\  -  /// |   |
+//                                     | \_|  ''\---/''  |_/ |
+//                                     \  .-\__  '-'  ___/-. /
+//                                   ___'. .'  /--.--\  `. .'___
+//                                  ."" '<  `.___\_<|>_/___.' >' "".
+//                                | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+//                                \  \ `_.   \_ __\ /__ _/   .-` /  /
+//                            =====`-.____`.___ \_____/___.-`___.-'=====
+//                                              `=---='
+//                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                              ~ Phật Tổ phù hộ - Không bao giờ Bug ~
+//                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
