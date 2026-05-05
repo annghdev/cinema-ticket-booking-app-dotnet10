@@ -33,7 +33,6 @@
     <Folder Include="FileStorages\" />
     <Folder Include="Notifications\" />
     <Folder Include="Payments\Vnpay\" />
-    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 
 </Project>

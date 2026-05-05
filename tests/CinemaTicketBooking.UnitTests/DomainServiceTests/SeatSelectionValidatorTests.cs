@@ -86,7 +86,7 @@ public class SeatSelectionValidatorTests
             Id = Guid.CreateVersion7(),
             CinemaId = Guid.CreateVersion7(),
             Code = "S1",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true,
             SeatMap = seatMap
         };

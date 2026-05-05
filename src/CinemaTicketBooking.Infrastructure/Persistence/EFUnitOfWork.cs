@@ -1,5 +1,6 @@
 using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine;
@@ -23,6 +24,7 @@ public class EFUnitOfWork(
     private IPricingPolicyRepository? _pricingPolicies;
     private ISeatSelectionPolicyRepository? _seatSelectionPolicies;
     private IPaymentTransactionRepository? _paymentTransactions;
+    private ISlideRepository? _slides;
 
     public ICinemaRepository Cinemas => _cinemas ??= serviceProvider.GetRequiredService<ICinemaRepository>();
     public IMovieRepository Movies => _movies ??= serviceProvider.GetRequiredService<IMovieRepository>();
@@ -35,6 +37,7 @@ public class EFUnitOfWork(
     public IPricingPolicyRepository PricingPolicies => _pricingPolicies ??= serviceProvider.GetRequiredService<IPricingPolicyRepository>();
     public ISeatSelectionPolicyRepository SeatSelectionPolicies => _seatSelectionPolicies ??= serviceProvider.GetRequiredService<ISeatSelectionPolicyRepository>();
     public IPaymentTransactionRepository PaymentTransactions => _paymentTransactions ??= serviceProvider.GetRequiredService<IPaymentTransactionRepository>();
+    public ISlideRepository Slides => _slides ??= serviceProvider.GetRequiredService<ISlideRepository>();
 
     public async Task CommitAsync(CancellationToken ct = default)
     {

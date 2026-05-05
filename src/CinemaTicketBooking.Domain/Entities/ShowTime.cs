@@ -10,6 +10,12 @@ public class ShowTime : AggregateRoot
     public DateTimeOffset StartAt { get; set; }
     public DateTimeOffset EndAt { get; set; }
     public ShowTimeStatus Status { get; set; }
+
+    /// <summary>
+    /// The projection format chosen for this showtime (must be one of Screen.SupportedFormats).
+    /// </summary>
+    public ScreenType Format { get; set; }
+
     public List<Ticket> Tickets { get; set; } = [];
 
     // Configuration constants
@@ -29,39 +35,49 @@ public class ShowTime : AggregateRoot
         Movie movie, 
         Screen screen, 
         DateTimeOffset startAt, 
-        List<PricingPolicy> pricingPolicies)
+        List<PricingPolicy> pricingPolicies,
+        ScreenType? format = null)
     {
-        // 1. Validate Movie status
+        // 1. Resolve format: use provided or default to screen's primary format
+        var resolvedFormat = format ?? screen.Type;
+
+        // 2. Validate Movie status
         if (movie.Status != MovieStatus.NowShowing && movie.Status != MovieStatus.Upcoming)
             throw new InvalidOperationException(
                 $"Movie '{movie.Name}' is not available for scheduling (Status: {movie.Status}).");
 
-        // 2. Validate Screen is active
+        // 3. Validate Screen is active
         if (!screen.IsActive)
             throw new InvalidOperationException(
                 $"Screen '{screen.Code}' is not active.");
 
-        // 3. Validate future time
+        // 4. Validate Screen supports the chosen format
+        if (!screen.SupportsFormat(resolvedFormat))
+            throw new InvalidOperationException(
+                $"Screen '{screen.Code}' does not support format '{resolvedFormat}'. " +
+                $"Supported: [{string.Join(", ", screen.SupportedFormats)}].");
+
+        // 5. Validate future time
         if (startAt <= DateTimeOffset.UtcNow)
             throw new InvalidOperationException(
                 "ShowTime must be scheduled in the future.");
 
-        // 4. Validate Screen has seats
+        // 6. Validate Screen has seats
         if (screen.Seats is null || screen.Seats.Count == 0)
             throw new InvalidOperationException(
                 $"Screen '{screen.Code}' has no seats. Cannot create a showtime.");
 
-        // 5. Validate pricing policies cover all seat types in the screen
+        // 7. Validate pricing policies cover all seat types in the screen
         if (pricingPolicies is null || pricingPolicies.Count == 0)
             throw new InvalidOperationException(
                 "Pricing policies are required to create a showtime.");
 
-        // 6. Calculate EndAt = StartAt + TrailerTime + Movie Duration
+        // 8. Calculate EndAt = StartAt + TrailerTime + Movie Duration
         var endAt = startAt
             .Add(TrailerTime)
             .Add(TimeSpan.FromMinutes(movie.Duration));
 
-        // 7. Create the ShowTime entity
+        // 9. Create the ShowTime entity
         var showTime = new ShowTime
         {
             Id = Guid.CreateVersion7(),
@@ -72,13 +88,14 @@ public class ShowTime : AggregateRoot
             Date = DateOnly.FromDateTime(startAt.ToOffset(TimeSpan.FromHours(7)).DateTime),
             StartAt = startAt,
             EndAt = endAt,
-            Status = ShowTimeStatus.Upcoming
+            Status = ShowTimeStatus.Upcoming,
+            Format = resolvedFormat
         };
 
-        // 8. Generate tickets with pricing for every active seat in the screen
+        // 10. Generate tickets with pricing for every active seat in the screen
         showTime.GenerateTickets(screen, pricingPolicies);
 
-        // 9. Raise domain event
+        // 11. Raise domain event
         showTime.RaiseEvent(new ShowTimeCreated(
             ShowTimeId: showTime.Id,
             MovieId: movie.Id,
@@ -88,7 +105,8 @@ public class ShowTime : AggregateRoot
             Date: showTime.Date,
             StartAt: showTime.StartAt,
             EndAt: showTime.EndAt,
-            TicketCount: showTime.Tickets.Count));
+            TicketCount: showTime.Tickets.Count,
+            Format: resolvedFormat));
 
         return showTime;
     }
@@ -98,6 +116,8 @@ public class ShowTime : AggregateRoot
     // =============================================================
     private void GenerateTickets(Screen screen, List<PricingPolicy> pricingPolicies)
     {
+        var isWeekend = Date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+
         foreach (var seat in screen.Seats.Where(s => s.IsActive))
         {
             var policy = pricingPolicies
@@ -105,7 +125,7 @@ public class ShowTime : AggregateRoot
 
             if (policy is null)
                 throw new InvalidOperationException(
-                    $"No pricing policy found for ScreenType '{screen.Type}', SeatType '{seat.Type}'.");
+                    $"No pricing policy found for Format '{Format}', SeatType '{seat.Type}'.");
 
             Tickets.Add(new Ticket
             {
@@ -114,7 +134,7 @@ public class ShowTime : AggregateRoot
                 SeatCode = seat.Code,
                 Code = $"{Date:yyyyMMdd}-{screen.Code}-{seat.Code}",
                 Description = $"{seat.Code} - {seat.Type}",
-                Price = policy.CalculatePrice(),
+                Price = policy.CalculatePrice(isWeekend),
                 ShowTimeId = Id,
                 Status = TicketStatus.Available
             });

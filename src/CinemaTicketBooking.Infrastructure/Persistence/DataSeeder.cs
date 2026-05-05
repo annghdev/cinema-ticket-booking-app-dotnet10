@@ -67,6 +67,7 @@ public class DataSeeder(
         var concessions = SeedConcessions();
         var seatSelectionPolicy = SeatSelectionPolicy.CreateDefault();
         var pricingPolicies = SeedPricingPolicies();
+        var slides = SeedSlides();
 
         // 2. Build screens and seats for each cinema.
         var screens = SeedScreens(cinemas);
@@ -87,6 +88,7 @@ public class DataSeeder(
         dbContext.ShowTimes.AddRange(showTimes);
         dbContext.Customers.AddRange(customers);
         dbContext.Bookings.AddRange(bookings);
+        dbContext.Slides.AddRange(slides);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await SeedRegisteredAccountsAsync(customers, cancellationToken);
@@ -111,7 +113,47 @@ public class DataSeeder(
             isActive: true);
         cinema2.Id = CinemaId2;
 
-        return [cinema1, cinema2];
+        var cinema3 = Cinema.Create(
+            name: "Lotte Gò Vấp",
+            thumbnailUrl: "https://images.unsplash.com/photo-1595769816263-9b910be24d5f",
+            geo: "10.828800,106.683400",
+            address: "242 Nguyen Van Luong, Go Vap, Ho Chi Minh City",
+            isActive: true);
+        cinema3.Id = new Guid("00000000-0000-0000-0000-000000000003");
+
+        var cinema4 = Cinema.Create(
+            name: "CGV Vincom Landmark 81",
+            thumbnailUrl: "https://images.unsplash.com/photo-1543666276-80dbf11b6ff4",
+            geo: "10.794600,106.721400",
+            address: "720A Dien Bien Phu, Ward 22, Binh Thanh, Ho Chi Minh City",
+            isActive: true);
+        cinema4.Id = new Guid("00000000-0000-0000-0000-000000000004");
+
+        var cinema5 = Cinema.Create(
+            name: "BHD Star Thao Dien",
+            thumbnailUrl: "https://images.unsplash.com/photo-1507676184212-d0330a15183c",
+            geo: "10.803700,106.736000",
+            address: "159 Xa Lo Ha Noi, Thao Dien, Thu Duc City",
+            isActive: true);
+        cinema5.Id = new Guid("00000000-0000-0000-0000-000000000005");
+
+        return [cinema1, cinema2, cinema3, cinema4, cinema5];
+    }
+
+    private static List<Slide> SeedSlides()
+    {
+        return [
+            Slide.Create("Blockbuster Summer", "Don't miss the biggest hits of the year.", "https://images.unsplash.com/photo-1440404653325-ab127d49abc1", "/movies", 1),
+            Slide.Create("Family Time", "Great movies for everyone in the family.", "https://images.unsplash.com/photo-1536440136628-849c177e76a1", "/movies", 2),
+            Slide.Create("Horror Nights", "Face your fears this weekend.", "https://images.unsplash.com/photo-1509281373149-e957c6296406", "/movies", 3),
+            Slide.Create("Action Packed", "High octane thrills and explosions.", "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba", "/movies", 4),
+            Slide.Create("Romance Special", "Perfect date night movies.", "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0", "/movies", 5),
+            Slide.Create("Comedy Central", "Laugh out loud comedies.", "https://images.unsplash.com/photo-1585647347483-22b66260dfff", "/movies", 6),
+            Slide.Create("Sci-Fi Adventures", "Explore new worlds.", "https://images.unsplash.com/photo-1517602302552-471fe67acf66", "/movies", 7),
+            Slide.Create("Indie Gems", "Discover independent cinema.", "https://images.unsplash.com/photo-1578849278619-e73505e9610f", "/movies", 8),
+            Slide.Create("Documentaries", "Learn something new today.", "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd", "/movies", 9),
+            Slide.Create("Classic Rewind", "Watch the all-time favorites.", "https://images.unsplash.com/photo-1542204165-65bf26472b9b", "/movies", 10),
+        ];
     }
 
     private static List<Movie> SeedMovies()
@@ -125,7 +167,8 @@ public class DataSeeder(
             officialTrailerUrl: "https://www.youtube.com/watch?v=2g811Eo7K8U",
             duration: 132,
             genre: MovieGenre.SciFi,
-            status: MovieStatus.NowShowing);
+            status: MovieStatus.NowShowing,
+            targetReach: 2000000000m);
         movie1.Id = MovieId1;
 
         var movie2 = Movie.Create(
@@ -137,7 +180,8 @@ public class DataSeeder(
             officialTrailerUrl: "https://www.youtube.com/watch?v=EXeTwQWrcwY",
             duration: 118,
             genre: MovieGenre.Thriller,
-            status: MovieStatus.NowShowing);
+            status: MovieStatus.NowShowing,
+            targetReach: 1500000000m);
         movie2.Id = MovieId2;
 
         var movie3 = Movie.Create(
@@ -149,7 +193,8 @@ public class DataSeeder(
             officialTrailerUrl: "https://www.youtube.com/watch?v=6ZfuNTqbHE8",
             duration: 106,
             genre: MovieGenre.Drama,
-            status: MovieStatus.Upcoming);
+            status: MovieStatus.Upcoming,
+            targetReach: 800000000m);
         movie3.Id = MovieId3;
 
         return [movie1, movie2, movie3];
@@ -186,19 +231,19 @@ public class DataSeeder(
         return
         [
             // TwoD
-            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Regular, 85000m, 1.00m, true),
-            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.VIP, 120000m, 1.00m, true),
-            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Couple, 170000m, 1.00m, true),
+            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Regular, 85000m, 1.00m, 1.00m, true),
+            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.VIP, 120000m, 1.00m, 1.00m, true),
+            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Couple, 170000m, 1.00m, 1.00m, true),
 
             // ThreeD
-            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Regular, 85000m, 1.25m, true),
-            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.VIP, 120000m, 1.25m, true),
-            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Couple, 170000m, 1.25m, true),
+            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Regular, 85000m, 1.25m, 1.00m, true),
+            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.VIP, 120000m, 1.25m, 1.00m, true),
+            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Couple, 170000m, 1.25m, 1.00m, true),
 
             // IMAX
-            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Regular, 85000m, 1.55m, true),
-            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.VIP, 120000m, 1.55m, true),
-            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Couple, 170000m, 1.55m, true)
+            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Regular, 85000m, 1.55m, 1.00m, true),
+            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.VIP, 120000m, 1.55m, 1.00m, true),
+            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Couple, 170000m, 1.55m, 1.00m, true)
         ];
     }
 
@@ -229,25 +274,34 @@ public class DataSeeder(
             + "[4,3,4,3,0,4,3,4,3,4,3,4,3,0,4,3,4,3]]";
 
 
-        var screen1 = CreateScreen(cinemas[0].Id, "ND-S1", standardSeatMap, ScreenType.TwoD);
-        screen1.Id = ScreenId1;
+        var screenList = new List<Screen>();
+        int screenIndex = 1;
 
-        var screen2 = CreateScreen(cinemas[0].Id, "ND-S2", compactSeatMap, ScreenType.ThreeD);
-        screen2.Id = ScreenId2;
+        foreach (var cinema in cinemas)
+        {
+            var s1 = CreateScreen(cinema.Id, $"S{screenIndex++}", standardSeatMap, ScreenType.TwoD, [ScreenType.TwoD]);
+            var s2 = CreateScreen(cinema.Id, $"S{screenIndex++}", compactSeatMap, ScreenType.ThreeD, [ScreenType.TwoD, ScreenType.ThreeD]);
+            var s3 = CreateScreen(cinema.Id, $"IMAX-{screenIndex++}", standardSeatMap, ScreenType.IMAX, [ScreenType.TwoD, ScreenType.ThreeD, ScreenType.IMAX]);
+            var s4 = CreateScreen(cinema.Id, $"IMAX-{screenIndex++}", mediumSeatMap, ScreenType.IMAX, [ScreenType.TwoD, ScreenType.ThreeD, ScreenType.IMAX]);
+            var s5 = CreateScreen(cinema.Id, $"IMAX-{screenIndex++}", largestSeatMap, ScreenType.IMAX, [ScreenType.TwoD, ScreenType.ThreeD, ScreenType.IMAX]);
 
-        var screen3 = CreateScreen(cinemas[1].Id, "BQK-IMAX-1", standardSeatMap, ScreenType.IMAX);
-        screen3.Id = ScreenId3;
+            // Assign fixed IDs only to the first cinema's screens to preserve existing tests/seed references
+            if (cinema.Id == CinemaId1)
+            {
+                s1.Id = ScreenId1;
+                s2.Id = ScreenId2;
+                s3.Id = ScreenId3;
+                s4.Id = ScreenId4;
+                s5.Id = ScreenId5;
+            }
 
-        var screen4 = CreateScreen(cinemas[1].Id, "BQK-IMAX-2", mediumSeatMap, ScreenType.IMAX);
-        screen4.Id = ScreenId4;
+            screenList.AddRange([s1, s2, s3, s4, s5]);
+        }
 
-        var screen5 = CreateScreen(cinemas[1].Id, "BQK-IMAX-3", largestSeatMap, ScreenType.IMAX);
-        screen5.Id = ScreenId5;
-
-        return [screen1, screen2, screen3, screen4, screen5];
+        return screenList;
     }
 
-    private static Screen CreateScreen(Guid cinemaId, string code, string seatMap, ScreenType type)
+    private static Screen CreateScreen(Guid cinemaId, string code, string seatMap, ScreenType type, List<ScreenType> supportedFormats)
     {
         var rowCount = seatMap.Count(c => c == '[') - 1;
         var firstRowStart = seatMap.IndexOf("[", StringComparison.Ordinal) + 1;
@@ -264,7 +318,8 @@ public class DataSeeder(
             totalSeats: totalSeats,
             seatMap: seatMap,
             type: type,
-            isActive: true);
+            isActive: true,
+            supportedFormats: supportedFormats);
 
         screen.GenerateSeats(seatMap);
         return screen;

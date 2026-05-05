@@ -22,6 +22,7 @@ public record PricingPolicyBasicInfoUpdated(
     SeatType SeatType,
     decimal BasePrice,
     decimal ScreenCoefficient,
+    decimal WeekendCoefficient,
     bool IsActive) : BaseDomainEvent;
 
 /// <summary>

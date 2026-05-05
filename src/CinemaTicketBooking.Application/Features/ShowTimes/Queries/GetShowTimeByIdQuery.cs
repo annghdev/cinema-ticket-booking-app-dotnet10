@@ -63,6 +63,7 @@ public class GetShowTimeByIdHandler(IUnitOfWork uow)
             showTime.StartAt,
             showTime.EndAt,
             showTime.Status,
+            showTime.Format,
             showTime.Tickets.Count,
             availableTicketCount,
             showTime.CreatedAt,

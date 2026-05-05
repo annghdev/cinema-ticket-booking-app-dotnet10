@@ -45,6 +45,7 @@ public class GetPagedPricingPoliciesHandler(IUnitOfWork uow)
                 x.SeatType,
                 x.BasePrice,
                 x.ScreenCoefficient,
+                x.WeekendCoefficient,
                 x.BasePrice * x.ScreenCoefficient,
                 x.IsActive,
                 x.CreatedAt))

@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<BookingConcession> BookingConcessions => Set<BookingConcession>();
     public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Slide> Slides => Set<Slide>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

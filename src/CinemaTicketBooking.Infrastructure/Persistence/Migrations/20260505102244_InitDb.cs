@@ -23,6 +23,7 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     CreatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     UpdatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    AvatarUrl = table.Column<string>(type: "text", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -123,6 +124,7 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     Duration = table.Column<int>(type: "integer", nullable: false),
                     Genre = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
+                    TargetReach = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     CreatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -154,6 +156,56 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "seat_selection_policies",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    IsGlobalDefault = table.Column<bool>(type: "boolean", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    MaxTicketsPerCheckout = table.Column<int>(type: "integer", nullable: false),
+                    MaxRowsPerCheckout = table.Column<int>(type: "integer", nullable: false),
+                    OrphanSeatLevel = table.Column<int>(type: "integer", nullable: false),
+                    CheckerboardLevel = table.Column<int>(type: "integer", nullable: false),
+                    SplitAcrossAisleLevel = table.Column<int>(type: "integer", nullable: false),
+                    IsolatedRowEndSingleLevel = table.Column<int>(type: "integer", nullable: false),
+                    MisalignedRowsLevel = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_seat_selection_policies", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "slides",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false),
+                    ImageUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    TargetUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_slides", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -218,6 +270,35 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TokenHash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    ExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    RevokedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ReplacedByTokenId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedFromIp = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_refresh_tokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_refresh_tokens_accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "pricing_policies",
                 columns: table => new
                 {
@@ -227,6 +308,7 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     SeatType = table.Column<int>(type: "integer", nullable: false),
                     BasePrice = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     ScreenCoefficient = table.Column<decimal>(type: "numeric(8,3)", precision: 8, scale: 3, nullable: false),
+                    WeekendCoefficient = table.Column<decimal>(type: "numeric(8,3)", precision: 8, scale: 3, nullable: false, defaultValue: 1.0m),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
@@ -257,7 +339,7 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     ColumnOfSeats = table.Column<int>(type: "integer", nullable: false),
                     TotalSeats = table.Column<int>(type: "integer", nullable: false),
                     SeatMap = table.Column<string>(type: "text", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
+                    SupportedFormats = table.Column<string>(type: "jsonb", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
@@ -357,6 +439,7 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     StartAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     EndAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
+                    Format = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     CreatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -424,11 +507,15 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SeatId = table.Column<Guid>(type: "uuid", nullable: true),
+                    SeatCode = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Code = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Description = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
                     Price = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     ShowTimeId = table.Column<Guid>(type: "uuid", nullable: false),
                     LockingBy = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    LockExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    PaymentExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     BookingId = table.Column<Guid>(type: "uuid", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -471,6 +558,35 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         name: "FK_booking_concessions_concessions_ConcessionId",
                         column: x => x.ConcessionId,
                         principalTable: "concessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "payment_transactions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    BookingId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Method = table.Column<int>(type: "integer", nullable: false),
+                    GatewayTransactionId = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    RedirectBehavior = table.Column<int>(type: "integer", nullable: false),
+                    PaymentUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    GatewayResponseRaw = table.Column<string>(type: "character varying(8000)", maxLength: 8000, nullable: true),
+                    PaidAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_payment_transactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_payment_transactions_bookings_BookingId",
+                        column: x => x.BookingId,
+                        principalTable: "bookings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -557,9 +673,24 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                 column: "ShowTimeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_payment_transactions_BookingId",
+                table: "payment_transactions",
+                column: "BookingId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pricing_policies_CinemaId",
                 table: "pricing_policies",
                 column: "CinemaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_refresh_tokens_AccountId",
+                table: "refresh_tokens",
+                column: "AccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_refresh_tokens_TokenHash",
+                table: "refresh_tokens",
+                column: "TokenHash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_role_claims_RoleId",
@@ -578,6 +709,11 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                 column: "CinemaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_seat_selection_policies_IsGlobalDefault_IsActive",
+                table: "seat_selection_policies",
+                columns: new[] { "IsGlobalDefault", "IsActive" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_seats_ScreenId",
                 table: "seats",
                 column: "ScreenId");
@@ -593,9 +729,20 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                 column: "ScreenId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_tickets_ShowTimeId",
+                name: "IX_tickets_ShowTimeId_SeatCode",
                 table: "tickets",
-                column: "ShowTimeId");
+                columns: new[] { "ShowTimeId", "SeatCode" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tickets_Status_LockExpiresAt",
+                table: "tickets",
+                columns: new[] { "Status", "LockExpiresAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tickets_Status_PaymentExpiresAt",
+                table: "tickets",
+                columns: new[] { "Status", "PaymentExpiresAt" });
         }
 
         /// <inheritdoc />
@@ -620,25 +767,37 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                 name: "booking_tickets");
 
             migrationBuilder.DropTable(
+                name: "payment_transactions");
+
+            migrationBuilder.DropTable(
                 name: "pricing_policies");
+
+            migrationBuilder.DropTable(
+                name: "refresh_tokens");
 
             migrationBuilder.DropTable(
                 name: "role_claims");
 
             migrationBuilder.DropTable(
+                name: "seat_selection_policies");
+
+            migrationBuilder.DropTable(
                 name: "seats");
 
             migrationBuilder.DropTable(
-                name: "accounts");
+                name: "slides");
 
             migrationBuilder.DropTable(
                 name: "concessions");
 
             migrationBuilder.DropTable(
+                name: "tickets");
+
+            migrationBuilder.DropTable(
                 name: "bookings");
 
             migrationBuilder.DropTable(
-                name: "tickets");
+                name: "accounts");
 
             migrationBuilder.DropTable(
                 name: "roles");

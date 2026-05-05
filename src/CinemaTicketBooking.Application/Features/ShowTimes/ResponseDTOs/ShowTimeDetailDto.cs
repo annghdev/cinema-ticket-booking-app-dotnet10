@@ -20,6 +20,7 @@ public sealed record ShowTimeDetailDto(
     DateTimeOffset StartAt,
     DateTimeOffset EndAt,
     ShowTimeStatus Status,
+    ScreenType Format,
     int TicketCount,
     int AvailableTicketCount,
     DateTimeOffset CreatedAt,

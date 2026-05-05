@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260415050345_AddTicketSeatReference")]
-    partial class AddTicketSeatReference
+    [Migration("20260505102244_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -350,6 +350,10 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<decimal>("TargetReach")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
                         .HasMaxLength(2048)
@@ -371,6 +375,63 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("movies", (string)null);
+                });
+
+            modelBuilder.Entity("CinemaTicketBooking.Domain.PaymentTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("GatewayResponseRaw")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<string>("GatewayTransactionId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<int>("RedirectBehavior")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
+
+                    b.ToTable("payment_transactions", (string)null);
                 });
 
             modelBuilder.Entity("CinemaTicketBooking.Domain.PricingPolicy", b =>
@@ -421,6 +482,12 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         .HasColumnType("xid")
                         .HasColumnName("xmin");
 
+                    b.Property<decimal>("WeekendCoefficient")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(8, 3)
+                        .HasColumnType("numeric(8,3)")
+                        .HasDefaultValue(1.0m);
+
                     b.HasKey("Id");
 
                     b.HasIndex("CinemaId");
@@ -464,10 +531,11 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TotalSeats")
-                        .HasColumnType("integer");
+                    b.PrimitiveCollection<string>("SupportedFormats")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("TotalSeats")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
@@ -613,6 +681,9 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("EndAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Format")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("MovieId")
                         .HasColumnType("uuid");
 
@@ -645,6 +716,65 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     b.HasIndex("ScreenId");
 
                     b.ToTable("show_times", (string)null);
+                });
+
+            modelBuilder.Entity("CinemaTicketBooking.Domain.Slide", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("TargetUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("slides", (string)null);
                 });
 
             modelBuilder.Entity("CinemaTicketBooking.Domain.Ticket", b =>
@@ -736,6 +866,9 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasMaxLength(128)
@@ -820,6 +953,64 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("accounts", (string)null);
+                });
+
+            modelBuilder.Entity("CinemaTicketBooking.Infrastructure.Auth.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("CreatedFromIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReplacedByTokenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("TokenHash");
+
+                    b.ToTable("refresh_tokens", (string)null);
                 });
 
             modelBuilder.Entity("CinemaTicketBooking.Infrastructure.Auth.Role", b =>
@@ -1042,6 +1233,17 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                     b.Navigation("Ticket");
                 });
 
+            modelBuilder.Entity("CinemaTicketBooking.Domain.PaymentTransaction", b =>
+                {
+                    b.HasOne("CinemaTicketBooking.Domain.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
             modelBuilder.Entity("CinemaTicketBooking.Domain.PricingPolicy", b =>
                 {
                     b.HasOne("CinemaTicketBooking.Domain.Cinema", "Cinema")
@@ -1100,6 +1302,17 @@ namespace CinemaTicketBooking.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("ShowTime");
+                });
+
+            modelBuilder.Entity("CinemaTicketBooking.Infrastructure.Auth.RefreshToken", b =>
+                {
+                    b.HasOne("CinemaTicketBooking.Infrastructure.Auth.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

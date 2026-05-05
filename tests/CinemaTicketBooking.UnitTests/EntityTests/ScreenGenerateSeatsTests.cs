@@ -14,7 +14,7 @@ public class ScreenGenerateSeatsTests
             Id = Guid.CreateVersion7(),
             CinemaId = cinemaId,
             Code = "S1",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true
         };
 
@@ -34,7 +34,7 @@ public class ScreenGenerateSeatsTests
             Id = Guid.CreateVersion7(),
             CinemaId = Guid.CreateVersion7(),
             Code = "S2",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true
         };
 
@@ -52,7 +52,7 @@ public class ScreenGenerateSeatsTests
             Id = Guid.CreateVersion7(),
             CinemaId = Guid.CreateVersion7(),
             Code = "S3",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true
         };
 
@@ -68,7 +68,7 @@ public class ScreenGenerateSeatsTests
             Id = Guid.CreateVersion7(),
             CinemaId = Guid.CreateVersion7(),
             Code = "S4",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true
         };
 
@@ -89,7 +89,7 @@ public class ScreenGenerateSeatsTests
             Id = Guid.CreateVersion7(),
             CinemaId = Guid.CreateVersion7(),
             Code = "S5",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true
         };
 
@@ -105,7 +105,7 @@ public class ScreenGenerateSeatsTests
             Id = Guid.CreateVersion7(),
             CinemaId = Guid.CreateVersion7(),
             Code = "S6",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true
         };
 

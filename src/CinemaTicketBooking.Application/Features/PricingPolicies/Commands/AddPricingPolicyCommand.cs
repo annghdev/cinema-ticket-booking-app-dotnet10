@@ -10,6 +10,7 @@ public class AddPricingPolicyCommand : ICommand
     public SeatType SeatType { get; set; }
     public decimal BasePrice { get; set; }
     public decimal ScreenCoefficient { get; set; } = 1m;
+    public decimal WeekendCoefficient { get; set; } = 1m;
     public bool IsActive { get; set; } = true;
     public string CorrelationId { get; set; } = string.Empty;
 }
@@ -30,6 +31,7 @@ public class AddPricingPolicyHandler(IUnitOfWork uow)
             seatType: cmd.SeatType,
             basePrice: cmd.BasePrice,
             screenCoefficient: cmd.ScreenCoefficient,
+            weekendCoefficient: cmd.WeekendCoefficient,
             isActive: cmd.IsActive);
 
         uow.PricingPolicies.Add(policy);
@@ -60,5 +62,8 @@ public class AddPricingPolicyValidator : AbstractValidator<AddPricingPolicyComma
 
         RuleFor(x => x.ScreenCoefficient)
             .GreaterThan(0).WithMessage("Screen coefficient must be positive.");
+
+        RuleFor(x => x.WeekendCoefficient)
+            .GreaterThan(0).WithMessage("Weekend coefficient must be positive.");
     }
 }

@@ -1,4 +1,4 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Domain;
 
 namespace CinemaTicketBooking.Application.Features;
@@ -11,6 +11,7 @@ public class AddShowTimeCommand : ICommand
     public Guid MovieId { get; set; }
     public Guid ScreenId { get; set; }
     public DateTimeOffset StartAt { get; set; }
+    public ScreenType? Format { get; set; }
     public string CorrelationId {  get; set; } = string.Empty;
 }
 
@@ -30,7 +31,7 @@ public class AddShowTimeHandler(IUnitOfWork uow)
 
         // 2. Call domain service to create ShowTime
         var domainService = new ShowTimeSchedulingService(uow.ShowTimes, uow.PricingPolicies);
-        var showTime = await domainService.ScheduleAsync(movie, screen, command.StartAt, ct);
+        var showTime = await domainService.ScheduleAsync(movie, screen, command.StartAt, command.Format, ct);
 
         // 3. Add to repository and save
         uow.ShowTimes.Add(showTime);
@@ -71,5 +72,9 @@ public class AddShowTimeValidator : AbstractValidator<AddShowTimeCommand>
         RuleFor(x => x.StartAt)
             .Must(x => x > DateTimeOffset.UtcNow)
             .WithMessage("StartAt must be in the future.");
+
+        RuleFor(x => x.Format)
+            .IsInEnum().When(x => x.Format.HasValue)
+            .WithMessage("Invalid screen format.");
     }
 }

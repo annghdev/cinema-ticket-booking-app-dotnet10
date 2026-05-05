@@ -10,6 +10,7 @@ public sealed record PricingPolicyDto(
     SeatType SeatType,
     decimal BasePrice,
     decimal ScreenCoefficient,
+    decimal WeekendCoefficient,
     decimal FinalPrice,
     bool IsActive,
     DateTimeOffset CreatedAt

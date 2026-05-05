@@ -46,7 +46,7 @@ public class GetPagedScreensHandler(IUnitOfWork uow)
                 screen.ColumnOfSeats,
                 screen.TotalSeats,
                 screen.SeatMap,
-                screen.Type,
+                screen.SupportedFormats,
                 screen.IsActive,
                 screen.Seats.Count(seat => seat.IsActive),
                 screen.CreatedAt
@@ -76,7 +76,8 @@ public class GetPagedScreensHandler(IUnitOfWork uow)
 
         if (query.Type.HasValue)
         {
-            dbQuery = dbQuery.Where(screen => screen.Type == query.Type.Value);
+            // PostgreSQL EF provider translates Contains on JSON array
+            dbQuery = dbQuery.Where(screen => screen.SupportedFormats.Contains(query.Type.Value));
         }
 
         return dbQuery;

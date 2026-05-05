@@ -82,7 +82,7 @@
                                 </div>
                             </td>
                             <td class="px-8 py-6">
-                                <span class="px-3 py-1 rounded-full bg-white/5 text-slate-300 text-[10px] font-bold border border-white/10">@s.Type</span>
+                                <span class="px-3 py-1 rounded-full bg-white/5 text-slate-300 text-[10px] font-bold border border-white/10">@string.Join(", ", s.SupportedFormats)</span>
                             </td>
                             <td class="px-8 py-6 text-sm text-slate-300 font-mono">@s.RowOfSeats x @s.ColumnOfSeats</td>
                             <td class="px-8 py-6 text-sm font-bold text-on-surface">@s.ActiveSeatCount / @s.TotalSeats ghế</td>
@@ -102,7 +102,7 @@
                                     data-cinema="@s.CinemaId"
                                     data-rows="@s.RowOfSeats"
                                     data-cols="@s.ColumnOfSeats"
-                                    data-type="@((int)s.Type)"
+                                    data-type="@((int)s.SupportedFormats.FirstOrDefault())"
                                     data-map="@s.SeatMap"
                                     onclick="openUpdateScreenModal(this)" 
                                     class="p-2 text-slate-500 hover:text-primary transition-colors">

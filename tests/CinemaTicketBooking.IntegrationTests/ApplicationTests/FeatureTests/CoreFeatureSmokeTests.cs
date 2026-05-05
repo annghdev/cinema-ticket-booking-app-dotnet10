@@ -80,7 +80,7 @@ public sealed class CoreFeatureSmokeTests(PostgresContainerFixture databaseFixtu
             ColumnOfSeats = 3,
             TotalSeats = 4,
             SeatMap = "[[1,2,0],[1,2,0]]",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             CorrelationId = "it-screen-create"
         });
 

@@ -21,6 +21,12 @@ public class Movie : AggregateRoot
     public MovieGenre Genre { get; set; }
     public MovieStatus Status { get; set; }
 
+    /// <summary>
+    /// Revenue target goal for this movie (e.g. 1,500,000,000 VND).
+    /// Used for dashboard performance tracking.
+    /// </summary>
+    public decimal TargetReach { get; set; }
+
     // =============================================================
     // Factory and data mutation
     // =============================================================
@@ -37,7 +43,8 @@ public class Movie : AggregateRoot
         string? officialTrailerUrl,
         int duration,
         MovieGenre genre,
-        MovieStatus status)
+        MovieStatus status,
+        decimal targetReach = 0m)
     {
         var movie = new Movie
         {
@@ -49,7 +56,8 @@ public class Movie : AggregateRoot
             OfficialTrailerUrl = officialTrailerUrl,
             Duration = duration,
             Genre = genre,
-            Status = status
+            Status = status,
+            TargetReach = targetReach
         };
 
         movie.RaiseEvent(new MovieCreated(movie.Id, movie.Name, movie.Status, movie.Genre));
@@ -67,7 +75,8 @@ public class Movie : AggregateRoot
         string director,
         string? officialTrailerUrl,
         int duration,
-        MovieGenre genre)
+        MovieGenre genre,
+        decimal targetReach = 0m)
     {
         Name = name;
         Description = description;
@@ -77,6 +86,7 @@ public class Movie : AggregateRoot
         OfficialTrailerUrl = officialTrailerUrl;
         Duration = duration;
         Genre = genre;
+        TargetReach = targetReach;
 
         RaiseEvent(new MovieBasicInfoUpdated(Id, Name, Status, Genre));
     }

@@ -1,4 +1,4 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Domain;
 
 namespace CinemaTicketBooking.Application.Features;
@@ -14,6 +14,7 @@ public class CreateMovieCommand : ICommand
     public int Duration { get; set; }
     public MovieGenre Genre { get; set; }
     public MovieStatus Status { get; set; }
+    public decimal TargetReach { get; set; }
 
     public string CorrelationId { get; set; } = string.Empty;
 }
@@ -31,7 +32,8 @@ public class CreateMovieCommandHandler(IUnitOfWork uow)
             command.OfficialTrailerUrl,
             command.Duration,
             command.Genre,
-            command.Status);
+            command.Status,
+            command.TargetReach);
 
         uow.Movies.Add(movie);
         await uow.CommitAsync(ct);
@@ -85,5 +87,8 @@ public class CreateMovieValidator : AbstractValidator<CreateMovieCommand>
 
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage("Invalid movie status.");
+
+        RuleFor(x => x.TargetReach)
+            .GreaterThanOrEqualTo(0).WithMessage("Target reach cannot be negative.");
     }
 }

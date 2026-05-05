@@ -13,7 +13,8 @@ public record ShowTimeCreated(
     DateOnly Date,
     DateTimeOffset StartAt,
     DateTimeOffset EndAt,
-    int TicketCount) : BaseDomainEvent;
+    int TicketCount,
+    ScreenType Format) : BaseDomainEvent;
 
 /// <summary>
 /// Raised when a ShowTime is cancelled.

@@ -25,20 +25,24 @@ public class ShowTimeSchedulingService
         Movie movie,
         Screen screen,
         DateTimeOffset startAt,
+        ScreenType? format = null,
         CancellationToken ct = default)
     {
-        // 1. Load pricing policies for this Cinema + ScreenType
+        // 1. Resolve format: use provided or default to screen's primary format
+        var resolvedFormat = format ?? screen.Type;
+
+        // 2. Load pricing policies for this Cinema + chosen format
         var pricingPolicies = await _pricingPolicyRepository
-            .GetActivePoliciesAsync(screen.CinemaId, screen.Type, ct);
+            .GetActivePoliciesAsync(screen.CinemaId, resolvedFormat, ct);
 
         if (pricingPolicies.Count == 0)
             throw new InvalidOperationException(
-                $"No pricing policies found for Cinema '{screen.CinemaId}', ScreenType '{screen.Type}'.");
+                $"No pricing policies found for Cinema '{screen.CinemaId}', Format '{resolvedFormat}'.");
 
-        // 2. Create ShowTime (entity validates invariants + generates priced tickets)
-        var newShowTime = ShowTime.Create(movie, screen, startAt, pricingPolicies);
+        // 3. Create ShowTime (entity validates invariants + generates priced tickets)
+        var newShowTime = ShowTime.Create(movie, screen, startAt, pricingPolicies, resolvedFormat);
 
-        // 3. Check for schedule conflicts on the same Screen
+        // 4. Check for schedule conflicts on the same Screen
         //    Query a generous range to cover edge cases (midnight crossover, etc.)
         var rangeStart = newShowTime.StartAt.AddHours(-24);
         var rangeEnd = newShowTime.OccupiedUntil.AddHours(24);

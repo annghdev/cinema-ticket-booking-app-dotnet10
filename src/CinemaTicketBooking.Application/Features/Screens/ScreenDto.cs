@@ -11,7 +11,7 @@ public sealed record ScreenDto(
     int ColumnOfSeats,
     int TotalSeats,
     string SeatMap,
-    ScreenType Type,
+    List<ScreenType> SupportedFormats,
     bool IsActive,
     int ActiveSeatCount,
     DateTimeOffset CreatedAt

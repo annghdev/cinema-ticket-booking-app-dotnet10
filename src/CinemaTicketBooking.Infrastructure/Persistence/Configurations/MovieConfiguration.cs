@@ -20,5 +20,6 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         builder.Property(x => x.Duration).IsRequired();
         builder.Property(x => x.Genre).IsRequired();
         builder.Property(x => x.Status).IsRequired();
+        builder.Property(x => x.TargetReach).HasPrecision(18, 2);
     }
 }
