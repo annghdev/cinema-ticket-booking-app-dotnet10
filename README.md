@@ -4,7 +4,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=for-the-badge&logo=postgresql)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis)
-![Docker](https://img.shields.io/badge/Docker-4-2496ED?style=for-the-badge&logo=docker)
+![Docker](https://img.shields.io/badge/Docker-28-2496ED?style=for-the-badge&logo=docker)
 
 > A full-stack, real-time cinema ticket booking platform built with **.NET 10** and **React 19** — designed to demonstrate production-grade Clean Architecture, domain-driven design, and modern DevOps practices.
 
@@ -69,7 +69,7 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 
 ### Frontend
 | Technology | Version | Purpose |
-|---|---|
+|---|---|---|
 | **React** | 19.2+ | SPA for customer-facing booking flow |
 | **TypeScript** | 6.0+ | Type-safe frontend development |
 | **Vite** | 8.0+ | Lightning-fast dev server & build tool |
@@ -86,7 +86,7 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 
 ### DevOps & Observability
 | Technology | Version | Purpose |
-|---|---|
+|---|---|---|
 | **Docker & Docker Compose** | 28.3+ | Containerized development & production environments |
 | **.NET Aspire** | 13.2+ | Service orchestration, service discovery, OpenTelemetry |
 | **GitHub Actions** | - | CI/CD — test → build → push Docker images → deploy |
