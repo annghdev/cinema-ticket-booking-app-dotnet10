@@ -1,23 +1,29 @@
 # 🎬 Cinema Ticket Booking
+  
+![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=for-the-badge&logo=dotnet&logoColor=blue)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=for-the-badge&logo=postgresql)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis)
+![Docker](https://img.shields.io/badge/Docker-4-2496ED?style=for-the-badge&logo=docker)
 
 > A full-stack, real-time cinema ticket booking platform built with **.NET 10** and **React 19** — designed to demonstrate production-grade Clean Architecture, domain-driven design, and modern DevOps practices.
 
 ## 📖 Table of Contents
 
-- [📌 Overview](#-overview)
-- [🚀 Key Features](#-key-features)
-- [🛠 Tech Stack](#-tech-stack)
-- [🏗 Architecture](#-architecture)
-- [📂 Project Structure](#-project-structure)
-- [⚙️ Getting Started](#-getting-started)
-- [📸 Demo](#-demo)
+- [📌 Overview](#overview)
+- [🚀 Key Features](#key-features)
+- [🛠 Tech Stack](#tech-stack)
+- [🏗 Architecture](#architecture)
+- [📂 Project Structure](#project-structure)
+- [⚙️ Getting Started](#getting-started)
+- [📸 Live Demo](#live-demo)
 - [🖼 Screenshots](#screenshots)
-- [📬 Contact](#-contact)
-- [📄 License](#-license)
+- [📬 Contact](#contact)
+- [📄 License](#license)
 
 ---
 
-## 📌 Overview
+## Overview
 
 Cinema Ticket Booking is an end-to-end web application that allows customers to browse movies, select showtimes, choose seats in real-time, and complete payments via VNPay or Momo gateways. An admin panel (ASP.NET Core MVC) provides cinema operators with full control over movies, screens, showtimes, pricing policies, and booking management.
 
@@ -30,7 +36,7 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 | Category | Highlights |
 |---|---|
@@ -41,55 +47,58 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 | **Dynamic Pricing** | Flexible pricing policies per screen, day-of-week, and showtime — managed from the admin panel |
 | **Performance & Caching** | Redis for seat-lock state mechanism and response caching |
 | **Recovery jobs** | Background jobs for detecting and recovering from invalid entity states (e.g., showtime not published, payment not completed, ticket not unlocked after timeout) when the system restarts |
+| **Showtime Scheduling** | Smart showtime management with automated conflict detection, incorporating movie duration, trailer time (5m), and mandatory cleanup buffers (15m) |
 | **Admin Panel** | Full MVC admin panel for managing Cinemas, Screens, Movies, Showtimes, Pricing, Access control and Dashboard |
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Backend
-| Technology | Purpose |
-|---|---|
-| **.NET 10 / ASP.NET Core** | Web framework — MVC for admin, Minimal APIs for frontend |
-| **Entity Framework Core** | ORM, migrations, data seeding |
-| **Dapper** | High-performance raw SQL queries where needed |
-| **Wolverine 5.x** | CQRS command/query bus + domain event messaging |
-| **SignalR** | Real-time WebSocket communication (ticket & payment hubs) |
-| **ASP.NET Core Identity** | Authentication, authorization, role management |
-| **Scalar** | Interactive API documentation (OpenAPI) |
+| Technology | Version | Purpose |
+|---|---|---|
+| **.NET / ASP.NET Core** | 10.0+ | Web framework — MVC for admin, Minimal APIs for frontend |
+| **Entity Framework Core** | 10.0+| ORM, migrations, data seeding |
+| **Dapper** | 2.1+ | High-performance raw SQL queries where needed |
+| **Wolverine** | 5.8+ | CQRS command/query bus + domain event messaging |
+| **SignalR** | Built-in .NET 10 | Real-time WebSocket communication (ticket & payment hubs) |
+| **ASP.NET Core Identity** | 10.0+ | Authentication, authorization, role management |
+| **Scalar** | 2.13+ | Interactive API documentation (OpenAPI) |
+| **Serilog** | 10.0+ | Structured logging with sinks for File, Console, and Loki |
+| **xUnit** | 2.9+ | Unit and integration testing framework |
 
 ### Frontend
-| Technology | Purpose |
+| Technology | Version | Purpose |
 |---|---|
-| **React 19** | SPA for customer-facing booking flow |
-| **TypeScript** | Type-safe frontend development |
-| **Vite** | Lightning-fast dev server & build tool |
-| **Tailwind CSS** | Utility-first styling |
-| **Axios** | HTTP client for API communication |
-| **@microsoft/signalr** | Real-time connection to backend hubs |
-| **React Router v7** | Client-side routing |
+| **React** | 19.2+ | SPA for customer-facing booking flow |
+| **TypeScript** | 6.0+ | Type-safe frontend development |
+| **Vite** | 8.0+ | Lightning-fast dev server & build tool |
+| **Tailwind CSS** | 3.4+ | Utility-first styling |
+| **Axios** | 1.15+ | HTTP client for API communication |
+| **@microsoft/signalr** | 10.0+ | Real-time connection to backend hubs |
+| **React Router** | 19.2+ | Client-side routing |
 
 ### Database & Caching
-| Technology | Purpose |
-|---|---|
-| **PostgreSQL 17** | Primary relational database |
-| **Redis 7** | Distributed caching & seat-lock management |
+| Technology | Version | Purpose |
+|---|---|---| 
+| **PostgreSQL 17** | 17+ | Primary relational database |
+| **Redis** | 7+ | Distributed caching & seat-lock management |
 
 ### DevOps & Observability
-| Technology | Purpose |
+| Technology | Version | Purpose |
 |---|---|
-| **Docker & Docker Compose** | Containerized development & production environments |
-| **.NET Aspire** | Service orchestration, service discovery, OpenTelemetry |
-| **GitHub Actions** | CI/CD — test → build → push Docker images → deploy |
-| **Coolify** | Self-hosted PaaS for deployment on AWS EC2 |
-| **Prometheus** | Metrics collection (app + PostgreSQL + Redis + cAdvisor) |
-| **Grafana** | Dashboards & alerting |
-| **Loki** | Log aggregation |
-| **Tempo** | Distributed tracing (OpenTelemetry) |
+| **Docker & Docker Compose** | 28.3+ | Containerized development & production environments |
+| **.NET Aspire** | 13.2+ | Service orchestration, service discovery, OpenTelemetry |
+| **GitHub Actions** | - | CI/CD — test → build → push Docker images → deploy |
+| **Coolify** | 4.0.0 | Self-hosted PaaS for deployment on AWS EC2 |
+| **Prometheus** | 2.55+ | Metrics collection (app + PostgreSQL + Redis + cAdvisor) |
+| **Grafana** | 11.6+ | Dashboards & alerting |
+| **Loki** | 3.2+ | Log aggregation |
+| **Tempo** | 2.6+ | Distributed tracing (OpenTelemetry) |
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ### Design Principles
 
@@ -97,7 +106,7 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 - **Domain-Driven Design (DDD)** — rich domain entities with encapsulated business rules, domain events, and value objects
 - **CQRS** — commands and queries separated via Wolverine message bus
 - **Repository + Unit of Work** — data access abstraction with transactional consistency
-- **Domain Events** — side effects handled through Wolverine messaging pipeline (e.g., `BookingConfirmed → SendCheckInQRCode`)
+- **Domain Events** — side effects handled through Wolverine messaging pipeline (e.g., `BookingConfirmed → SendConfirmationEmail`)
 
 ### System Diagram
 
@@ -109,7 +118,7 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 📁 src/
@@ -168,7 +177,7 @@ Cinema Ticket Booking is an end-to-end web application that allows customers to 
 
 ---
 
-## ⚙️ Getting Started
+## Getting Started
 
 
 ### Option 1: Docker Compose (Recommended)
@@ -228,6 +237,12 @@ aspire run src/Aspire.AppHost/Aspire.AppHost.csproj
 cd src/CinemaTicketBooking.WebApp
 npm install
 npm run dev
+
+# 7. Access the application
+#    - Frontend (React):   http://localhost:5173
+#    - Admin panel:        http://localhost:8080
+#    - API Docs (Scalar):  http://localhost:8080/scalar/v1
+#    - Grafana:            http://localhost:3000
 ```
 
 ### Default Accounts
@@ -259,9 +274,7 @@ Key configuration sections in `appsettings.json`:
 
 ---
 
-## 📸 Demo
-
-**Live Demo**
+## Live Demo
 
 | | |
 |---|---|
@@ -299,9 +312,18 @@ Key configuration sections in `appsettings.json`:
 ### Admin Manage Permissions
 ![Admin Design Seat](assets/admin/access-control.png)
 
+### Grafana Dashboard
+![Grafana Dashboard](assets/monitoring/grafana-dashboard.png)
+
+### Loki Logs
+![Loki Logs](assets/monitoring/loki-logging.png)
+
+### Tempo Traces
+![Tempo Traces](assets/monitoring/tempo-tracing.png)
+
 ---
 
-## 📬 Contact
+## Contact
 
 | | |
 |---|---|
@@ -311,30 +333,30 @@ Key configuration sections in `appsettings.json`:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE.txt).
 
 ```
-//                                             _oo0oo_
-//                                            o8888888o
-//                                            88" . "88
-//                                            (| -_- |)
-//                                            0\  =  /0
-//                                          ___/`---'\___
-//                                        .' \\|     |// '.
-//                                       / \\|||  :  |||// \
-//                                      / _||||| -:- |||||- \
-//                                     |   | \\\  -  /// |   |
-//                                     | \_|  ''\---/''  |_/ |
-//                                     \  .-\__  '-'  ___/-. /
-//                                   ___'. .'  /--.--\  `. .'___
+//                                               _oo0oo_
+//                                              o8888888o
+//                                              88" . "88
+//                                              (| -_- |)
+//                                              0\  =  /0
+//                                            ___/`---'\___
+//                                          .' \\|     |// '.
+//                                         / \\|||  :  |||// \
+//                                        / _||||| -:- |||||- \
+//                                       |   | \\\  -  /// |   |
+//                                       | \_|  ''\---/''  |_/ |
+//                                       \  .-\__  '-'  ___/-. /
+//                                     ___'. .'  /--.--\  `. .'___
 //                                  ."" '<  `.___\_<|>_/___.' >' "".
-//                                | | :  `- \`.;`\ _ /`;.`/ - ` : | |
-//                                \  \ `_.   \_ __\ /__ _/   .-` /  /
-//                            =====`-.____`.___ \_____/___.-`___.-'=====
-//                                              `=---='
-//                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                              ~ Phật Tổ phù hộ - Không bao giờ Bug ~
-//                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                                 | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+//                                 \  \ `_.   \_ __\ /__ _/   .-` /  /
+//                              ====`-.____`.___ \_____/___.-`___.-'=====
+//                                               `=---='
+//                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                                ~ Phật Tổ phù hộ - Không bao giờ Bug ~
+//                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
