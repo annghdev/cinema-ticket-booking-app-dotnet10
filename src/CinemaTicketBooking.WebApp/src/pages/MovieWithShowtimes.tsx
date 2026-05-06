@@ -9,13 +9,13 @@ import type { MovieDto } from "../types/Movie"
 import { format, addDays, startOfDay } from "date-fns"
 import { vi } from "date-fns/locale"
 import { MovieTrailerModal } from "../components/MovieTrailerModal"
+import { useLoading } from "../contexts/LoadingContext"
 
 function MovieWithShowTimes() {
   const { movieId } = useParams<{ movieId: string }>()
   const { error } = useToast()
+  const { showLoading, hideLoading } = useLoading()
   
-  const [movieLoading, setMovieLoading] = useState(true)
-  const [showtimesLoading, setShowtimesLoading] = useState(false)
   const [movie, setMovie] = useState<MovieDto | null>(null)
   const [showtimes, setShowtimes] = useState<ShowTimeDto[]>([])
   const [selectedDate, setSelectedDate] = useState<Date>(startOfDay(new Date()))
@@ -35,7 +35,7 @@ function MovieWithShowTimes() {
 
   const fetchMovie = useCallback(async () => {
     if (!movieId) return
-    setMovieLoading(true)
+    showLoading("Đang tải thông tin phim...")
     try {
       const movieData = await getMovieById(movieId)
       setMovie(movieData)
@@ -43,13 +43,13 @@ function MovieWithShowTimes() {
       console.error(e)
       error("Không thể tải thông tin phim. Vui lòng thử lại sau.")
     } finally {
-      setMovieLoading(false)
+      hideLoading()
     }
-  }, [movieId, error])
+  }, [movieId, error, showLoading, hideLoading])
 
   const fetchShowtimes = useCallback(async () => {
     if (!movieId) return
-    setShowtimesLoading(true)
+    showLoading("Đang cập nhật lịch chiếu...")
     try {
       const showtimesData = await getShowTimes({ 
         movieId, 
@@ -59,14 +59,13 @@ function MovieWithShowTimes() {
       setShowtimes(showtimesData)
     } catch (e) {
       console.error(e)
-      // Only show error toast if it's not the initial fetch (initial error handled by fetchMovie)
       if (movie) {
         error("Không thể tải lịch chiếu cho ngày này.")
       }
     } finally {
-      setShowtimesLoading(false)
+      hideLoading()
     }
-  }, [movieId, selectedDate, movie, error])
+  }, [movieId, selectedDate, movie, error, showLoading, hideLoading])
 
   useEffect(() => {
     fetchMovie()
@@ -101,20 +100,8 @@ function MovieWithShowTimes() {
     return groups
   }, [showtimes])
 
-  if (movieLoading && !movie) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    )
-  }
-
   if (!movie) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="text-on-surface-variant">Không tìm thấy thông tin phim.</p>
-      </div>
-    )
+    return null; // Handled by global loading or error toast
   }
 
   return (
@@ -200,11 +187,7 @@ function MovieWithShowTimes() {
         </section>
 
         <section className="space-y-6">
-          {showtimesLoading ? (
-            <div className="flex h-32 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-            </div>
-          ) : groupedByCinema.length === 0 ? (
+          {groupedByCinema.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-container-low py-12 text-center">
               <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2">calendar_today</span>
               <p className="text-on-surface-variant">Không có lịch chiếu cho ngày đã chọn.</p>

@@ -6,13 +6,8 @@
     ViewData["Title"] = "Lịch chiếu";
 }
 
-<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-6">
     <div>
-        <h2 class="text-display-lg text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Quản lý lịch chiếu</h2>
-        <p class="text-on-surface-variant font-body max-w-md">Điều phối suất chiếu, kiểm soát khung giờ hoạt động và bố cục phòng chiếu tại các rạp.</p>
-    </div>
-    
-    <div class="flex items-center gap-4 flex-wrap md:flex-nowrap">
         @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.ShowTimesManage)).Succeeded)
         {
             <!-- Add Showtime Button -->
@@ -21,14 +16,34 @@
                 <span>Tạo suất chiếu</span>
             </button>
         }
+    </div>
+</div>
 
-        <!-- Date Picker Filter -->
-        <form method="get" onsubmit="event.preventDefault(); loadShowtimes(this.date.value);" class="glass-panel p-2 rounded-2xl flex items-center gap-2 border border-white/5 shadow-2xl">
-            <input type="date" id="selectedDateInput" name="date" class="bg-surface-container-high border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-3 px-4 w-44" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="loadShowtimes(this.value)" />
-            <button type="submit" class="p-3 text-secondary-fixed hover:bg-white/5 rounded-xl transition-colors">
-                <span class="material-symbols-outlined">calendar_today</span>
-            </button>
-        </form>
+<!-- New Filter Bar -->
+<div class="glass-panel p-3 rounded-2xl flex flex-col lg:flex-row items-center gap-4 border border-white/5 shadow-2xl mb-8">
+    <!-- Cinema Filter -->
+    <select id="cinemaFilter" onchange="filterCinema(this.value)" class="bg-surface-container-high border-none text-xs font-bold rounded-xl text-slate-200 focus:ring-1 focus:ring-primary py-3 px-4 w-full lg:w-56 shrink-0 shadow-inner">
+        <option value="">Tất cả cụm rạp</option>
+    </select>
+
+    <!-- 7 Date Buttons -->
+    <div class="flex gap-2 w-full overflow-x-auto custom-scrollbar pb-2 lg:pb-0" id="dateButtonsContainer">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Date Input Group -->
+    <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-end shrink-0">
+        <button type="button" onclick="changeDate(-1)" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-slate-300 flex items-center justify-center">
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+        </button>
+        <input type="date" id="selectedDateInput" name="date" class="bg-surface-container-high border-none text-xs font-bold rounded-xl text-slate-200 focus:ring-1 focus:ring-primary py-3 px-4 w-full sm:w-40 text-center shadow-inner" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="handleDateInputChange(this.value)" />
+        <button type="button" onclick="changeDate(1)" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-slate-300 flex items-center justify-center">
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+        </button>
+        <div class="w-px h-8 bg-white/10 mx-1 hidden sm:block"></div>
+        <button type="button" onclick="resetFilters()" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-[#00f4fe] flex items-center justify-center" title="Làm mới">
+            <span class="material-symbols-outlined text-sm">refresh</span>
+        </button>
     </div>
 </div>
 
@@ -66,9 +81,18 @@
             <!-- Screen Selection -->
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn phòng chiếu</label>
-                <select id="screenSelect" name="screenId" required class="w-full bg-surface-container border-white/5 rounded-xl text-slate-300 text-xs focus:ring-1 focus:ring-primary py-3 px-4">
+                <select id="screenSelect" name="screenId" required onchange="onScreenChange(this.value)" class="w-full bg-surface-container border-white/5 rounded-xl text-slate-300 text-xs focus:ring-1 focus:ring-primary py-3 px-4">
                     <option value="">-- Chọn phòng chiếu --</option>
                 </select>
+            </div>
+
+            <!-- Format Selection -->
+            <div id="formatContainer" class="hidden">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Định dạng chiếu</label>
+                <select id="formatSelect" name="format" class="w-full bg-surface-container border-white/5 rounded-xl text-slate-300 text-xs focus:ring-1 focus:ring-primary py-3 px-4">
+                    <option value="">-- Chọn định dạng --</option>
+                </select>
+                <p class="text-[10px] text-on-surface-variant mt-1 italic">* Chọn định dạng phòng chiếu hỗ trợ cho suất này</p>
             </div>
             
             <!-- StartAt Selection -->
@@ -123,6 +147,10 @@
                 <span class="text-xs text-slate-400 uppercase tracking-wider">Trạng thái</span>
                 <span id="dtlStatus" class="font-bold"></span>
             </div>
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                <span class="text-xs text-slate-400 uppercase tracking-wider">Định dạng</span>
+                <span id="dtlFormat" class="font-bold text-secondary"></span>
+            </div>
             <div class="flex justify-between items-center pb-3">
                 <span class="text-xs text-slate-400 uppercase tracking-wider">Số vé khả dụng</span>
                 <span id="dtlTicket" class="font-bold text-[#00f4fe]"></span>
@@ -146,50 +174,159 @@
     </div>
 </div>
 
-<!-- Calendar / Timeline Grid -->
-<div class="glass-panel rounded-xl border border-white/5 overflow-hidden shadow-2xl bg-white/[0.01]">
-    
+<!-- Calendar / Timeline Grid Desktop -->
+<div class="glass-panel rounded-xl border border-white/5 overflow-hidden shadow-2xl bg-white/[0.01] hidden lg:block">
     <!-- Header Timeline (Sticky at top) -->
     <div class="flex border-b border-white/5 bg-white/[0.02]">
-        
         <!-- Cinema Header -->
         <div class="w-48 px-6 py-4 font-headline font-bold text-sm text-slate-400 text-center flex-shrink-0">
             Cụm rạp
         </div>
-
         <!-- Screens Header -->
         <div class="w-32 px-4 py-4 font-headline font-bold text-sm text-slate-400 border-l border-r border-white/5 text-center flex-shrink-0">
             Phòng chiếu
         </div>
-
-        <!-- Time Slots (2h intervals on the right - extended past midnight) -->
-        <div class="flex-1 grid grid-cols-[repeat(14,minmax(0,1fr))] relative">
-            @for (int hour = 0; hour < 28; hour += 2)
+        <!-- Time Slots -->
+        <div class="flex-1 grid grid-cols-[repeat(10,minmax(0,1fr))] relative">
+            @for (int hour = 8; hour < 28; hour += 2)
             {
                 var displayHour = hour % 24;
-                var isNextDay = hour >= 24;
                 <div class="border-r border-white/5 text-center py-4 font-body font-bold text-xs text-slate-400 flex flex-col justify-center">
                     <span>@($"{displayHour:D2}:00")</span>
                 </div>
             }
         </div>
     </div>
-    
     <!-- Rows for Cinema Locations rendered via AJAX -->
-    <div id="timelineContainer" class="divide-y divide-white/5">
+    <div id="timelineContainerDesktop" class="divide-y divide-white/5">
         <div class="p-10 text-center text-xs text-slate-400">Đang tải lịch chiếu...</div>
     </div>
 </div>
 
+<!-- Calendar / Timeline Grid Mobile -->
+<div id="timelineContainerMobile" class="block lg:hidden space-y-6">
+    <div class="p-10 text-center text-xs text-slate-400">Đang tải lịch chiếu...</div>
+</div>
+
 @section Scripts {
     <script>
+        let cachedData = {
+            screens: [],
+            movies: [],
+            cinemas: []
+        };
+        let currentShowtimesData = [];
+
+        const screenTypeLabels = {
+            0: '2D',
+            1: '3D',
+            2: 'IMAX'
+        };
+
+        function onScreenChange(screenId) {
+            const formatSelect = document.getElementById('formatSelect');
+            const formatContainer = document.getElementById('formatContainer');
+            
+            if (!screenId) {
+                formatContainer.classList.add('hidden');
+                return;
+            }
+
+            const screen = cachedData.screens.find(s => s.id === screenId);
+            if (screen && screen.supportedFormats && screen.supportedFormats.length > 0) {
+                formatSelect.innerHTML = '';
+                screen.supportedFormats.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f;
+                    opt.textContent = screenTypeLabels[f] || `Format ${f}`;
+                    formatSelect.appendChild(opt);
+                });
+                formatContainer.classList.remove('hidden');
+            } else {
+                formatContainer.classList.add('hidden');
+            }
+        }
+
+        function generateDateButtons() {
+            const container = document.getElementById('dateButtonsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const currentDateStr = document.getElementById('selectedDateInput').value;
+            const daysOfWeek = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                
+                const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                const isSelected = dateStr === currentDateStr;
+                const isToday = i === 0;
+                
+                const dayName = isToday ? 'Hôm nay' : daysOfWeek[d.getDay()];
+                const dayNum = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `flex flex-col items-center justify-center min-w-[70px] px-2 py-2 rounded-xl border transition-all flex-shrink-0 ${
+                    isSelected 
+                    ? 'bg-primary/20 border-primary text-primary shadow-[0_0_10px_rgba(97,180,254,0.2)]' 
+                    : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                }`;
+                btn.onclick = () => {
+                    document.getElementById('selectedDateInput').value = dateStr;
+                    handleDateInputChange(dateStr);
+                };
+                
+                btn.innerHTML = `
+                    <span class="text-[10px] font-bold uppercase tracking-wider mb-0.5">${dayName}</span>
+                    <span class="text-xs font-headline">${dayNum}</span>
+                `;
+                
+                container.appendChild(btn);
+            }
+        }
+
+        function changeDate(days) {
+            const input = document.getElementById('selectedDateInput');
+            const d = new Date(input.value);
+            if (isNaN(d.getTime())) return;
+            
+            d.setDate(d.getDate() + days);
+            const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            input.value = dateStr;
+            handleDateInputChange(dateStr);
+        }
+
+        function handleDateInputChange(dateStr) {
+            generateDateButtons();
+            loadShowtimes(dateStr);
+        }
+
+        function resetFilters() {
+            const today = new Date();
+            const dateStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            document.getElementById('selectedDateInput').value = dateStr;
+            
+            const cinemaSelect = document.getElementById('cinemaFilter');
+            if(cinemaSelect) cinemaSelect.value = '';
+            
+            handleDateInputChange(dateStr);
+        }
+
+        function filterCinema(cinemaId) {
+            renderTimeline();
+        }
 
         async function loadShowtimes(date) {
-            // Set date input value
             const dateInput = document.getElementById('selectedDateInput');
             if (dateInput) dateInput.value = date;
+            
+            generateDateButtons();
 
-            // Show loading spinner via global service
             if (window.showLoading) window.showLoading();
 
             try {
@@ -197,156 +334,244 @@
                 const result = await res.json();
                 
                 if (result.success) {
-                    const container = document.getElementById('timelineContainer');
-                    container.innerHTML = '';
-                    
-                    if (!result.cinemas || result.cinemas.length === 0) {
-                        container.innerHTML = '<div class="p-10 text-center text-sm text-on-surface-variant">Không có cụm rạp nào khả dụng.</div>';
-                        return;
-                    }
+                    cachedData.screens = result.screens || [];
+                    cachedData.movies = result.movies || [];
+                    cachedData.cinemas = result.cinemas || [];
+                    currentShowtimesData = result.showtimes || [];
 
-                    result.cinemas.forEach(cinema => {
-                        const cinemaScreens = result.screens.filter(s => s.cinemaId === cinema.id).sort((a,b) => a.code.localeCompare(b.code));
-                        
-                        const row = document.createElement('div');
-                        row.className = "flex hover:bg-white/[0.01] transition-colors border-b border-white/5 last:border-b-0";
-                        
-                        const leftCol = `
-                            <div class="w-48 px-6 py-6 flex flex-col justify-center bg-white/[0.02] flex-shrink-0">
-                                <h4 class="font-headline font-bold text-sm text-on-surface flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
-                                    ${cinema.name}
-                                </h4>
-                                <p class="text-[10px] text-on-surface-variant mt-1">${cinema.address}</p>
-                            </div>
-                        `;
-                        
-                        let screenColHtml = '';
-                        cinemaScreens.forEach(screen => {
-                            screenColHtml += `
-                                <div class="h-20 flex flex-col items-center justify-center font-bold text-xs text-[#00f4fe] font-headline tracking-wider">
-                                    <span>${screen.code}</span>
-                                </div>
-                            `;
-                        });
-                        
-                        const screenCol = `
-                            <div class="w-32 py-4 border-l border-r border-white/5 flex flex-col justify-around bg-white/[0.01] flex-shrink-0">
-                                ${screenColHtml}
-                            </div>
-                        `;
-                        
-                        let tracksHtml = '';
-                        if (cinemaScreens.length === 0) {
-                            tracksHtml = '<div class="text-center text-xs text-slate-600 my-auto py-4">Chưa có phòng chiếu nào tại rạp này</div>';
-                        } else {
-                            let tracksRowsHtml = '';
-                            cinemaScreens.forEach(screen => {
-                                tracksRowsHtml += `
-                                    <div id="track-${screen.id}" class="relative h-20 w-full border-b border-white/[0.02] last:border-b-0 pointer-events-auto"></div>
-                                `;
-                            });
-                            
-                            tracksHtml = `
-                                <div class="space-y-4 relative w-full h-full">
-                                    ${tracksRowsHtml}
-                                </div>
-                            `;
-                        }
-                        
-                        const timelineArea = `
-                            <div class="flex-1 relative py-4">
-                                <div class="absolute inset-0 grid grid-cols-[repeat(14,minmax(0,1fr))] pointer-events-none">
-                                    ${cinemaScreens.length > 0 ? Array(14).fill('<div class="border-r border-white/[0.03] h-full"></div>').join('') : ''}
-                                </div>
-                                ${tracksHtml}
-                            </div>
-                        `;
-                        
-                        row.innerHTML = leftCol + screenCol + timelineArea;
-                        container.appendChild(row);
-                    });
-
-                    // Group showtimes by screen
-                    const grouped = {};
-                    result.showtimes.forEach(st => {
-                        if (!grouped[st.screenId]) grouped[st.screenId] = [];
-                        grouped[st.screenId].push(st);
-                    });
-                    
-                    // Populate tracks
-                    for (const screenId in grouped) {
-                        const track = document.getElementById(`track-${screenId}`);
-                        if (track) {
-                            grouped[screenId].forEach(st => {
-                                const startAt = new Date(st.startAt);
-                                const endAt = new Date(st.endAt);
-                                
-                                let startMinutes = startAt.getHours() * 60 + startAt.getMinutes();
-                                let endMinutes = endAt.getHours() * 60 + endAt.getMinutes();
-                                
-                                if (endMinutes < startMinutes) {
-                                    endMinutes += 1440;
-                                }
-                                
-                                const duration = endMinutes - startMinutes;
-                                const leftPercent = (startMinutes / (28 * 60)) * 100;
-                                const widthPercent = (duration / (28 * 60)) * 100;
-                                
-                                const card = document.createElement('div');
-                                card.className = `absolute top-0 p-2 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-secondary/30 shadow-[0_4px_15px_rgba(0,244,254,0.1)] flex flex-col justify-between overflow-hidden group hover:scale-105 hover:bg-white/10 hover:border-secondary transition-all duration-300 z-10 cursor-pointer`;
-                                card.style.left = `${leftPercent.toFixed(2)}%`;
-                                card.style.width = `${widthPercent.toFixed(2)}%`;
-                                card.onclick = () => openShowtimeDetails(st);
-                                
-                                const formatTime = (dateObj) => {
-                                    return dateObj.getHours().toString().padStart(2, '0') + ':' + dateObj.getMinutes().toString().padStart(2, '0');
-                                };
-                                
-                                card.innerHTML = `
-                                    <p class="text-xs font-bold text-on-surface truncate group-hover:text-secondary transition-colors">${st.movieName}</p>
-                                    <p class="text-[9px] text-secondary font-medium">${formatTime(startAt)} — ${formatTime(endAt)}</p>
-                                `;
-                                
-                                track.appendChild(card);
-                            });
-                        }
-                    }
-
-                    // Populate Form Dropdowns if not yet loaded
-                    const movieSelect = document.getElementById('movieSelect');
-                    if (movieSelect && movieSelect.children.length <= 1 && result.movies) {
-                        movieSelect.innerHTML = '<option value="">-- Choose Movie --</option>';
-                        result.movies.forEach(m => {
-                            movieSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
-                        });
-                    }
-
-                    const screenSelect = document.getElementById('screenSelect');
-                    if (screenSelect && screenSelect.children.length <= 1 && result.cinemas) {
-                        screenSelect.innerHTML = '<option value="">-- Choose Screen --</option>';
+                    const cinemaFilter = document.getElementById('cinemaFilter');
+                    if (cinemaFilter && cinemaFilter.children.length <= 1 && result.cinemas) {
+                        cinemaFilter.innerHTML = '<option value="">Tất cả cụm rạp</option>';
                         result.cinemas.forEach(cinema => {
-                            const optgroup = document.createElement('optgroup');
-                            optgroup.label = cinema.name;
-                            
-                            const cinemaScreens = result.screens.filter(s => s.cinemaId === cinema.id);
-                            cinemaScreens.forEach(screen => {
-                                const opt = document.createElement('option');
-                                opt.value = screen.id;
-                                opt.textContent = `${screen.code}`;
-                                optgroup.appendChild(opt);
-                            });
-                            
-                            screenSelect.appendChild(optgroup);
+                            cinemaFilter.innerHTML += `<option value="${cinema.id}">${cinema.name}</option>`;
                         });
                     }
+
+                    loadDropdowns();
+                    renderTimeline();
                 }
             } catch (err) {
                 console.error("Failed to refresh timeline data", err);
                 window.showToast("Không thể tải lại lịch chiếu.", "error");
             } finally {
-                // Hide loading spinner via global service
                 if (window.hideLoading) window.hideLoading();
+            }
+        }
+
+        function renderTimeline() {
+            const desktopContainer = document.getElementById('timelineContainerDesktop');
+            const mobileContainer = document.getElementById('timelineContainerMobile');
+            
+            if(!desktopContainer || !mobileContainer) return;
+            
+            desktopContainer.innerHTML = '';
+            mobileContainer.innerHTML = '';
+
+            const selectedCinemaId = document.getElementById('cinemaFilter')?.value;
+            let filteredCinemas = cachedData.cinemas;
+            if (selectedCinemaId) {
+                filteredCinemas = cachedData.cinemas.filter(c => c.id === selectedCinemaId);
+            }
+
+            if (!filteredCinemas || filteredCinemas.length === 0) {
+                desktopContainer.innerHTML = '<div class="p-10 text-center text-sm text-on-surface-variant">Không có cụm rạp nào khả dụng.</div>';
+                mobileContainer.innerHTML = '<div class="p-10 text-center text-sm text-on-surface-variant">Không có cụm rạp nào khả dụng.</div>';
+                return;
+            }
+
+            filteredCinemas.forEach(cinema => {
+                const cinemaScreens = cachedData.screens.filter(s => s.cinemaId === cinema.id).sort((a,b) => a.code.localeCompare(b.code));
+                
+                // --- Desktop Row ---
+                const row = document.createElement('div');
+                row.className = "flex hover:bg-white/[0.01] transition-colors border-b border-white/5 last:border-b-0";
+                
+                const leftCol = `
+                    <div class="w-48 px-6 py-6 flex flex-col justify-center bg-white/[0.02] flex-shrink-0">
+                        <h4 class="font-headline font-bold text-sm text-on-surface flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
+                            ${cinema.name}
+                        </h4>
+                        <p class="text-[10px] text-on-surface-variant mt-1">${cinema.address}</p>
+                    </div>
+                `;
+                
+                let screenColHtml = '';
+                cinemaScreens.forEach(screen => {
+                    screenColHtml += `
+                        <div class="h-20 flex flex-col items-center justify-center font-bold text-xs text-[#00f4fe] font-headline tracking-wider">
+                            <span>${screen.code}</span>
+                        </div>
+                    `;
+                });
+                
+                const screenCol = `
+                    <div class="w-32 py-4 border-l border-r border-white/5 flex flex-col justify-around bg-white/[0.01] flex-shrink-0">
+                        ${screenColHtml}
+                    </div>
+                `;
+                
+                let tracksHtml = '';
+                if (cinemaScreens.length === 0) {
+                    tracksHtml = '<div class="text-center text-xs text-slate-600 my-auto py-4">Chưa có phòng chiếu nào tại rạp này</div>';
+                } else {
+                    let tracksRowsHtml = '';
+                    cinemaScreens.forEach(screen => {
+                        tracksRowsHtml += `
+                            <div id="track-${screen.id}" class="relative h-20 w-full border-b border-white/[0.02] last:border-b-0 pointer-events-auto"></div>
+                        `;
+                    });
+                    
+                    tracksHtml = `
+                        <div class="space-y-4 relative w-full h-full">
+                            ${tracksRowsHtml}
+                        </div>
+                    `;
+                }
+                
+                const timelineArea = `
+                    <div class="flex-1 relative py-4">
+                        <div class="absolute inset-0 grid grid-cols-[repeat(10,minmax(0,1fr))] pointer-events-none">
+                            ${cinemaScreens.length > 0 ? Array(10).fill('<div class="border-r border-white/[0.03] h-full"></div>').join('') : ''}
+                        </div>
+                        ${tracksHtml}
+                    </div>
+                `;
+                row.innerHTML = leftCol + screenCol + timelineArea;
+                desktopContainer.appendChild(row);
+
+                // --- Mobile Block ---
+                const mRow = document.createElement('div');
+                mRow.className = "mb-8 border border-white/5 rounded-xl overflow-hidden bg-white/[0.01]";
+                
+                let mTimeMarkers = '';
+                let mGridLines = '';
+                for(let i=0; i<10; i++){
+                    const h = (8 + i * 2) % 24;
+                    mTimeMarkers += `<div class="h-24 border-b border-white/5 text-[10px] text-slate-400 font-bold text-center py-2 flex flex-col justify-center">${String(h).padStart(2, '0')}:00</div>`;
+                    mGridLines += `<div class="h-24 border-b border-white/[0.03] w-full"></div>`;
+                }
+
+                let mScreensHtml = '';
+                if (cinemaScreens.length === 0) {
+                    mScreensHtml = '<div class="p-4 text-xs text-slate-600">Chưa có phòng chiếu nào tại rạp này</div>';
+                } else {
+                    mScreensHtml = cinemaScreens.map(screen => `
+                        <div class="w-32 flex-shrink-0 border-r border-white/5 relative">
+                            <div class="h-10 flex items-center justify-center font-bold text-xs text-[#00f4fe] bg-white/[0.02] border-b border-white/5">
+                                ${screen.code}
+                            </div>
+                            <div class="relative w-full" style="height: 960px;" id="mob-track-${screen.id}">
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                mRow.innerHTML = `
+                    <div class="p-4 bg-white/[0.02] border-b border-white/5 text-center">
+                        <h4 class="font-bold text-[#00f4fe] text-sm">${cinema.name}</h4>
+                    </div>
+                    <div class="flex overflow-x-auto relative custom-scrollbar">
+                        <div class="w-16 flex-shrink-0 border-r border-white/5 bg-surface z-20">
+                            <div class="h-10 border-b border-white/5"></div>
+                            ${mTimeMarkers}
+                        </div>
+                        <div class="flex flex-1 min-w-max relative">
+                            <div class="absolute inset-0 pointer-events-none flex flex-col z-0">
+                                <div class="h-10 border-b border-white/[0.03] w-full"></div>
+                                ${mGridLines}
+                            </div>
+                            <div class="flex relative z-10">
+                                ${mScreensHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                mobileContainer.appendChild(mRow);
+            });
+
+            // Populate Tracks
+            const grouped = {};
+            currentShowtimesData.forEach(st => {
+                if (!grouped[st.screenId]) grouped[st.screenId] = [];
+                grouped[st.screenId].push(st);
+            });
+            
+            for (const screenId in grouped) {
+                const desktopTrack = document.getElementById(`track-${screenId}`);
+                const mobileTrack = document.getElementById(`mob-track-${screenId}`);
+                
+                if(grouped[screenId]) {
+                    grouped[screenId].forEach(st => {
+                        const startAt = new Date(st.startAt);
+                        const endAt = new Date(st.endAt);
+                        
+                        let startMinutes = startAt.getHours() * 60 + startAt.getMinutes();
+                        let endMinutes = endAt.getHours() * 60 + endAt.getMinutes();
+                        
+                        if (startMinutes < 480) startMinutes += 1440;
+                        if (endMinutes < startMinutes) endMinutes += 1440;
+                        
+                        const timelineStartMin = 480;
+                        const timelineDuration = 20 * 60;
+                        
+                        const duration = endMinutes - startMinutes;
+                        const posPercent = ((startMinutes - timelineStartMin) / timelineDuration) * 100;
+                        const sizePercent = (duration / timelineDuration) * 100;
+                        
+                        const formatTime = (dateObj) => dateObj.getHours().toString().padStart(2, '0') + ':' + dateObj.getMinutes().toString().padStart(2, '0');
+                        
+                        const fmt = (st.format || '0').toString();
+                        let fmtLabel = '2D';
+                        if (fmt === '1' || fmt === 'ThreeD') fmtLabel = '3D';
+                        else if (fmt === '2' || fmt === 'IMAX') fmtLabel = 'IMAX';
+                        
+                        if (desktopTrack) {
+                            const card = document.createElement('div');
+                            card.className = `absolute top-0 p-2 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-secondary/30 shadow-[0_4px_15px_rgba(0,244,254,0.1)] flex flex-col justify-between overflow-hidden group hover:scale-105 hover:bg-white/10 hover:border-secondary transition-all duration-300 z-10 cursor-pointer`;
+                            card.style.left = `${posPercent.toFixed(2)}%`;
+                            card.style.width = `${sizePercent.toFixed(2)}%`;
+                            card.style.height = '100%';
+                            card.onclick = () => openShowtimeDetails(st);
+                            card.innerHTML = `
+                                <div class="flex justify-between items-start gap-1 mb-1">
+                                    <p class="text-xs font-bold text-on-surface truncate group-hover:text-secondary transition-colors">${st.movieName}</p>
+                                    <span class="text-[8px] font-bold bg-white/20 px-1 py-0.5 rounded text-white flex-shrink-0">${fmtLabel}</span>
+                                </div>
+                                <div class="mt-auto">
+                                    <p class="text-[9px] text-slate-300 font-medium mb-0.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[10px]">confirmation_number</span> 
+                                        <span class="text-white">${st.availableTicketCount}</span>/<span class="text-slate-400">${st.ticketCount}</span>
+                                    </p>
+                                    <p class="text-[9px] text-secondary font-medium">${formatTime(startAt)} — ${formatTime(endAt)}</p>
+                                </div>
+                            `;
+                            desktopTrack.appendChild(card);
+                        }
+
+                        if (mobileTrack) {
+                            const mcard = document.createElement('div');
+                            mcard.className = `absolute left-1 right-1 p-2 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-secondary/30 shadow-[0_4px_15px_rgba(0,244,254,0.1)] flex flex-col justify-between overflow-hidden group hover:scale-105 hover:bg-white/10 hover:border-secondary transition-all duration-300 z-10 cursor-pointer`;
+                            mcard.style.top = `${posPercent.toFixed(2)}%`;
+                            mcard.style.height = `${sizePercent.toFixed(2)}%`;
+                            mcard.onclick = () => openShowtimeDetails(st);
+                            mcard.innerHTML = `
+                                <div class="flex flex-col gap-0.5 mb-1">
+                                    <span class="w-fit text-[8px] font-bold bg-white/20 px-1 py-0.5 rounded text-white leading-none">${fmtLabel}</span>
+                                    <p class="text-[10px] leading-tight font-bold text-on-surface line-clamp-2 group-hover:text-secondary transition-colors">${st.movieName}</p>
+                                </div>
+                                <div class="mt-auto">
+                                    <p class="text-[8px] text-slate-300 font-medium mb-0.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[9px]">confirmation_number</span> 
+                                        <span class="text-white">${st.availableTicketCount}</span>/<span class="text-slate-400">${st.ticketCount}</span>
+                                    </p>
+                                    <p class="text-[9px] text-secondary font-medium">${formatTime(startAt)} — ${formatTime(endAt)}</p>
+                                </div>
+                            `;
+                            mobileTrack.appendChild(mcard);
+                        }
+                    });
+                }
             }
         }
 
@@ -383,6 +608,14 @@
             
             statusEl.innerText = statusText;
             statusEl.className = `font-bold ${statusColor}`;
+            
+            const fmt = (st.format || '0').toString();
+            let fmtLabel = fmt;
+            if (fmt === '0' || fmt === 'TwoD') fmtLabel = '2D';
+            else if (fmt === '1' || fmt === 'ThreeD') fmtLabel = '3D';
+            else if (fmt === '2' || fmt === 'IMAX') fmtLabel = 'IMAX';
+            
+            document.getElementById('dtlFormat').innerText = fmtLabel;
             document.getElementById('dtlTicket').innerText = `${st.availableTicketCount} / ${st.ticketCount}`;
             
             // Enable cancellation if upcoming and not started yet
@@ -419,6 +652,42 @@
                 window.showToast('Không thể kết nối đến máy chủ.', 'error');
             } finally {
                 if (window.hideLoading) window.hideLoading();
+            }
+        }
+
+        function loadDropdowns() {
+            const movieSelect = document.getElementById('movieSelect');
+            const screenSelect = document.getElementById('screenSelect');
+            const formatContainer = document.getElementById('formatContainer');
+            
+            formatContainer.classList.add('hidden');
+            
+            if (cachedData.movies && cachedData.movies.length > 0) {
+                movieSelect.innerHTML = '<option value="">-- Chọn phim --</option>';
+                cachedData.movies.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.name;
+                    movieSelect.appendChild(opt);
+                });
+            }
+
+            if (cachedData.cinemas && cachedData.cinemas.length > 0) {
+                screenSelect.innerHTML = '<option value="">-- Chọn phòng chiếu --</option>';
+                cachedData.cinemas.forEach(cinema => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = cinema.name;
+                    
+                    const cinemaScreens = cachedData.screens.filter(s => s.cinemaId === cinema.id);
+                    cinemaScreens.forEach(screen => {
+                        const opt = document.createElement('option');
+                        opt.value = screen.id;
+                        opt.textContent = `${screen.code}`;
+                        optgroup.appendChild(opt);
+                    });
+                    
+                    screenSelect.appendChild(optgroup);
+                });
             }
         }
 

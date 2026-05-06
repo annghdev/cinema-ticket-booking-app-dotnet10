@@ -113,21 +113,28 @@
             currentUser = await UserManager.GetUserAsync(User);
         }
     }
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-[45] bg-black/60 backdrop-blur-sm hidden transition-opacity duration-300 lg:hidden"></div>
+
     <!-- SideNavBar -->
-    <aside
-        class="fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-[#0b0e14] border-r border-[#45484f]/10 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
-        <div class="p-8">
-            <h1 class="text-xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Absolute Cinema</h1>
-            <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản trị</p>
+    <aside id="sidebar"
+        class="fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-[#0b0e14] border-r border-[#45484f]/10 shadow-[10px_0_30px_rgba(0,0,0,0.5)] transition-all duration-300 -translate-x-full lg:translate-x-0">
+        <div class="p-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Absolute Cinema</h1>
+                <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản trị</p>
+            </div>
+            <button id="closeSidebar" class="p-2 text-slate-400 lg:hidden hover:text-secondary">
+                <span class="material-symbols-outlined">close</span>
+            </button>
         </div>
-        <nav class="flex-1 mt-4">
+        <nav class="flex-1 mt-4 overflow-y-auto custom-scrollbar">
             @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin) || (await AuthorizationService.AuthorizeAsync(User, Permissions.ReportsView)).Succeeded)
             {
-                <!-- Dashboard Active -->
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Home" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
                     asp-controller="Home" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-                    Trang tổng quan
+                    <span class="sidebar-text">Trang tổng quan</span>
                 </a>
             }
             @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.MoviesView)).Succeeded)
@@ -135,7 +142,7 @@
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Movie" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
                     asp-controller="Movie" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="movie">movie</span>
-                    Thư viện phim
+                    <span class="sidebar-text">Thư viện phim</span>
                 </a>
             }
             @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.ShowTimesView)).Succeeded)
@@ -143,7 +150,7 @@
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "ShowTime" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
                     asp-controller="ShowTime" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="schedule">schedule</span>
-                    Lịch chiếu
+                    <span class="sidebar-text">Lịch chiếu</span>
                 </a>
             }
             @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.CinemasView)).Succeeded)
@@ -151,7 +158,7 @@
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Cinema" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
                     asp-controller="Cinema" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="store">store</span>
-                    Quản lý rạp
+                    <span class="sidebar-text">Quản lý rạp</span>
                 </a>
             }
             @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin))
@@ -159,39 +166,42 @@
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Role" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
                     asp-controller="Role" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="security">security</span>
-                    Phân quyền
+                    <span class="sidebar-text">Phân quyền</span>
                 </a>
             }
             <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
                 href="#">
                 <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
-                Phòng vé
+                <span class="sidebar-text">Phòng vé</span>
             </a>
             <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
                 href="#">
                 <span class="material-symbols-outlined" data-icon="terminal">terminal</span>
-                Nhật ký hệ thống
+                <span class="sidebar-text">Nhật ký hệ thống</span>
             </a>
         </nav>
-
     </aside>
+
     <!-- TopAppBar -->
-    <header
-        class="fixed top-0 right-0 left-64 z-40 bg-[#0b0e14]/60 backdrop-blur-xl border-b border-[#45484f]/20 shadow-2xl shadow-black/40 flex items-center justify-between px-8 h-20">
+    <header id="topAppBar"
+        class="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-[#0b0e14]/60 backdrop-blur-xl border-b border-[#45484f]/20 shadow-2xl shadow-black/40 flex items-center justify-between px-8 h-20 transition-all duration-300">
         <div class="flex items-center gap-6">
-            <h2
-                class="text-2xl font-bold text-[#00f4fe] drop-shadow-[0_0_8px_rgba(0,244,254,0.5)] font-headline tracking-tight">
-                @ViewData["Title"]</h2>
-            <div class="relative hidden lg:block">
+            <button id="toggleSidebar" class="p-2 text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-lg active:scale-95 duration-200">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h2 class="text-xl font-bold text-[#00f4fe] drop-shadow-[0_0_8px_rgba(0,244,254,0.5)] font-headline tracking-tight md:text-2xl">
+                @ViewData["Title"]
+            </h2>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="relative hidden xl:block">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
                     data-icon="search">search</span>
                 <input
                     class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm w-80 focus:ring-1 focus:ring-secondary/50 text-on-surface"
                     placeholder="Tìm kiếm phim, phòng chiếu, phân tích..." type="text" />
             </div>
-        </div>
-        <div class="flex items-center gap-6">
-            <div class="flex items-center gap-4 border-r border-[#45484f]/20 pr-6">
+            <div class="flex items-center gap-4 border-r border-[#45484f]/20 pr-6 hidden md:flex">
                 <button
                     class="p-2 text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-full relative scale-95 active:scale-90 duration-200">
                     <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
@@ -234,9 +244,10 @@
             </div>
         </div>
     </header>
+
     <!-- Main Content -->
-    <main
-        class="ml-64 pt-24 p-8 min-h-screen bg-gradient-to-br from-background via-surface-container-low to-background">
+    <main id="mainContent"
+        class="lg:ml-64 pt-24 p-8 min-h-screen bg-gradient-to-br from-background via-surface-container-low to-background transition-all duration-300">
         @RenderBody()
     </main>
     <!-- Global Toast Container -->
@@ -252,6 +263,31 @@
     </div>
 
     <script>
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.getElementById('mainContent');
+        const topAppBar = document.getElementById('topAppBar');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+
+        function toggleSidebar() {
+            const isMobile = window.innerWidth < 1024;
+            if (isMobile) {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarOverlay.classList.toggle('hidden');
+                document.body.classList.toggle('overflow-hidden');
+            } else {
+                sidebar.classList.toggle('lg:-translate-x-full');
+                mainContent.classList.toggle('lg:ml-0');
+                topAppBar.classList.toggle('lg:left-0');
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
         // Global Loading Spinner Service
         window.showLoading = function() {
             const overlay = document.getElementById('loadingOverlay');
@@ -266,6 +302,8 @@
         // Global Toast Service
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
+            if (!container) return;
+            
             const toast = document.createElement('div');
             toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border backdrop-blur-md shadow-2xl transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-auto max-w-sm`;
             

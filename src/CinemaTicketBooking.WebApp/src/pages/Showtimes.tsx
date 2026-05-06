@@ -44,6 +44,8 @@ type MovieGroupWithCinemas = {
   }[]
 }
 
+import { useLoading } from "../contexts/LoadingContext"
+
 function Showtimes() {
   const { error } = useToast()
   const [groupMode, setGroupMode] = useState<GroupMode>("cinema")
@@ -51,8 +53,8 @@ function Showtimes() {
   const [timeRange, setTimeRange] = useState("all")
   const [selectedCinemaIds, setSelectedCinemaIds] = useState<string[]>([])
   const [selectedMovieIds, setSelectedMovieIds] = useState<string[]>([])
+  const { showLoading, hideLoading } = useLoading()
   
-  const [loading, setLoading] = useState(true)
   const [showtimes, setShowtimes] = useState<ShowTimeDto[]>([])
   const [movies, setMovies] = useState<MovieDto[]>([])
   const [cinemas, setCinemas] = useState<CinemaDto[]>([])
@@ -74,7 +76,7 @@ function Showtimes() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
+      showLoading("Đang tải lịch chiếu...")
       try {
         const [showtimesData, moviesData, cinemasData] = await Promise.all([
           getShowTimes({ date: format(selectedDate, "yyyy-MM-dd"), status: "Upcoming" }),
@@ -88,12 +90,12 @@ function Showtimes() {
         console.error(e)
         error("Không thể tải dữ liệu lịch chiếu. Vui lòng thử lại sau.")
       } finally {
-        setLoading(false)
+        hideLoading()
       }
     }
 
     fetchData()
-  }, [selectedDate, error])
+  }, [selectedDate, error, showLoading, hideLoading])
 
   const toggleSelection = (value: string, current: string[], setter: (value: string[]) => void) => {
     if (current.includes(value)) {
@@ -247,11 +249,7 @@ function Showtimes() {
           </div>
         </section>
 
-        {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          </div>
-        ) : filteredShowtimes.length === 0 ? (
+        {filteredShowtimes.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-container-low p-20 text-center shadow-2xl">
             <span className="material-symbols-outlined text-6xl text-on-surface-variant/40 mb-4">calendar_today</span>
             <h2 className="text-2xl font-bold text-on-background">Không tìm thấy lịch chiếu</h2>

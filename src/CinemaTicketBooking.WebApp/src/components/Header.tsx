@@ -18,6 +18,9 @@ function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null)
+  const mobileMenuBtnRef = useRef<HTMLButtonElement | null>(null)
   const accountMenuRef = useRef<HTMLDivElement | null>(null)
 
   const avatarFallback = useMemo(() => {
@@ -27,8 +30,14 @@ function Header() {
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
-      if (!accountMenuRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (
+        !accountMenuRef.current?.contains(target) &&
+        !mobileMenuRef.current?.contains(target) &&
+        !mobileMenuBtnRef.current?.contains(target)
+      ) {
         setIsAccountMenuOpen(false)
+        setIsMobileMenuOpen(false)
       }
     }
 
@@ -46,6 +55,7 @@ function Header() {
 
   const navigateFromMenu = (path: string) => {
     setIsAccountMenuOpen(false)
+    setIsMobileMenuOpen(false)
     navigate(path)
   }
 
@@ -61,6 +71,7 @@ function Header() {
     } finally {
       clearAuth()
       setIsAccountMenuOpen(false)
+      setIsMobileMenuOpen(false)
       setIsLoggingOut(false)
       navigate("/")
     }
@@ -69,9 +80,22 @@ function Header() {
   return (
     <>
       <header className="fixed top-0 z-50 w-full border-b border-outline-variant/20 bg-background/95 shadow-lg shadow-black/20 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-8 py-4">
-          <div className="font-headline text-2xl font-black tracking-tighter text-[#61b4fe]">
-            ABSOLUTE CINEMA
+        <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-6 py-4 md:px-8">
+          <div className="flex items-center gap-4">
+            <button
+              ref={mobileMenuBtnRef}
+              type="button"
+              className="material-symbols-outlined flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-white/5 md:hidden"
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            >
+              {isMobileMenuOpen ? "close" : "menu"}
+            </button>
+            <div
+              className="cursor-pointer font-headline text-xl font-black tracking-tighter text-[#61b4fe] transition-transform active:scale-95 sm:text-2xl"
+              onClick={() => navigate("/")}
+            >
+              ABSOLUTE CINEMA
+            </div>
           </div>
 
           <nav className="hidden items-center space-x-8 font-headline font-bold tracking-tight md:flex">
@@ -90,7 +114,7 @@ function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               type="button"
               aria-label="Tìm kiếm"
@@ -110,10 +134,10 @@ function Header() {
                     <img
                       src={avatarUrl}
                       alt={displayName ?? "Avatar"}
-                      className="h-8 w-8 rounded-full object-cover"
+                      className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8"
                     />
                   ) : (
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-secondary/20 font-semibold text-secondary">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-secondary/20 text-xs font-semibold text-secondary sm:h-8 sm:w-8 sm:text-base">
                       {avatarFallback}
                     </span>
                   )}
@@ -162,7 +186,33 @@ function Header() {
             )}
           </div>
         </div>
+
+        {/* Mobile Navigation Panel */}
+        <div
+          ref={mobileMenuRef}
+          className={`absolute left-0 top-[calc(100%-1px)] w-full border-b border-outline-variant/20 bg-background/95 shadow-xl backdrop-blur-md transition-all duration-300 md:hidden ${
+            isMobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"
+          }`}
+        >
+          <nav className="flex flex-col p-4">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-xl px-4 py-3 font-headline font-bold transition-all active:scale-[0.98] ${
+                    isActive ? "bg-primary/10 text-[#00f4fe]" : "text-slate-400 hover:bg-white/5"
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
       </header>
+
 
       <AuthModal open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} />
     </>

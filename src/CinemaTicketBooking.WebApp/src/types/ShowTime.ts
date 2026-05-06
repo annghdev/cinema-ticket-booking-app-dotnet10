@@ -24,6 +24,7 @@ export type ShowTimeDtoRaw = {
   status: ShowTimeStatusValue
   ticketCount: number
   availableTicketCount: number
+  format: string
   createdAt: string
 }
 
@@ -64,6 +65,7 @@ export type ShowTimeDetailDtoRaw = {
   status: ShowTimeStatusValue
   ticketCount: number
   availableTicketCount: number
+  format: string
   createdAt: string
   tickets: ShowTimeTicketDtoRaw[]
 }

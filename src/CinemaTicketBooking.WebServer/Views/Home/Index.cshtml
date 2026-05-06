@@ -70,77 +70,33 @@
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
     <!-- Revenue Analytics Section -->
     <div class="xl:col-span-2 glass-card rounded-2xl p-8 relative">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
             <div>
                 <h4 class="text-xl font-headline font-bold text-on-surface">Phân tích doanh thu</h4>
-                <p class="text-sm text-on-surface-variant">Hiệu suất tài chính 30 ngày qua</p>
+                <p class="text-sm text-on-surface-variant">Hiệu suất tài chính theo thời gian</p>
             </div>
-            <div class="flex gap-2">
-                <button
-                    class="px-4 py-2 text-xs font-bold rounded-lg bg-surface-container-highest text-on-surface border border-outline-variant/30">WEEK</button>
-                <button
-                    class="px-4 py-2 text-xs font-bold rounded-lg bg-secondary/10 text-secondary border border-secondary/30">MONTH</button>
-            </div>
-        </div>
-        <!-- Mockup Chart -->
-        <div class="h-64 w-full relative flex items-end gap-2 px-2">
-            <div class="absolute inset-0 flex flex-col justify-between py-2 text-[10px] text-outline">
-                <div class="border-b border-outline-variant/10 w-full pb-1">$50k</div>
-                <div class="border-b border-outline-variant/10 w-full pb-1">$40k</div>
-                <div class="border-b border-outline-variant/10 w-full pb-1">$30k</div>
-                <div class="border-b border-outline-variant/10 w-full pb-1">$20k</div>
-                <div class="border-b border-outline-variant/10 w-full pb-1">$10k</div>
-            </div>
-            <!-- Neon Data Points (Visualization using divs) -->
-            <div class="flex-1 flex items-end justify-between h-full relative z-10 pt-4">
-                <div class="w-1.5 h-1/3 bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-1/2 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-2/3">
-                    </div>
+            <div class="flex items-center gap-4">
+                <div class="flex rounded-lg bg-surface-container-low p-1 border border-outline-variant/10">
+                    <button id="btnMonthly" onclick="updateChartPeriod('monthly')"
+                        class="px-4 py-1.5 text-[10px] font-bold rounded-md bg-secondary text-on-secondary transition-all">THÁNG</button>
+                    <button id="btnYearly" onclick="updateChartPeriod('yearly')"
+                        class="px-4 py-1.5 text-[10px] font-bold rounded-md text-on-surface-variant hover:text-on-surface transition-all">NĂM</button>
                 </div>
-                <div class="w-1.5 h-1/2 bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-2/3 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-3/4">
-                    </div>
-                </div>
-                <div class="w-1.5 h-2/3 bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-3/4 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
-                    </div>
-                </div>
-                <div class="w-1.5 h-1/2 bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-1/3 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-1/2">
-                    </div>
-                </div>
-                <div class="w-1.5 h-3/4 bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-4/5 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
-                    </div>
-                </div>
-                <div class="w-1.5 h-full bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-5/6 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
-                    </div>
-                </div>
-                <!-- More bars would go here... -->
-                <div class="w-1.5 h-2/3 bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-1/2 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-2/3">
-                    </div>
-                </div>
-                <div class="w-1.5 h-3/4 bg-primary/20 rounded-t-full relative group">
-                    <div
-                        class="absolute bottom-0 w-full h-4/5 bg-secondary neon-glow rounded-t-full transition-all group-hover:h-full">
-                    </div>
+                <div class="flex rounded-lg bg-surface-container-low p-1 border border-outline-variant/10">
+                    <button id="btnBar" onclick="updateChartType('bar')"
+                        class="p-1.5 rounded-md bg-surface-container-high text-secondary border border-secondary/20 shadow-[0_0_10px_rgba(0,244,254,0.2)]">
+                        <span class="material-symbols-outlined text-sm">bar_chart</span>
+                    </button>
+                    <button id="btnLine" onclick="updateChartType('line')"
+                        class="p-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-all">
+                        <span class="material-symbols-outlined text-sm">show_chart</span>
+                    </button>
                 </div>
             </div>
         </div>
-        <div class="flex justify-between mt-4 px-2 text-[10px] text-outline font-label uppercase">
-            <span>Oct 01</span>
-            <span>Oct 10</span>
-            <span>Oct 20</span>
-            <span>Oct 30</span>
+        
+        <div class="h-64 w-full">
+            <canvas id="revenueChart"></canvas>
         </div>
     </div>
     <!-- Real-time Status Grid -->
@@ -320,3 +276,107 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let revenueChart;
+        let currentType = 'bar';
+        let currentPeriod = 'monthly';
+
+        const chartData = {
+            monthly: {
+                labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
+                data: [45000, 52000, 38000, 61000]
+            },
+            yearly: {
+                labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                data: [120000, 150000, 140000, 180000, 210000, 250000, 300000, 280000, 220000, 190000, 240000, 320000]
+            }
+        };
+
+        function initChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const data = chartData[currentPeriod];
+            
+            revenueChart = new Chart(ctx, {
+                type: currentType,
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Doanh thu ($)',
+                        data: data.data,
+                        backgroundColor: currentType === 'bar' ? 'rgba(0, 244, 254, 0.3)' : 'rgba(97, 180, 254, 0.2)',
+                        borderColor: currentType === 'bar' ? '#00f4fe' : '#61b4fe',
+                        borderWidth: 2,
+                        borderRadius: currentType === 'bar' ? 6 : 0,
+                        fill: currentType === 'line',
+                        tension: 0.4,
+                        pointBackgroundColor: '#00f4fe',
+                        pointBorderColor: '#0b0e14',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { 
+                                color: '#a9abb3',
+                                callback: value => '$' + (value >= 1000 ? (value / 1000) + 'k' : value)
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a9abb3' }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.updateChartPeriod = function(period) {
+            currentPeriod = period;
+            
+            // UI Toggle
+            document.getElementById('btnMonthly').className = period === 'monthly' 
+                ? 'px-4 py-1.5 text-[10px] font-bold rounded-md bg-secondary text-on-secondary transition-all'
+                : 'px-4 py-1.5 text-[10px] font-bold rounded-md text-on-surface-variant hover:text-on-surface transition-all';
+            
+            document.getElementById('btnYearly').className = period === 'yearly'
+                ? 'px-4 py-1.5 text-[10px] font-bold rounded-md bg-secondary text-on-secondary transition-all'
+                : 'px-4 py-1.5 text-[10px] font-bold rounded-md text-on-surface-variant hover:text-on-surface transition-all';
+
+            const newData = chartData[period];
+            revenueChart.data.labels = newData.labels;
+            revenueChart.data.datasets[0].data = newData.data;
+            revenueChart.update();
+        };
+
+        window.updateChartType = function(type) {
+            currentType = type;
+            
+            // UI Toggle
+            document.getElementById('btnBar').className = type === 'bar'
+                ? 'p-1.5 rounded-md bg-surface-container-high text-secondary border border-secondary/20 shadow-[0_0_10px_rgba(0,244,254,0.2)]'
+                : 'p-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-all';
+                
+            document.getElementById('btnLine').className = type === 'line'
+                ? 'p-1.5 rounded-md bg-surface-container-high text-secondary border border-secondary/20 shadow-[0_0_10px_rgba(0,244,254,0.2)]'
+                : 'p-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-all';
+
+            revenueChart.destroy();
+            initChart();
+        };
+
+        document.addEventListener('DOMContentLoaded', initChart);
+    </script>
+}

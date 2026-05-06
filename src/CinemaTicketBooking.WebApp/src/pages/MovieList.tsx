@@ -5,6 +5,7 @@ import { getShowTimes } from "../apis/showtimeApi"
 import type { MovieDto } from "../types/Movie"
 import type { ShowTimeDto } from "../types/ShowTime"
 import { MovieTrailerModal } from "../components/MovieTrailerModal"
+import { useLoading } from "../contexts/LoadingContext"
 
 type MovieWithShowTimes = {
   movie: MovieDto
@@ -26,19 +27,19 @@ function formatDateLabel(dateInput: string) {
   return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date)
 }
 
-function formatShowTime(showtime: ShowTimeDto) {
-  const date = new Date(showtime.startAt)
-  if (Number.isNaN(date.getTime())) {
-    return showtime.startAt
-  }
-  return new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(date)
-}
-
 function genreLabel(genre: MovieDto["genre"]) {
   if (genre === "SciFi") {
     return "Sci-Fi"
   }
   return genre
+}
+
+function formatLabel(format: string | number) {
+  const f = (format || "0").toString()
+  if (f === "0" || f === "TwoD") return "2D"
+  if (f === "1" || f === "ThreeD") return "3D"
+  if (f === "2" || f === "IMAX") return "IMAX"
+  return f
 }
 
 function sectionTagByStatus(status: MovieDto["status"]) {
@@ -56,8 +57,8 @@ function MovieList() {
   const returnUrl = encodeURIComponent(location.pathname + location.search)
   const [movies, setMovies] = useState<MovieDto[]>([])
   const [showtimes, setShowtimes] = useState<ShowTimeDto[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { showLoading, hideLoading } = useLoading()
 
   const [trailerModal, setTrailerModal] = useState<{ isOpen: boolean; movieName: string; trailerUrl: string | null }>({
     isOpen: false,
@@ -72,7 +73,7 @@ function MovieList() {
   useEffect(() => {
     async function loadData() {
       try {
-        setLoading(true)
+        showLoading("Đang tải danh sách phim...")
         const [movieData, showtimeData] = await Promise.all([getUpcomingAndNowShowingMovies(), getShowTimes()])
         const activeShowtimes = showtimeData
           .filter((item) => item.status === "Upcoming" || item.status === "Showing")
@@ -83,15 +84,20 @@ function MovieList() {
       } catch {
         setError("Không tải được dữ liệu phim/lịch chiếu từ backend.")
       } finally {
-        setLoading(false)
+        hideLoading()
       }
     }
 
     void loadData()
-  }, [])
+  }, [showLoading, hideLoading])
 
   const showtimesByMovieId = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0]
     return showtimes.reduce<Record<string, ShowTimeDto[]>>((acc, item) => {
+      // Filter for today's showtimes for the "Quick Pick" section
+      const itemDate = new Date(item.startAt).toISOString().split("T")[0]
+      if (itemDate !== today) return acc
+
       if (!acc[item.movieId]) {
         acc[item.movieId] = []
       }
@@ -127,19 +133,6 @@ function MovieList() {
   const upcomingMovies = useMemo(() => {
     return moviesWithShowtimes.filter((item) => item.movie.status === "Upcoming")
   }, [moviesWithShowtimes])
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-background pb-20 pt-24 md:pt-28">
-        <div className="mx-auto w-full max-w-screen-2xl px-8 py-16">
-          <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low p-12 text-center text-on-surface-variant flex flex-col items-center justify-center gap-4">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-[0_0_15px_rgba(97,180,254,0.3)]"></div>
-            <p className="font-headline font-semibold text-lg text-on-surface">Đang tải danh sách phim...</p>
-          </div>
-        </div>
-      </main>
-    )
-  }
 
   if (error) {
     return (
@@ -304,28 +297,36 @@ function MovieList() {
                     </div>
 
                     <div className="mt-6">
-                      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Suất chiếu nhanh</p>
-                      <div className="flex flex-wrap gap-2">
-                        {movieShowtimes.slice(0, 8).map((showtime) => (
-                          <Link
-                            key={showtime.id}
-                            to={`/showtimes/${showtime.id}/seats?returnUrl=${returnUrl}`}
-                            className="rounded-lg border border-outline-variant/30 bg-surface-container/80 px-4 py-2 text-sm font-semibold text-on-background transition-all hover:border-primary/50 hover:text-primary hover:bg-surface-container-highest"
-                          >
-                            {formatShowTime(showtime)} · {showtime.cinemaName}
-                          </Link>
-                        ))}
+                      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Suất chiếu hôm nay</p>
+                      <div className="flex flex-wrap gap-3">
+                        {movieShowtimes.slice(0, 8).map((showtime) => {
+                          const time = new Date(showtime.startAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false })
+                          return (
+                            <Link
+                              key={showtime.id}
+                              to={`/showtimes/${showtime.id}/seats?returnUrl=${returnUrl}`}
+                              className="group flex flex-col items-center justify-center min-w-[70px] rounded-lg border border-outline-variant/30 bg-surface-container/80 py-2 px-3 transition-all hover:border-primary/50 hover:bg-surface-container-highest"
+                            >
+                              <span className="text-[10px] font-black tracking-tighter text-secondary opacity-80 uppercase group-hover:text-primary transition-colors">
+                                {formatLabel(showtime.format)}
+                              </span>
+                              <span className="font-headline text-base font-black text-on-background">
+                                {time}
+                              </span>
+                            </Link>
+                          )
+                        })}
                         {movieShowtimes.length === 0 && (
-                          <span className="rounded-lg border border-outline-variant/30 bg-surface-container/50 px-4 py-2 text-sm text-on-surface-variant">
-                            Chưa có suất chiếu khả dụng hôm nay
+                          <span className="rounded-lg border border-outline-variant/30 bg-surface-container/50 px-4 py-2 text-sm text-on-surface-variant italic">
+                            Hôm nay đã hết suất chiếu
                           </span>
                         )}
                         {movieShowtimes.length > 8 && (
                           <Link
                             to={`/movies/${movie.id}/showtimes`}
-                            className="flex items-center gap-1 rounded-lg border border-outline-variant/20 bg-surface-variant/20 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-variant/40"
+                            className="flex h-[52px] items-center justify-center rounded-lg border border-outline-variant/20 bg-surface-variant/20 px-4 text-xs font-bold text-on-surface-variant hover:bg-surface-variant/40"
                           >
-                            +{movieShowtimes.length - 8} suất khác
+                            +{movieShowtimes.length - 8} suất
                           </Link>
                         )}
                       </div>
