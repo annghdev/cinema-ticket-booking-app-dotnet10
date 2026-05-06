@@ -4,14 +4,10 @@
 @model PagedResult<MovieDto>
 
 @{
-    ViewData["Title"] = "Thư viện phim";
+    ViewData["Title"] = "Quản lý phim";
 }
 
 <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-    <div>
-        <h2 class="text-display-lg text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Thư viện phim</h2>
-        <p class="text-on-surface-variant font-body max-w-md">Quản lý kho phim của rạp chiếu. Cập nhật thông tin, trạng thái phát hành.</p>
-    </div>
     <div class="flex items-center gap-4">
         @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.MoviesManage)).Succeeded)
         {

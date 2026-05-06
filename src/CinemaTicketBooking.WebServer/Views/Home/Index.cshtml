@@ -99,62 +99,77 @@
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
-    <!-- Real-time Status Grid -->
+    <!-- Revenue by Cinema Cluster -->
     <div class="glass-card rounded-2xl p-6">
-        <h4 class="text-lg font-headline font-bold text-on-surface mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-secondary" data-icon="sensors">sensors</span>
-            Trạng thái phòng chiếu
-        </h4>
-        <div class="space-y-4">
-            <div
-                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse neon-glow"></div>
-                    <span class="text-sm font-medium">Hall 01</span>
+        <div class="flex justify-between items-center mb-6">
+            <h4 class="text-lg font-headline font-bold text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary" data-icon="hub">hub</span>
+                Doanh thu cụm rạp
+            </h4>
+            <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container px-2 py-1 rounded">Tháng này</span>
+        </div>
+        
+        <div class="space-y-5">
+            <!-- Cinema 1 -->
+            <div class="group cursor-pointer">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">Galaxy Nguyen Du</span>
+                    <span class="text-sm font-bold text-secondary font-headline">$12,450</span>
                 </div>
-                <span
-                    class="text-[10px] px-2 py-1 rounded bg-secondary/10 text-secondary uppercase font-bold tracking-tighter">Đang chiếu</span>
+                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
+                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 85%"></div>
+                </div>
             </div>
-            <div
-                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse neon-glow"></div>
-                    <span class="text-sm font-medium">Hall 02</span>
+
+            <!-- Cinema 2 -->
+            <div class="group cursor-pointer">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">CGV Landmark 81</span>
+                    <span class="text-sm font-bold text-secondary font-headline">$9,820</span>
                 </div>
-                <span
-                    class="text-[10px] px-2 py-1 rounded bg-secondary/10 text-secondary uppercase font-bold tracking-tighter">Đang chiếu</span>
+                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
+                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 68%"></div>
+                </div>
             </div>
-            <div
-                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-outline"></div>
-                    <span class="text-sm font-medium">Hall 03</span>
+
+            <!-- Cinema 3 -->
+            <div class="group cursor-pointer">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">Lotte Gò Vấp</span>
+                    <span class="text-sm font-bold text-secondary font-headline">$7,560</span>
                 </div>
-                <span
-                    class="text-[10px] px-2 py-1 rounded bg-outline/10 text-outline uppercase font-bold tracking-tighter">Đang trống</span>
+                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
+                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 52%"></div>
+                </div>
             </div>
-            <div
-                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
-                    <span class="text-sm font-medium">Hall 04</span>
+
+            <!-- Cinema 4 -->
+            <div class="group cursor-pointer">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">BHD Star Thảo Điền</span>
+                    <span class="text-sm font-bold text-secondary font-headline">$6,210</span>
                 </div>
-                <span
-                    class="text-[10px] px-2 py-1 rounded bg-error/10 text-error uppercase font-bold tracking-tighter">Bảo trì</span>
+                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
+                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 44%"></div>
+                </div>
             </div>
-            <div
-                class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse neon-glow"></div>
-                    <span class="text-sm font-medium">Hall 05</span>
+
+            <!-- Cinema 5 -->
+            <div class="group cursor-pointer">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">Beta T.Quang Khai</span>
+                    <span class="text-sm font-bold text-secondary font-headline">$4,120</span>
                 </div>
-                <span
-                    class="text-[10px] px-2 py-1 rounded bg-secondary/10 text-secondary uppercase font-bold tracking-tighter">Screening</span>
+                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
+                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 29%"></div>
+                </div>
             </div>
         </div>
+
         <button
-            class="w-full mt-6 py-3 text-xs font-bold text-primary hover:bg-primary/5 rounded-xl border border-primary/20 transition-all">VIEW
-            SYSTEM MAP</button>
+            class="w-full mt-8 py-3 text-[10px] font-bold text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-xl border border-outline-variant/20 hover:border-secondary/30 transition-all uppercase tracking-[0.2em]">
+            Báo cáo chi tiết rạp
+        </button>
     </div>
 </div>
 <!-- Top Performing Movies -->

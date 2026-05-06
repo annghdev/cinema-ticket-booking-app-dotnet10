@@ -7,10 +7,6 @@
 }
 
 <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-    <div>
-        <h2 class="text-display-lg text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Quản lý rạp chiếu</h2>
-        <p class="text-on-surface-variant font-body max-w-md">Danh sách hệ thống rạp chiếu phim, hỗ trợ cập nhật vị trí, trạng thái hoạt động.</p>
-    </div>
     <div class="flex items-center gap-4">
         @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.CinemasManage)).Succeeded)
         {

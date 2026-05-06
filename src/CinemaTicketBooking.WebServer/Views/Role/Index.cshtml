@@ -2,7 +2,7 @@
 @model CinemaTicketBooking.WebServer.Controllers.RoleManagementViewModel
 
 @{
-    ViewData["Title"] = "Phân quyền người dùng";
+    ViewData["Title"] = "Phân quyền truy cập";
 
     var permissionTranslations = new Dictionary<string, string>
     {
@@ -31,12 +31,6 @@
     };
 }
 
-<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-    <div>
-        <h2 class="text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Quản lý Vai trò & Quyền hạn</h2>
-        <p class="text-on-surface-variant font-body max-w-md">Kiểm soát phạm vi thao tác, liên kết policy tĩnh và phân quyền chặt chẽ.</p>
-    </div>
-</div>
 
 @if (TempData["Error"] != null)
 {
@@ -55,7 +49,7 @@
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
     <!-- Left column: List of Roles -->
     <div class="xl:col-span-1 space-y-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Danh sách Vai trò</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Vai trò người dùng</h3>
         
         @foreach (var role in Model.Roles)
         {
@@ -102,6 +96,7 @@
 
     <!-- Right column: Permissions Matrix -->
     <div class="xl:col-span-2">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Quyền truy cập chức năng</h3>
         <div id="permissionMatrixContainer" class="hidden">
             <form asp-action="UpdatePermissions" method="post" class="glass-panel p-8 rounded-3xl border border-white/10 bg-slate-900/80 shadow-2xl">
                 @Html.AntiForgeryToken()
