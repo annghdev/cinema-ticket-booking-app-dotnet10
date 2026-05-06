@@ -36,6 +36,7 @@ public class GetMovieByIdHandler(IUnitOfWork uow)
                 x.Duration,
                 x.Genre,
                 x.Status,
+                x.TargetReach,
                 x.CreatedAt))
             .FirstOrDefaultAsync(ct);
 

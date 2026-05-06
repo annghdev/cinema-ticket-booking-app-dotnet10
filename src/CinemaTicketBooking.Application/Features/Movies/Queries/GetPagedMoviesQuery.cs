@@ -50,6 +50,7 @@ public class GetPagedMoviesHandler(IUnitOfWork uow)
                 movie.Duration,
                 movie.Genre,
                 movie.Status,
+                movie.TargetReach,
                 movie.CreatedAt
             ))
             .ToListAsync(ct);

@@ -14,5 +14,6 @@ public sealed record MovieDto(
     int Duration,
     MovieGenre Genre,
     MovieStatus Status,
+    decimal TargetReach,
     DateTimeOffset CreatedAt
 );
