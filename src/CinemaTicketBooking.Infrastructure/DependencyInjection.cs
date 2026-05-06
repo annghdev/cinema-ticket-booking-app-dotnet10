@@ -59,7 +59,7 @@ public static class DependencyInjection
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
         services.AddScoped<ISlideRepository, SlideRepository>();
-        services.AddScoped<IStatisticService, StatisticService>();
+        services.AddScoped<IQueryService, QueryService>();
         services.AddScoped<IUnitOfWork, EFUnitOfWork>();
         services.AddScoped<DataSeeder>();
         services.AddHttpClient();
