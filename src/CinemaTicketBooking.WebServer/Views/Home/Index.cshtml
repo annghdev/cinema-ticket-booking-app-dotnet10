@@ -1,3 +1,5 @@
+@using CinemaTicketBooking.WebServer.Models
+@model DashboardViewModel
 @{
     ViewData["Title"] = "Tổng quan";
 }
@@ -9,49 +11,43 @@
             <div class="p-2 rounded-lg bg-primary/10 text-primary">
                 <span class="material-symbols-outlined" data-icon="payments">payments</span>
             </div>
-            <span class="text-secondary text-xs font-bold flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
-                +12.5%
+            <span class="@(Model.Summary.RevenueTrendPercentage >= 0 ? "text-secondary" : "text-error") text-xs font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]" data-icon="@(Model.Summary.RevenueTrendPercentage >= 0 ? "trending_up" : "trending_down")">@(Model.Summary.RevenueTrendPercentage >= 0 ? "trending_up" : "trending_down")</span>
+                @(Model.Summary.RevenueTrendPercentage >= 0 ? "+" : "")@Model.Summary.RevenueTrendPercentage.ToString("F1")%
             </span>
         </div>
         <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Doanh thu hàng ngày</p>
-        <h3 class="text-3xl font-headline font-bold">$24,592.00</h3>
-        <div
-            class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent">
-        </div>
+        <h3 class="text-3xl font-headline font-bold">@Model.Summary.DailyRevenue.ToString("N0")₫</h3>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
     </div>
     <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
         <div class="flex justify-between items-start mb-4">
             <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
                 <span class="material-symbols-outlined" data-icon="local_activity">local_activity</span>
             </div>
-            <span class="text-secondary text-xs font-bold flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
-                +8.2%
+            <span class="@(Model.Summary.TicketTrendPercentage >= 0 ? "text-secondary" : "text-error") text-xs font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]" data-icon="@(Model.Summary.TicketTrendPercentage >= 0 ? "trending_up" : "trending_down")">@(Model.Summary.TicketTrendPercentage >= 0 ? "trending_up" : "trending_down")</span>
+                @(Model.Summary.TicketTrendPercentage >= 0 ? "+" : "")@Model.Summary.TicketTrendPercentage.ToString("F1")%
             </span>
         </div>
         <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Vé đã bán</p>
-        <h3 class="text-3xl font-headline font-bold">1,842</h3>
-        <div
-            class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-secondary/30 to-transparent">
-        </div>
+        <h3 class="text-3xl font-headline font-bold">@Model.Summary.DailyTicketsSold.ToString("N0")</h3>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-secondary/30 to-transparent"></div>
     </div>
     <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
         <div class="flex justify-between items-start mb-4">
             <div class="p-2 rounded-lg bg-tertiary/10 text-tertiary">
-                <span class="material-symbols-outlined" data-icon="event_seat">event_seat</span>
+                <span class="material-symbols-outlined" data-icon="lunch_dining">lunch_dining</span>
             </div>
-            <span class="text-error text-xs font-bold flex items-center gap-1">
+            <span class="@(Model.Summary.ConcessionTrendPercentage >= 0 ? "text-secondary" : "text-error") text-xs font-bold flex items-center gap-1">
                 <span class="material-symbols-outlined text-[14px]"
-                    data-icon="trending_down">trending_down</span>
-                -2.1%
+                    data-icon="@(Model.Summary.ConcessionTrendPercentage >= 0 ? "trending_up" : "trending_down")">@(Model.Summary.ConcessionTrendPercentage >= 0 ? "trending_up" : "trending_down")</span>
+                @(Model.Summary.ConcessionTrendPercentage >= 0 ? "+" : "")@Model.Summary.ConcessionTrendPercentage.ToString("F1")%
             </span>
         </div>
-        <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Tỉ lệ lấp đầy TB</p>
-        <h3 class="text-3xl font-headline font-bold">76.4%</h3>
-        <div
-            class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-tertiary/30 to-transparent">
-        </div>
+        <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Doanh thu bắp nước</p>
+        <h3 class="text-3xl font-headline font-bold">@Model.Summary.ConcessionRevenue.ToString("N0")₫</h3>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-tertiary/30 to-transparent"></div>
     </div>
     <div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
         <div class="flex justify-between items-start mb-4">
@@ -61,7 +57,7 @@
             <span class="text-on-surface-variant text-xs font-bold">Live</span>
         </div>
         <p class="text-on-surface-variant text-sm font-label uppercase tracking-widest mb-1">Phim đang chiếu</p>
-        <h3 class="text-3xl font-headline font-bold">14</h3>
+        <h3 class="text-3xl font-headline font-bold">@Model.Summary.NowShowingMoviesCount</h3>
         <div
             class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-surface-tint/30 to-transparent">
         </div>
@@ -77,6 +73,8 @@
             </div>
             <div class="flex items-center gap-4">
                 <div class="flex rounded-lg bg-surface-container-low p-1 border border-outline-variant/10">
+                    <button id="btnWeekly" onclick="updateChartPeriod('weekly')"
+                        class="px-4 py-1.5 text-[10px] font-bold rounded-md text-on-surface-variant hover:text-on-surface transition-all">TUẦN</button>
                     <button id="btnMonthly" onclick="updateChartPeriod('monthly')"
                         class="px-4 py-1.5 text-[10px] font-bold rounded-md bg-secondary text-on-secondary transition-all">THÁNG</button>
                     <button id="btnYearly" onclick="updateChartPeriod('yearly')"
@@ -110,60 +108,18 @@
         </div>
         
         <div class="space-y-5">
-            <!-- Cinema 1 -->
-            <div class="group cursor-pointer">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">Galaxy Nguyen Du</span>
-                    <span class="text-sm font-bold text-secondary font-headline">$12,450</span>
+            @foreach (var cinema in Model.CinemaRevenues)
+            {
+                <div class="group cursor-pointer">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium group-hover:text-secondary transition-colors">@cinema.CinemaName</span>
+                        <span class="text-sm font-bold text-secondary font-headline">@cinema.Revenue.ToString("N0")₫</span>
+                    </div>
+                    <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
+                        <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: @(cinema.Percentage)%"></div>
+                    </div>
                 </div>
-                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
-                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 85%"></div>
-                </div>
-            </div>
-
-            <!-- Cinema 2 -->
-            <div class="group cursor-pointer">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">CGV Landmark 81</span>
-                    <span class="text-sm font-bold text-secondary font-headline">$9,820</span>
-                </div>
-                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
-                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 68%"></div>
-                </div>
-            </div>
-
-            <!-- Cinema 3 -->
-            <div class="group cursor-pointer">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">Lotte Gò Vấp</span>
-                    <span class="text-sm font-bold text-secondary font-headline">$7,560</span>
-                </div>
-                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
-                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 52%"></div>
-                </div>
-            </div>
-
-            <!-- Cinema 4 -->
-            <div class="group cursor-pointer">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">BHD Star Thảo Điền</span>
-                    <span class="text-sm font-bold text-secondary font-headline">$6,210</span>
-                </div>
-                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
-                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 44%"></div>
-                </div>
-            </div>
-
-            <!-- Cinema 5 -->
-            <div class="group cursor-pointer">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium group-hover:text-secondary transition-colors">Beta T.Quang Khai</span>
-                    <span class="text-sm font-bold text-secondary font-headline">$4,120</span>
-                </div>
-                <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden border border-outline-variant/10">
-                    <div class="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 29%"></div>
-                </div>
-            </div>
+            }
         </div>
 
         <button
@@ -175,9 +131,9 @@
 <!-- Top Performing Movies -->
 <div class="glass-card rounded-2xl overflow-hidden">
     <div class="p-8 border-b border-outline-variant/20 flex justify-between items-center">
-        <h4 class="text-xl font-headline font-bold text-on-surface">Top Performing Movies</h4>
+        <h4 class="text-xl font-headline font-bold text-on-surface">Phim doanh thu hàng đầu</h4>
         <button class="text-secondary text-sm font-bold flex items-center gap-2 hover:underline">
-            FULL REPORT
+            XEM CHI TIẾT
             <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
         </button>
     </div>
@@ -186,107 +142,42 @@
             <thead
                 class="bg-surface-container-lowest text-on-surface-variant text-[10px] uppercase tracking-widest font-label">
                 <tr>
-                    <th class="px-8 py-4">Movie</th>
-                    <th class="px-8 py-4">Release Date</th>
-                    <th class="px-8 py-4">Box Office</th>
-                    <th class="px-8 py-4">Target Reach</th>
-                    <th class="px-8 py-4">Trend</th>
+                    <th class="px-8 py-4">Phim</th>
+                    <th class="px-8 py-4">Ngày phát hành</th>
+                    <th class="px-8 py-4">Doanh thu</th>
+                    <th class="px-8 py-4">Mục tiêu</th>
+                    <th class="px-8 py-4">Xu hướng</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant/10">
-                <!-- Movie 1 -->
-                <tr class="hover:bg-white/5 transition-colors">
-                    <td class="px-8 py-4">
-                        <div class="flex items-center gap-4">
-                            <img class="w-12 h-16 rounded-lg object-cover"
-                                data-alt="Cinematic movie poster with vibrant neon colors and dramatic shadows, depicting a sci-fi city landscape"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzHzEI5prk9snZCti3CWtg-7FyxJvBflmZLbJKUsRIdHaHdrtzakpbMpCNuRXFws6t3GI7N9CapG8mUCryr8nbAMBZMDjyxh0R3JsM8vWYRmVbnaDvJQp4XU1QVbW6tsJFPZHoVaTPb_tPzlBOlSKAsCeFWtJZAAEu4ACkefVAOpXECiZ1hKqGJTjU4zoyHdTtGbmaV2aXxi3Ogzth9kExXsIF0zlpBMSKnAzGRxzYLAZ4JBViPhv3XqAyTbJG4FvMevN01TNJ9EA" />
-                            <div>
-                                <p class="font-bold">Aether: Genesis</p>
-                                <p class="text-xs text-on-surface-variant">Sci-Fi / Action</p>
+                @foreach (var movie in Model.TopMovies)
+                {
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-8 py-4">
+                            <div class="flex items-center gap-4">
+                                <img class="w-12 h-16 rounded-lg object-cover"
+                                     src="@movie.ThumbnailUrl" alt="@movie.Title" />
+                                <div>
+                                    <p class="font-bold">@movie.Title</p>
+                                    <p class="text-xs text-on-surface-variant">@movie.Genre</p>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-4 text-sm text-on-surface-variant">Oct 12, 2023</td>
-                    <td class="px-8 py-4 font-headline font-bold">$1.2M</td>
-                    <td class="px-8 py-4">
-                        <div class="w-32">
-                            <div class="flex justify-between text-[10px] mb-1">
-                                <span>88%</span>
-                                <span>$1.5M Goal</span>
+                        </td>
+                        <td class="px-8 py-4 text-sm text-on-surface-variant">@movie.ReleaseDate.ToString("MMM dd, yyyy")</td>
+                        <td class="px-8 py-4 font-headline font-bold">@movie.BoxOffice.ToString("N0")₫</td>
+                        <td class="px-8 py-4">
+                            <div class="w-32">
+                                <div class="flex justify-between text-[10px] mb-1">
+                                    <span>@movie.ProgressPercentage.ToString("F0")%</span>
+                                    <span>@(movie.TargetGoal / 1000000)M Mục tiêu</span>
+                                </div>
+                                <div class="w-full bg-surface-container rounded-full h-1.5">
+                                    <div class="bg-secondary h-1.5 rounded-full neon-glow" style="width: @(movie.ProgressPercentage)%"></div>
+                                </div>
                             </div>
-                            <div class="w-full bg-surface-container rounded-full h-1.5">
-                                <div class="bg-secondary h-1.5 rounded-full neon-glow" style="width: 88%"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-4">
-                        <span class="material-symbols-outlined text-secondary"
-                            data-icon="trending_up">trending_up</span>
-                    </td>
-                </tr>
-                <!-- Movie 2 -->
-                <tr class="hover:bg-white/5 transition-colors">
-                    <td class="px-8 py-4">
-                        <div class="flex items-center gap-4">
-                            <img class="w-12 h-16 rounded-lg object-cover"
-                                data-alt="Artistic movie poster showing a dark silhouettes against a glowing ember background, dramatic noir aesthetic"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaoUCVXE-tYP8xQlUeN9jUelcAtbm9vXYSX8DZjvSmHw25wZscxJKMdyxzf6g4V-2DIL05F8Fg2Em-rxo9IhIUeb1zLpF0waMQmZcUk4WHRoTLIVYdmHnOSty2SXU0JvlS54_3zkQzB76Q-qncLCuAc3iaiXRye30TK_4oKoZYS8T6h1GWItdaF4pQvcVYN82HfXZ4WEyrOSr1VF4f-h_xAh5LRI-N23oc5c7Jo4iHWdy0uJ_Z9Gz2CLUVpd5SidFYkMWspWqdgy4" />
-                            <div>
-                                <p class="font-bold">Midnight Echo</p>
-                                <p class="text-xs text-on-surface-variant">Thriller / Noir</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-4 text-sm text-on-surface-variant">Oct 05, 2023</td>
-                    <td class="px-8 py-4 font-headline font-bold">$840k</td>
-                    <td class="px-8 py-4">
-                        <div class="w-32">
-                            <div class="flex justify-between text-[10px] mb-1">
-                                <span>70%</span>
-                                <span>$1.2M Goal</span>
-                            </div>
-                            <div class="w-full bg-surface-container rounded-full h-1.5">
-                                <div class="bg-secondary h-1.5 rounded-full neon-glow" style="width: 70%"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-4">
-                        <span class="material-symbols-outlined text-secondary"
-                            data-icon="trending_up">trending_up</span>
-                    </td>
-                </tr>
-                <!-- Movie 3 -->
-                <tr class="hover:bg-white/5 transition-colors">
-                    <td class="px-8 py-4">
-                        <div class="flex items-center gap-4">
-                            <img class="w-12 h-16 rounded-lg object-cover"
-                                data-alt="Abstract movie poster with liquid chrome textures and blue lighting, futuristic and minimal"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAexnVfsT3gRje8xqZOuXoaGGWrdkhv7z2emfR2qIABkuGZ0OsZXzFnDCeHcDTyUf18MvO7RxqN24_NSKH2EHuf7pvCNzKe0AnCk7HyO_I1GpMgX2bCsfIKkeFZaxp1QYh4dKhvaIaJHRyHjHZRsN0SkRcLgtyjcQhtQtBrQjDT91reYHiBFWmccHCf9uTAuWv9HTrRIUQJlLm7XklvgDrYUhdGrVR87Mx2uNYbj7vvNYs8Xh461Zzj8j4RghI_lxpBOV7TsOcdc_4" />
-                            <div>
-                                <p class="font-bold">Silicon Dreams</p>
-                                <p class="text-xs text-on-surface-variant">Documentary</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-4 text-sm text-on-surface-variant">Sep 28, 2023</td>
-                    <td class="px-8 py-4 font-headline font-bold">$420k</td>
-                    <td class="px-8 py-4">
-                        <div class="w-32">
-                            <div class="flex justify-between text-[10px] mb-1">
-                                <span>105%</span>
-                                <span>$400k Goal</span>
-                            </div>
-                            <div class="w-full bg-surface-container rounded-full h-1.5">
-                                <div class="bg-primary h-1.5 rounded-full" style="width: 100%"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-4">
-                        <span class="material-symbols-outlined text-outline"
-                            data-icon="trending_flat">trending_flat</span>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
@@ -300,14 +191,9 @@
         let currentPeriod = 'monthly';
 
         const chartData = {
-            monthly: {
-                labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
-                data: [45000, 52000, 38000, 61000]
-            },
-            yearly: {
-                labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-                data: [120000, 150000, 140000, 180000, 210000, 250000, 300000, 280000, 220000, 190000, 240000, 320000]
-            }
+            weekly: @Html.Raw(Json.Serialize(Model.WeeklyRevenueChart)),
+            monthly: @Html.Raw(Json.Serialize(Model.MonthlyRevenueChart)),
+            yearly: @Html.Raw(Json.Serialize(Model.YearlyRevenueChart))
         };
 
         function initChart() {
@@ -319,7 +205,7 @@
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: 'Doanh thu ($)',
+                        label: 'Doanh thu (₫)',
                         data: data.data,
                         backgroundColor: currentType === 'bar' ? 'rgba(0, 244, 254, 0.3)' : 'rgba(97, 180, 254, 0.2)',
                         borderColor: currentType === 'bar' ? '#00f4fe' : '#61b4fe',
@@ -346,7 +232,7 @@
                             grid: { color: 'rgba(255, 255, 255, 0.05)' },
                             ticks: { 
                                 color: '#a9abb3',
-                                callback: value => '$' + (value >= 1000 ? (value / 1000) + 'k' : value)
+                                callback: value => (value >= 1000000 ? (value / 1000000).toFixed(1) + 'M' : value.toLocaleString()) + '₫'
                             }
                         },
                         x: {
@@ -362,13 +248,15 @@
             currentPeriod = period;
             
             // UI Toggle
-            document.getElementById('btnMonthly').className = period === 'monthly' 
-                ? 'px-4 py-1.5 text-[10px] font-bold rounded-md bg-secondary text-on-secondary transition-all'
-                : 'px-4 py-1.5 text-[10px] font-bold rounded-md text-on-surface-variant hover:text-on-surface transition-all';
-            
-            document.getElementById('btnYearly').className = period === 'yearly'
-                ? 'px-4 py-1.5 text-[10px] font-bold rounded-md bg-secondary text-on-secondary transition-all'
-                : 'px-4 py-1.5 text-[10px] font-bold rounded-md text-on-surface-variant hover:text-on-surface transition-all';
+            const periods = ['weekly', 'monthly', 'yearly'];
+            periods.forEach(p => {
+                const btn = document.getElementById('btn' + p.charAt(0).toUpperCase() + p.slice(1));
+                if (btn) {
+                    btn.className = period === p 
+                        ? 'px-4 py-1.5 text-[10px] font-bold rounded-md bg-secondary text-on-secondary transition-all'
+                        : 'px-4 py-1.5 text-[10px] font-bold rounded-md text-on-surface-variant hover:text-on-surface transition-all';
+                }
+            });
 
             const newData = chartData[period];
             revenueChart.data.labels = newData.labels;
