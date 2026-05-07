@@ -1,0 +1,301 @@
+@using CinemaTicketBooking.Application.Features
+@using CinemaTicketBooking.Domain
+@using CinemaTicketBooking.Application.Common.Auth
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@model IReadOnlyList<SeatSelectionPolicyDto>
+
+@{
+    Layout = "_Layout";
+    var canManage = (await AuthorizationService.AuthorizeAsync(User, Permissions.SeatSelectionPoliciesManage)).Succeeded;
+}
+
+<div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Header -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">        
+        @if (canManage)
+        {
+            <button onclick="openAddPolicyModal()" class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-container px-6 py-3 font-headline text-xs font-bold uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                Tạo cấu hình mới
+            </button>
+        }
+    </div>
+
+    <!-- Info Alert -->
+    <div class="flex items-start gap-4 rounded-2xl border border-secondary/20 bg-secondary/5 p-4 text-secondary/80 backdrop-blur-md">
+        <span class="material-symbols-outlined mt-0.5">info</span>
+        <div class="text-sm">
+            <p class="font-bold uppercase tracking-widest text-[10px] mb-1">Hướng dẫn</p>
+            <p>Hệ thống sử dụng cấu hình được đánh dấu <span class="font-bold text-secondary">Global Default</span> để kiểm tra lỗi khi khách hàng nhấn "Thanh toán". Các cấp độ bao gồm: 
+               <span class="inline-flex items-center px-2 py-0.5 rounded bg-green-500/10 text-green-500 text-[10px] font-bold mx-1">ALLOW</span> (Bỏ qua),
+               <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 text-[10px] font-bold mx-1">WARNING</span> (Cảnh báo nhưng cho phép),
+               <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-500/10 text-red-500 text-[10px] font-bold mx-1">BLOCK</span> (Ngăn chặn).
+            </p>
+        </div>
+    </div>
+
+    <!-- Policy List -->
+    <div class="grid gap-6">
+        @foreach (var policy in Model)
+        {
+            <div class="group relative overflow-hidden rounded-3xl border border-white/5 bg-surface-container-low/40 p-8 backdrop-blur-xl transition-all hover:border-white/10 hover:bg-surface-container-low/60 shadow-2xl">
+                <!-- Status & Title -->
+                <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h2 class="font-headline text-2xl font-bold text-on-surface">@policy.Name</h2>
+                            @if (policy.IsGlobalDefault)
+                            {
+                                <span class="rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">Global Default</span>
+                            }
+                        </div>
+                        <p class="text-xs text-on-surface-variant italic">ID: @policy.Id · Tạo ngày @policy.CreatedAt.ToString("dd/MM/yyyy")</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-2">
+                             <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" class="peer sr-only" @(policy.IsActive ? "checked" : "") 
+                                       onchange="togglePolicyStatus('@policy.Id', this.checked)" @(canManage ? "" : "disabled") />
+                                <div class="peer h-6 w-11 rounded-full bg-white/10 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-slate-500 after:transition-all peer-checked:bg-secondary/30 peer-checked:after:translate-x-full peer-checked:after:bg-secondary"></div>
+                            </label>
+                            <span class="text-[10px] font-bold uppercase tracking-widest @(policy.IsActive ? "text-secondary" : "text-slate-500")">
+                                @(policy.IsActive ? "Đang áp dụng" : "Đã tạm dừng")
+                            </span>
+                        </div>
+
+                        @if (canManage)
+                        {
+                            <button onclick='openUpdatePolicyModal(@Json.Serialize(policy))' 
+                                    class="p-3 rounded-2xl bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
+                                <span class="material-symbols-outlined">settings</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Limits -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 border-b border-white/5 pb-8">
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Vé tối đa / Checkout</p>
+                        <p class="text-2xl font-black text-on-surface">@policy.MaxTicketsPerCheckout</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Hàng ghế tối đa / Checkout</p>
+                        <p class="text-2xl font-black text-on-surface">@policy.MaxRowsPerCheckout</p>
+                    </div>
+                </div>
+
+                <!-- Rule Matrix -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    @renderRule("Ghế trống đơn (Orphan)", policy.OrphanSeatLevel, "person_off")
+                    @renderRule("Ghế so le (Checkerboard)", policy.CheckerboardLevel, "grid_view")
+                    @renderRule("Ngắt quãng bởi lối đi", policy.SplitAcrossAisleLevel, "vertical_align_center")
+                    @renderRule("Ghế lẻ cuối hàng", policy.IsolatedRowEndSingleLevel, "last_page")
+                    @renderRule("Ghế không thẳng hàng", policy.MisalignedRowsLevel, "format_align_left")
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    public Microsoft.AspNetCore.Html.IHtmlContent renderRule(string label, SeatSelectionPolicyLevel level, string icon)
+    {
+        var (colorClass, levelText) = level switch
+        {
+            SeatSelectionPolicyLevel.Allow => ("text-green-500 bg-green-500/10 border-green-500/20", "ALLOW"),
+            SeatSelectionPolicyLevel.Warning => ("text-yellow-500 bg-yellow-500/10 border-yellow-500/20", "WARNING"),
+            _ => ("text-red-500 bg-red-500/10 border-red-500/20", "BLOCK")
+        };
+
+        return new Microsoft.AspNetCore.Html.HtmlString($@"
+            <div class='flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4'>
+                <div class='flex items-center gap-2 text-slate-500'>
+                    <span class='material-symbols-outlined text-[18px]'>{icon}</span>
+                    <span class='text-[10px] font-bold uppercase tracking-widest truncate'>{label}</span>
+                </div>
+                <div class='px-3 py-1.5 rounded-xl border font-black text-[11px] tracking-[0.2em] text-center {colorClass}'>
+                    {levelText}
+                </div>
+            </div>");
+    }
+}
+
+<!-- Modal: Add/Update Policy -->
+<div id="policyModal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closePolicyModal()"></div>
+    <div class="absolute left-1/2 top-1/2 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 animate-in zoom-in-95 duration-200">
+        <div class="overflow-hidden rounded-3xl border border-white/10 bg-surface-container-highest shadow-2xl">
+            <div class="bg-gradient-to-r from-primary/20 to-transparent px-8 py-6 border-b border-white/5">
+                <h3 id="modalTitle" class="font-headline text-xl font-bold text-on-surface">CẤU HÌNH CHỌN GHẾ</h3>
+                <p class="text-xs text-on-surface-variant mt-1">Thiết lập các quy tắc giới hạn khi khách hàng đặt vé.</p>
+            </div>
+            
+            <form id="policyForm" class="p-8 space-y-6">
+                <input type="hidden" id="modalId" />
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Tên cấu hình</label>
+                        <input type="text" id="modalName" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" placeholder="Ví dụ: Cấu hình chuẩn 2026" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Số vé tối đa / Lần đặt</label>
+                        <input type="number" id="modalMaxTickets" min="1" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Số hàng tối đa / Lần đặt</label>
+                        <input type="number" id="modalMaxRows" min="1" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" />
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="font-headline text-sm font-bold text-slate-300 uppercase tracking-widest">Thiết lập mức độ vi phạm</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @renderLevelSelect("Lỗi ghế trống đơn", "Orphan")
+                        @renderLevelSelect("Lỗi ghế so le", "Checkerboard")
+                        @renderLevelSelect("Lỗi chia cách bởi lối đi", "SplitAisle")
+                        @renderLevelSelect("Ghế lẻ cuối hàng", "RowEnd")
+                        @renderLevelSelect("Ghế không cùng hàng", "Misaligned")
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 pt-4 border-t border-white/5">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" id="modalIsGlobal" class="peer hidden" />
+                        <div class="w-10 h-5 bg-white/10 rounded-full border border-white/10 peer-checked:bg-primary/20 peer-checked:border-primary/40 transition-all"></div>
+                        <div class="absolute left-1 top-1 w-3 h-3 bg-slate-500 rounded-full transition-all peer-checked:left-6 peer-checked:bg-primary shadow-sm"></div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Thiết lập làm mặc định</span>
+                    </label>
+
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" id="modalIsActive" class="peer hidden" checked />
+                        <div class="w-10 h-5 bg-white/10 rounded-full border border-white/10 peer-checked:bg-secondary/20 peer-checked:border-secondary/40 transition-all"></div>
+                        <div class="absolute left-1 top-1 w-3 h-3 bg-slate-500 rounded-full transition-all peer-checked:left-6 peer-checked:bg-secondary shadow-sm"></div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kích hoạt</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closePolicyModal()" class="flex-1 py-3 rounded-xl border border-white/10 font-headline text-xs font-bold uppercase tracking-widest text-slate-400 hover:bg-white/5 transition-all">Hủy</button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-container font-headline text-xs font-bold uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Lưu cấu hình</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public Microsoft.AspNetCore.Html.IHtmlContent renderLevelSelect(string label, string idPrefix)
+    {
+        return new Microsoft.AspNetCore.Html.HtmlString($@"
+            <div class='flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5'>
+                <span class='text-xs font-semibold text-slate-400'>{label}</span>
+                <select id='modal{idPrefix}Level' class='bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer'>
+                    <option value='0' class='bg-surface-container-highest text-green-500'>ALLOW</option>
+                    <option value='1' class='bg-surface-container-highest text-yellow-500'>WARNING</option>
+                    <option value='2' class='bg-surface-container-highest text-red-500'>BLOCK</option>
+                </select>
+            </div>");
+    }
+}
+
+@section Scripts {
+    <script>
+        const modal = document.getElementById('policyModal');
+        const form = document.getElementById('policyForm');
+        let isUpdate = false;
+
+        function openAddPolicyModal() {
+            isUpdate = false;
+            document.getElementById('modalTitle').innerText = 'TẠO CẤU HÌNH CHỌN GHẾ';
+            document.getElementById('modalId').value = '';
+            form.reset();
+            modal.classList.remove('hidden');
+        }
+
+        function openUpdatePolicyModal(policy) {
+            isUpdate = true;
+            document.getElementById('modalTitle').innerText = 'CẬP NHẬT CẤU HÌNH';
+            
+            document.getElementById('modalId').value = policy.id;
+            document.getElementById('modalName').value = policy.name;
+            document.getElementById('modalMaxTickets').value = policy.maxTicketsPerCheckout;
+            document.getElementById('modalMaxRows').value = policy.maxRowsPerCheckout;
+            document.getElementById('modalIsGlobal').checked = policy.isGlobalDefault;
+            document.getElementById('modalIsActive').checked = policy.isActive;
+            
+            document.getElementById('modalOrphanLevel').value = policy.orphanSeatLevel;
+            document.getElementById('modalCheckerboardLevel').value = policy.checkerboardLevel;
+            document.getElementById('modalSplitAisleLevel').value = policy.splitAcrossAisleLevel;
+            document.getElementById('modalRowEndLevel').value = policy.isolatedRowEndSingleLevel;
+            document.getElementById('modalMisalignedLevel').value = policy.misalignedRowsLevel;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closePolicyModal() {
+            modal.classList.add('hidden');
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                id: document.getElementById('modalId').value,
+                name: document.getElementById('modalName').value,
+                maxTicketsPerCheckout: parseInt(document.getElementById('modalMaxTickets').value),
+                maxRowsPerCheckout: parseInt(document.getElementById('modalMaxRows').value),
+                isGlobalDefault: document.getElementById('modalIsGlobal').checked,
+                isActive: document.getElementById('modalIsActive').checked,
+                orphanSeatLevel: parseInt(document.getElementById('modalOrphanLevel').value),
+                checkerboardLevel: parseInt(document.getElementById('modalCheckerboardLevel').value),
+                splitAcrossAisleLevel: parseInt(document.getElementById('modalSplitAisleLevel').value),
+                isolatedRowEndSingleLevel: parseInt(document.getElementById('modalRowEndLevel').value),
+                misalignedRowsLevel: parseInt(document.getElementById('modalMisalignedLevel').value)
+            };
+
+            const url = isUpdate ? '/SeatSelectionPolicy/Update' : '/SeatSelectionPolicy/Create';
+            
+            try {
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Đã có lỗi xảy ra!', 'error');
+            }
+        };
+
+        async function togglePolicyStatus(id, isActive) {
+            try {
+                const resp = await fetch('/SeatSelectionPolicy/ToggleStatus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, isActive })
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Không thể cập nhật trạng thái!', 'error');
+            }
+        }
+    </script>
+}
