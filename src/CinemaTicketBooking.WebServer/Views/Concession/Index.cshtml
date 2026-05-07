@@ -1,0 +1,293 @@
+@using CinemaTicketBooking.Application
+@using CinemaTicketBooking.Application.Features
+@using CinemaTicketBooking.Application.Abstractions
+@using CinemaTicketBooking.Application.Common.Auth
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@model PagedResult<ConcessionDto>
+
+@{
+    Layout = "_Layout";
+    var canManage = (await AuthorizationService.AuthorizeAsync(User, Permissions.ConcessionsManage)).Succeeded;
+}
+
+<div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Header & Stats -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="font-headline text-3xl font-black tracking-tight text-on-surface">QUẢN LÝ BẮP NƯỚC</h1>
+            <p class="text-sm text-on-surface-variant">Thiết lập danh mục sản phẩm bắp, nước và combo đi kèm.</p>
+        </div>
+        
+        @if (canManage)
+        {
+            <button onclick="openAddConcessionModal()" class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-container px-6 py-3 font-headline text-xs font-bold uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                Thêm sản phẩm
+            </button>
+        }
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="rounded-2xl border border-white/5 bg-surface-container-low/60 p-4 backdrop-blur-xl shadow-xl">
+        <form method="get" class="flex flex-wrap items-end gap-4">
+            <div class="flex-grow min-w-[200px]">
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Tìm kiếm</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[18px] group-focus-within:text-primary transition-colors">search</span>
+                    <input type="text" name="searchTerm" value="@Context.Request.Query["searchTerm"]" placeholder="Tên sản phẩm..." class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" />
+                </div>
+            </div>
+            
+            <div class="w-48">
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Trạng thái</label>
+                <select name="isAvailable" class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all cursor-pointer">
+                    <option value="" class="bg-surface-container-highest">Tất cả</option>
+                    <option value="true" selected="@(Context.Request.Query["isAvailable"] == "true")" class="bg-surface-container-highest">Đang bán</option>
+                    <option value="false" selected="@(Context.Request.Query["isAvailable"] == "false")" class="bg-surface-container-highest">Tạm ngưng</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="p-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-all">
+                    <span class="material-symbols-outlined">filter_list</span>
+                </button>
+                <a asp-action="Index" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 transition-all">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Data Table -->
+    <div class="overflow-hidden rounded-2xl border border-white/5 bg-surface-container-low/40 backdrop-blur-md shadow-2xl">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-white/[0.02]">
+                <tr>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">Sản phẩm</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">Giá bán</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-center">Trạng thái</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                @if (Model.Items == null || !Model.Items.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="px-8 py-10 text-center text-sm text-on-surface-variant">Không tìm thấy sản phẩm nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var c in Model.Items)
+                    {
+                        <tr class="hover:bg-white/[0.03] transition-colors group">
+                            <td class="px-8 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-lg overflow-hidden bg-white/5 border border-white/10 shrink-0">
+                                        <img src="@c.ImageUrl" alt="@c.Name" class="w-full h-full object-cover" onerror="this.src='/img/placeholder-concession.png'" />
+                                    </div>
+                                    <span class="font-headline font-bold text-on-surface">@c.Name</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-4 text-right font-mono font-bold text-primary">
+                                @c.Price.ToString("N0") <span class="text-[8px] opacity-50">₫</span>
+                            </td>
+                            <td class="px-8 py-4 text-center">
+                                <button onclick="toggleConcessionStatus('@c.Id', @((!c.IsAvailable).ToString().ToLower()))" class="px-3 py-1 rounded-full @(c.IsAvailable ? "bg-secondary/10 text-secondary border-secondary/20" : "bg-white/5 text-slate-400 border-white/10") text-[10px] font-bold border uppercase hover:scale-105 transition-all">
+                                    @(c.IsAvailable ? "Đang bán" : "Tạm ngưng")
+                                </button>
+                            </td>
+                            <td class="px-8 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button 
+                                        data-id="@c.Id"
+                                        data-name="@c.Name"
+                                        data-price="@c.Price"
+                                        data-image="@c.ImageUrl"
+                                        onclick="openUpdateConcessionModal(this)" 
+                                        class="p-2 text-slate-500 hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </button>
+                                    <button onclick="confirmDeleteConcession('@c.Id', '@c.Name')" class="p-2 text-slate-500 hover:text-error transition-colors">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="px-8 py-4 bg-white/[0.01] flex items-center justify-between border-t border-white/5">
+                <span class="text-xs text-on-surface-variant">Hiển thị @Model.Items.Count() trên @Model.TotalItems sản phẩm</span>
+                <div class="flex gap-1">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a asp-action="Index" 
+                           asp-route-pageNumber="@i" 
+                           asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+                           asp-route-isAvailable="@Context.Request.Query["isAvailable"]"
+                           class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all @(i == Model.PageNumber ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "bg-white/5 text-slate-400 hover:bg-white/10")">
+                            @i
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal: Add/Update Concession -->
+<div id="concessionModal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeConcessionModal()"></div>
+    <div class="absolute left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 animate-in zoom-in-95 duration-200">
+        <div class="overflow-hidden rounded-3xl border border-white/10 bg-surface-container-highest shadow-2xl">
+            <div class="bg-gradient-to-r from-primary/20 to-transparent px-8 py-6 border-b border-white/5">
+                <h3 id="modalTitle" class="font-headline text-xl font-bold text-on-surface">THÊM BẮP NƯỚC</h3>
+                <p class="text-xs text-on-surface-variant mt-1">Vui lòng điền đầy đủ thông tin sản phẩm.</p>
+            </div>
+            
+            <form id="concessionForm" class="p-8 space-y-5">
+                <input type="hidden" id="modalConcessionId" name="id" />
+                
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Tên sản phẩm</label>
+                    <input type="text" name="name" id="modalName" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" placeholder="Ví dụ: Combo Bắp Lớn + 2 Coke" />
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Giá bán (VNĐ)</label>
+                    <input type="number" name="price" id="modalPrice" required min="0" step="1000" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm font-mono text-primary focus:outline-none focus:border-primary/50 transition-all" placeholder="0" />
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Link ảnh (URL)</label>
+                    <input type="url" name="imageUrl" id="modalImage" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" placeholder="https://..." />
+                </div>
+                
+                <div id="modalActiveField">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <div class="relative">
+                            <input type="checkbox" name="isAvailable" id="modalIsAvailable" class="peer hidden" checked />
+                            <div class="w-10 h-5 bg-white/10 rounded-full border border-white/10 peer-checked:bg-secondary/20 peer-checked:border-secondary/40 transition-all"></div>
+                            <div class="absolute left-1 top-1 w-3 h-3 bg-slate-500 rounded-full transition-all peer-checked:left-6 peer-checked:bg-secondary shadow-sm"></div>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">Mở bán ngay khi tạo</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeConcessionModal()" class="flex-1 py-3 rounded-xl border border-white/10 font-headline text-xs font-bold uppercase tracking-widest text-slate-400 hover:bg-white/5 transition-all">Hủy</button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-container font-headline text-xs font-bold uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Lưu lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const modal = document.getElementById('concessionModal');
+        const form = document.getElementById('concessionForm');
+        let isUpdate = false;
+
+        function openAddConcessionModal() {
+            isUpdate = false;
+            document.getElementById('modalTitle').innerText = 'THÊM BẮP NƯỚC';
+            document.getElementById('modalConcessionId').value = '';
+            document.getElementById('modalActiveField').style.display = 'block';
+            form.reset();
+            modal.classList.remove('hidden');
+        }
+
+        function openUpdateConcessionModal(btn) {
+            isUpdate = true;
+            document.getElementById('modalTitle').innerText = 'CẬP NHẬT BẮP NƯỚC';
+            document.getElementById('modalActiveField').style.display = 'none';
+            
+            document.getElementById('modalConcessionId').value = btn.dataset.id;
+            document.getElementById('modalName').value = btn.dataset.name;
+            document.getElementById('modalPrice').value = btn.dataset.price;
+            document.getElementById('modalImage').value = btn.dataset.image;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeConcessionModal() {
+            modal.classList.add('hidden');
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Format data
+            data.price = parseFloat(data.price);
+            if (!isUpdate) {
+                data.isAvailable = document.getElementById('modalIsAvailable').checked;
+            }
+
+            const url = isUpdate ? '/Concession/Update' : '/Concession/Create';
+            
+            try {
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Đã có lỗi xảy ra!', 'error');
+            }
+        };
+
+        async function toggleConcessionStatus(id, isAvailable) {
+            try {
+                const resp = await fetch('/Concession/ToggleStatus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, isAvailable })
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Không thể cập nhật trạng thái!', 'error');
+            }
+        }
+
+        async function confirmDeleteConcession(id, name) {
+            if (confirm(`Bạn có chắc muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`)) {
+                try {
+                    const resp = await fetch(`/Concession/Delete?id=${id}`, { method: 'POST' });
+                    const result = await resp.json();
+                    if (result.success) {
+                        showToast(result.message, 'success');
+                        setTimeout(() => location.reload(), 800);
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                } catch (err) {
+                    showToast('Lỗi khi xóa sản phẩm!', 'error');
+                }
+            }
+        }
+    </script>
+}
