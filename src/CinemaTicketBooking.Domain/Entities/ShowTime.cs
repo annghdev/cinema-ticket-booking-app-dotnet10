@@ -120,12 +120,13 @@ public class ShowTime : AggregateRoot
 
         foreach (var seat in screen.Seats.Where(s => s.IsActive))
         {
+            // Explicitly filter by Format (ScreenType) of the ShowTime and the Seat's type
             var policy = pricingPolicies
-                .FirstOrDefault(p => p.SeatType == seat.Type && p.IsActive);
+                .FirstOrDefault(p => p.ScreenType == Format && p.SeatType == seat.Type && p.IsActive);
 
             if (policy is null)
                 throw new InvalidOperationException(
-                    $"No pricing policy found for Format '{Format}', SeatType '{seat.Type}'.");
+                    $"No pricing policy found for Format '{Format}', SeatType '{seat.Type}' (Cinema: {screen.CinemaId}).");
 
             Tickets.Add(new Ticket
             {
