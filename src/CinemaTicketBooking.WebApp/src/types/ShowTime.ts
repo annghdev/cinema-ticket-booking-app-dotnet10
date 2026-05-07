@@ -24,7 +24,7 @@ export type ShowTimeDtoRaw = {
   status: ShowTimeStatusValue
   ticketCount: number
   availableTicketCount: number
-  format: string
+  format: string | number
   createdAt: string
 }
 
@@ -65,7 +65,7 @@ export type ShowTimeDetailDtoRaw = {
   status: ShowTimeStatusValue
   ticketCount: number
   availableTicketCount: number
-  format: string
+  format: string | number
   createdAt: string
   tickets: ShowTimeTicketDtoRaw[]
 }
@@ -89,6 +89,12 @@ export const ticketStatusFromNumber: Record<number, ApiTicketStatus> = {
   3: "Sold",
 }
 
+export const screenTypeFromNumber: Record<number, string> = {
+  0: "2D",
+  1: "3D",
+  2: "IMAX",
+}
+
 function extractSeatCodeFromTicketCode(ticketCode: string): string {
   if (!ticketCode) {
     return ticketCode
@@ -110,6 +116,7 @@ export function normalizeShowTimeDto(raw: ShowTimeDtoRaw): ShowTimeDto {
   return {
     ...raw,
     status: normalizeEnumValue(raw.status, showTimeStatusFromNumber, "Upcoming"),
+    format: typeof raw.format === "number" ? (screenTypeFromNumber[raw.format] || "2D") : raw.format,
   }
 }
 
@@ -126,6 +133,7 @@ export function normalizeShowTimeDetailDto(raw: ShowTimeDetailDtoRaw): ShowTimeD
   return {
     ...raw,
     status: normalizeEnumValue(raw.status, showTimeStatusFromNumber, "Upcoming"),
+    format: typeof raw.format === "number" ? (screenTypeFromNumber[raw.format] || "2D") : raw.format,
     tickets: raw.tickets.map(normalizeShowTimeTicketDto),
   }
 }
