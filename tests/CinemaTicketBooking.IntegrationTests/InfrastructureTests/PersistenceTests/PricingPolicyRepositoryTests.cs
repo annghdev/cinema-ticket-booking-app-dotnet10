@@ -20,7 +20,7 @@ public sealed class PricingPolicyRepositoryTests(PostgresContainerFixture databa
 
         var matchRegular = IntegrationEntityBuilder.PricingPolicy(cinema.Id, ScreenType.TwoD, SeatType.Regular, true);
         var matchVip = IntegrationEntityBuilder.PricingPolicy(cinema.Id, ScreenType.TwoD, SeatType.VIP, true);
-        var inactive = IntegrationEntityBuilder.PricingPolicy(cinema.Id, ScreenType.TwoD, SeatType.Couple, false);
+        var inactive = IntegrationEntityBuilder.PricingPolicy(cinema.Id, ScreenType.TwoD, SeatType.Sweetbox, false);
         var wrongScreen = IntegrationEntityBuilder.PricingPolicy(cinema.Id, ScreenType.IMAX, SeatType.Regular, true);
         db.PricingPolicies.AddRange(matchRegular, matchVip, inactive, wrongScreen);
         await db.SaveChangesAsync();

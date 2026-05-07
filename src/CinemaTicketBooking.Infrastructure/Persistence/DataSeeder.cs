@@ -261,17 +261,17 @@ public class DataSeeder(
             // TwoD - Weekend surcharge 20%
             PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Regular, 85000m, 1.00m, 1.20m, true),
             PricingPolicy.Create(null, ScreenType.TwoD, SeatType.VIP, 120000m, 1.00m, 1.20m, true),
-            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Couple, 170000m, 1.00m, 1.20m, true),
+            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Sweetbox, 170000m, 1.00m, 1.20m, true),
 
             // ThreeD - Weekend surcharge 15%
             PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Regular, 85000m, 1.25m, 1.15m, true),
             PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.VIP, 120000m, 1.25m, 1.15m, true),
-            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Couple, 170000m, 1.25m, 1.15m, true),
+            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Sweetbox, 170000m, 1.25m, 1.15m, true),
 
             // IMAX - Weekend surcharge 10%
             PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Regular, 85000m, 1.55m, 1.10m, true),
             PricingPolicy.Create(null, ScreenType.IMAX, SeatType.VIP, 120000m, 1.55m, 1.10m, true),
-            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Couple, 170000m, 1.55m, 1.10m, true)
+            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Sweetbox, 170000m, 1.55m, 1.10m, true)
         ];
     }
 

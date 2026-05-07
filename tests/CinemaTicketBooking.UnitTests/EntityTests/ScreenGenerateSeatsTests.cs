@@ -113,6 +113,6 @@ public class ScreenGenerateSeatsTests
 
         screen.Seats.Should().ContainSingle();
         screen.Seats[0].Code.Should().StartWith("Sweet");
-        screen.Seats[0].Type.Should().Be(SeatType.Couple);
+        screen.Seats[0].Type.Should().Be(SeatType.Sweetbox);
     }
 }
