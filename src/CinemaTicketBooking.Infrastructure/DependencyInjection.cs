@@ -4,6 +4,7 @@ using CinemaTicketBooking.Infrastructure.Persistence.Repositories;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure.Cache;
+using CinemaTicketBooking.Infrastructure.FileStorages;
 using CinemaTicketBooking.Infrastructure.Payments.Momo;
 using CinemaTicketBooking.Infrastructure.Payments;
 using CinemaTicketBooking.Infrastructure.Payments.Vnpay;
@@ -12,6 +13,7 @@ using CinemaTicketBooking.Infrastructure.QrCodes;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Minio;
 using StackExchange.Redis;
 
 namespace CinemaTicketBooking.Infrastructure;
@@ -74,6 +76,56 @@ public static class DependencyInjection
         services.AddSingleton<IPaymentRealtimePublisher, NoOpPaymentRealtimePublisher>();
 
         services.AddSingleton<IQrCodeGenerator, QrCodeGenerator>();
+
+        // File storage (MinIO)
+        // Priority: ConnectionStrings:minio (Aspire) > Minio section (manual config)
+        services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
+        var minioOpts = configuration.GetSection(MinioOptions.SectionName).Get<MinioOptions>() ?? new MinioOptions();
+        var minioConnectionString = configuration.GetConnectionString("minio");
+
+        if (!string.IsNullOrWhiteSpace(minioConnectionString))
+        {
+            // Parse Aspire format: "Endpoint=http://host:port;AccessKey=xxx;SecretKey=xxx"
+            var parts = minioConnectionString
+                .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Split('=', 2))
+                .Where(p => p.Length == 2)
+                .ToDictionary(p => p[0].Trim(), p => p[1].Trim(), StringComparer.OrdinalIgnoreCase);
+
+            if (parts.TryGetValue("Endpoint", out var endpoint))
+            {
+                // Strip scheme for MinIO SDK (expects "host:port" without http://)
+                var uri = new Uri(endpoint);
+                minioOpts.Endpoint = uri.Host + ":" + uri.Port;
+                minioOpts.UseSsl = uri.Scheme == "https";
+            }
+            if (parts.TryGetValue("AccessKey", out var accessKey)) minioOpts.AccessKey = accessKey;
+            if (parts.TryGetValue("SecretKey", out var secretKey)) minioOpts.SecretKey = secretKey;
+        }
+
+        // Re-publish resolved options so IOptions<MinioOptions> stays in sync
+        services.PostConfigure<MinioOptions>(opts =>
+        {
+            opts.Endpoint = minioOpts.Endpoint;
+            opts.AccessKey = minioOpts.AccessKey;
+            opts.SecretKey = minioOpts.SecretKey;
+            opts.UseSsl = minioOpts.UseSsl;
+        });
+
+        services.AddSingleton<IMinioClient>(_ =>
+        {
+            var client = new MinioClient()
+                .WithEndpoint(minioOpts.Endpoint)
+                .WithCredentials(minioOpts.AccessKey, minioOpts.SecretKey);
+
+            if (minioOpts.UseSsl)
+            {
+                client = client.WithSSL();
+            }
+
+            return client.Build();
+        });
+        services.AddScoped<IFileStorageService, MinioFileStorageService>();
 
         return services;
     }
