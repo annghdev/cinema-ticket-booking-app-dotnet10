@@ -131,75 +131,121 @@
 
 <!-- Add Movie Modal -->
 <div id="addMovieModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-lg rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
-        <button onclick="document.getElementById('addMovieModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
-            <span class="material-symbols-outlined">close</span>
-        </button>
+    <div class="glass-panel w-full max-w-4xl rounded-3xl border border-white/10 p-0 shadow-2xl bg-slate-900/90 relative overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex items-center justify-between">
+            <h3 class="font-headline font-bold text-xl text-on-surface flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_#61b4fe]"></span>
+                THÊM PHIM MỚI
+            </h3>
+            <button onclick="document.getElementById('addMovieModal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
         
-        <h3 class="font-headline font-bold text-2xl text-on-surface mb-6 flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_#61b4fe]"></span>
-            Thêm phim mới
-        </h3>
-        
-        <form id="addMovieForm" class="space-y-4 text-sm">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Tên phim</label>
-                    <input type="text" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+        <form id="addMovieForm" class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left Side: Basic Info -->
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tên phim</label>
+                        <input type="text" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Mô tả</label>
+                        <textarea name="description" rows="4" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Thời lượng (phút)</label>
+                            <input type="number" name="duration" required min="1" max="600" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Hãng phim</label>
+                            <input type="text" name="studio" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Đạo diễn</label>
+                            <input type="text" name="director" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Thể loại</label>
+                            <select name="genre" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                                <option value="0">Action</option>
+                                <option value="1">Comedy</option>
+                                <option value="2">Drama</option>
+                                <option value="3">Horror</option>
+                                <option value="4">SciFi</option>
+                                <option value="5">Romance</option>
+                                <option value="6">Thriller</option>
+                                <option value="7">Animation</option>
+                                <option value="8">Documentary</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Trạng thái</label>
+                        <select name="status" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                            <option value="0">Upcoming</option>
+                            <option value="1">NowShowing</option>
+                            <option value="2">NoShow</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Mô tả</label>
-                    <textarea name="description" rows="3" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thời lượng (phút)</label>
-                    <input type="number" name="duration" required min="1" max="600" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Hãng phim</label>
-                    <input type="text" name="studio" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Đạo diễn</label>
-                    <input type="text" name="director" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thể loại</label>
-                    <select name="genre" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
-                        <option value="0">Action</option>
-                        <option value="1">Comedy</option>
-                        <option value="2">Drama</option>
-                        <option value="3">Horror</option>
-                        <option value="4">SciFi</option>
-                        <option value="5">Romance</option>
-                        <option value="6">Thriller</option>
-                        <option value="7">Animation</option>
-                        <option value="8">Documentary</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Trạng thái</label>
-                    <select name="status" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
-                        <option value="0">Upcoming</option>
-                        <option value="1">NowShowing</option>
-                        <option value="2">NoShow</option>
-                    </select>
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
-                    <input type="url" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="https://..." />
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Official Trailer URL (Optional)</label>
-                    <input type="url" name="officialTrailerUrl" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="https://..." />
+
+                <!-- Right Side: Media -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
+                        <input type="url" id="addThumbnailUrl" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="https://..." />
+                    </div>
+                    
+                    <div class="relative group">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Upload Thumbnail</label>
+                        <div id="addMovieDropZone" class="relative border-2 border-dashed border-white/10 rounded-2xl p-8 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group overflow-hidden">
+                            <input type="file" id="addMovieFileInput" accept="image/jpeg,image/png,image/gif,image/webp,image/avif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            
+                            <div id="addMovieUploadPrompt">
+                                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500">
+                                    <span class="material-symbols-outlined text-3xl text-slate-500 group-hover:text-primary transition-colors">cloud_upload</span>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-300">Kéo thả hoặc click để chọn ảnh</p>
+                                <p class="text-xs text-slate-500 mt-1">Hỗ trợ JPG, PNG, WebP (Max 5MB)</p>
+                            </div>
+
+                            <div id="addMoviePreview" class="hidden relative z-20">
+                                <img id="addMoviePreviewImg" class="max-h-48 mx-auto rounded-xl shadow-2xl border border-white/10" />
+                                <div class="mt-4 flex items-center justify-center gap-3">
+                                    <p id="addMovieFileName" class="text-xs text-slate-400 truncate max-w-[150px]"></p>
+                                    <button type="button" onclick="clearAddMoviePreview()" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">
+                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Upload Loading Overlay -->
+                            <div id="addMovieUploadLoading" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-30">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    <p class="text-[10px] font-bold text-primary tracking-widest uppercase">Đang tải lên...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Official Trailer URL (Optional)</label>
+                        <input type="url" name="officialTrailerUrl" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="https://youtube.com/..." />
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/5 mt-4">
-                <button type="button" onclick="document.getElementById('addMovieModal').classList.add('hidden')" class="py-2.5 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-white/5 mt-8">
+                <button type="button" onclick="document.getElementById('addMovieModal').classList.add('hidden')" class="py-2.5 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
                     Đóng
                 </button>
-                <button type="submit" class="py-2.5 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] transition-all">
+                <button type="submit" class="py-2.5 px-8 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] transition-all">
                     Thêm phim
                 </button>
             </div>
@@ -209,74 +255,119 @@
 
 <!-- Update Movie Modal -->
 <div id="updateMovieModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-lg rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
-        <button onclick="document.getElementById('updateMovieModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
-            <span class="material-symbols-outlined">close</span>
-        </button>
+    <div class="glass-panel w-full max-w-4xl rounded-3xl border border-white/10 p-0 shadow-2xl bg-slate-900/90 relative overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex items-center justify-between">
+            <h3 class="font-headline font-bold text-xl text-on-surface flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_10px_#00f4fe]"></span>
+                CẬP NHẬT PHIM
+            </h3>
+            <button onclick="document.getElementById('updateMovieModal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
         
-        <h3 class="font-headline font-bold text-2xl text-on-surface mb-6 flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_10px_#00f4fe]"></span>
-            Cập nhật thông tin phim
-        </h3>
-        
-        <form id="updateMovieForm" class="space-y-4 text-sm">
+        <form id="updateMovieForm">
             <input type="hidden" name="id" id="updMovieId" />
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Tên phim</label>
-                    <input type="text" id="updName" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+            <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left Side: Basic Info -->
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tên phim</label>
+                        <input type="text" id="updName" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Mô tả</label>
+                        <textarea id="updDescription" name="description" rows="4" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Thời lượng (phút)</label>
+                            <input type="number" id="updDuration" name="duration" required min="1" max="600" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Hãng phim</label>
+                            <input type="text" id="updStudio" name="studio" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Đạo diễn</label>
+                            <input type="text" id="updDirector" name="director" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Thể loại</label>
+                            <select id="updGenre" name="genre" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                                <option value="0">Action</option>
+                                <option value="1">Comedy</option>
+                                <option value="2">Drama</option>
+                                <option value="3">Horror</option>
+                                <option value="4">SciFi</option>
+                                <option value="5">Romance</option>
+                                <option value="6">Thriller</option>
+                                <option value="7">Animation</option>
+                                <option value="8">Documentary</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Mô tả</label>
-                    <textarea id="updDescription" name="description" rows="3" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thời lượng (phút)</label>
-                    <input type="number" id="updDuration" name="duration" required min="1" max="600" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Hãng phim</label>
-                    <input type="text" id="updStudio" name="studio" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Đạo diễn</label>
-                    <input type="text" id="updDirector" name="director" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thể loại</label>
-                    <select id="updGenre" name="genre" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
-                        <option value="0">Action</option>
-                        <option value="1">Comedy</option>
-                        <option value="2">Drama</option>
-                        <option value="3">Horror</option>
-                        <option value="4">SciFi</option>
-                        <option value="5">Romance</option>
-                        <option value="6">Thriller</option>
-                        <option value="7">Animation</option>
-                        <option value="8">Documentary</option>
-                    </select>
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
-                    <input type="url" id="updThumbnailUrl" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Official Trailer URL (Optional)</label>
-                    <input type="url" id="updOfficialTrailerUrl" name="officialTrailerUrl" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+
+                <!-- Right Side: Media -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
+                        <input type="url" id="updThumbnailUrl" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    
+                    <div class="relative group">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Update Thumbnail</label>
+                        <div id="updMovieDropZone" class="relative border-2 border-dashed border-white/10 rounded-2xl p-8 text-center cursor-pointer hover:border-secondary/40 hover:bg-secondary/5 transition-all group overflow-hidden">
+                            <input type="file" id="updMovieFileInput" accept="image/jpeg,image/png,image/gif,image/webp,image/avif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            
+                            <div id="updMovieUploadPrompt">
+                                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-secondary/10 transition-all duration-500">
+                                    <span class="material-symbols-outlined text-3xl text-slate-500 group-hover:text-secondary transition-colors">cloud_upload</span>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-300">Kéo thả hoặc click để thay đổi</p>
+                                <p class="text-xs text-slate-500 mt-1">Hỗ trợ JPG, PNG, WebP (Max 5MB)</p>
+                            </div>
+
+                            <div id="updMoviePreview" class="hidden relative z-20">
+                                <img id="updMoviePreviewImg" class="max-h-48 mx-auto rounded-xl shadow-2xl border border-white/10" />
+                                <div class="mt-4 flex items-center justify-center gap-3">
+                                    <p id="updMovieFileName" class="text-xs text-slate-400 truncate max-w-[150px]"></p>
+                                    <button type="button" onclick="clearUpdMoviePreview()" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">
+                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Upload Loading Overlay -->
+                            <div id="updMovieUploadLoading" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-30">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin"></div>
+                                    <p class="text-[10px] font-bold text-secondary tracking-widest uppercase">Đang tải lên...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Official Trailer URL (Optional)</label>
+                        <input type="url" id="updOfficialTrailerUrl" name="officialTrailerUrl" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between pt-4 border-t border-white/5 mt-4">
+            <div class="p-6 bg-white/5 flex items-center justify-between">
                 <button type="button" onclick="deleteMovie()" class="py-2.5 px-4 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">delete</span>
                     Xóa phim
                 </button>
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="document.getElementById('updateMovieModal').classList.add('hidden')" class="py-2.5 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                    <button type="button" onclick="document.getElementById('updateMovieModal').classList.add('hidden')" class="py-2.5 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
                         Đóng
                     </button>
-                    <button type="submit" class="py-2.5 px-6 rounded-xl bg-gradient-to-r from-secondary to-secondary text-on-secondary text-xs font-bold shadow-[0_4px_15px_rgba(0,244,254,0.3)] hover:shadow-[0_4px_25px_rgba(0,244,254,0.5)] transition-all">
+                    <button type="submit" class="py-2.5 px-8 rounded-xl bg-gradient-to-r from-secondary to-secondary text-on-secondary text-xs font-bold shadow-[0_4px_15px_rgba(0,244,254,0.3)] hover:shadow-[0_4px_25px_rgba(0,244,254,0.5)] transition-all">
                         Lưu thay đổi
                     </button>
                 </div>
@@ -287,13 +378,88 @@
 
 @section Scripts {
     <script>
+        // =============================================
+        // File upload preview helpers
+        // =============================================
+
+        let addMovieFile = null;
+        let updMovieFile = null;
+
+        function setupFilePreview(inputId, previewContainerId, previewImgId, fileNameId, promptId, loadingId, urlInputId, fileSetter) {
+            const input = document.getElementById(inputId);
+            input.addEventListener('change', async function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                // Show loading
+                document.getElementById(loadingId).classList.remove('hidden');
+                document.getElementById(loadingId).classList.add('flex');
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const resp = await fetch('/Movie/UploadThumbnail', { method: 'POST', body: formData });
+                    const result = await resp.json();
+
+                    if (result.success) {
+                        // Auto-fill URL input
+                        document.getElementById(urlInputId).value = result.url;
+                        
+                        // Update Preview
+                        document.getElementById(previewImgId).src = result.url;
+                        document.getElementById(fileNameId).textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                        document.getElementById(previewContainerId).classList.remove('hidden');
+                        document.getElementById(promptId).classList.add('hidden');
+                        
+                        fileSetter(file);
+                        window.showToast('Tải lên ảnh thành công!', 'success');
+                    } else {
+                        window.showToast(result.message, 'error');
+                        input.value = '';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    window.showToast('Lỗi khi tải lên ảnh.', 'error');
+                    input.value = '';
+                } finally {
+                    document.getElementById(loadingId).classList.add('hidden');
+                    document.getElementById(loadingId).classList.remove('flex');
+                }
+            });
+        }
+
+        setupFilePreview('addMovieFileInput', 'addMoviePreview', 'addMoviePreviewImg', 'addMovieFileName', 'addMovieUploadPrompt', 'addMovieUploadLoading', 'addThumbnailUrl', f => addMovieFile = f);
+        setupFilePreview('updMovieFileInput', 'updMoviePreview', 'updMoviePreviewImg', 'updMovieFileName', 'updMovieUploadPrompt', 'updMovieUploadLoading', 'updThumbnailUrl', f => updMovieFile = f);
+
+        function clearAddMoviePreview() {
+            addMovieFile = null;
+            document.getElementById('addMovieFileInput').value = '';
+            document.getElementById('addThumbnailUrl').value = '';
+            document.getElementById('addMoviePreview').classList.add('hidden');
+            document.getElementById('addMovieUploadPrompt').classList.remove('hidden');
+        }
+
+        function clearUpdMoviePreview() {
+            updMovieFile = null;
+            document.getElementById('updMovieFileInput').value = '';
+            document.getElementById('updThumbnailUrl').value = '';
+            document.getElementById('updMoviePreview').classList.add('hidden');
+            document.getElementById('updMovieUploadPrompt').classList.remove('hidden');
+        }
+
+        // =============================================
+        // Modal functions
+        // =============================================
+
         function openAddMovieModal() {
             document.getElementById('addMovieForm').reset();
+            clearAddMoviePreview();
             document.getElementById('addMovieModal').classList.remove('hidden');
         }
 
         function openUpdateMovieModal(btn) {
             document.getElementById('updateMovieForm').reset();
+            clearUpdMoviePreview();
             
             document.getElementById('updMovieId').value = btn.getAttribute('data-id');
             document.getElementById('updName').value = btn.getAttribute('data-name');
@@ -307,6 +473,10 @@
 
             document.getElementById('updateMovieModal').classList.remove('hidden');
         }
+
+        // =============================================
+        // Delete
+        // =============================================
 
         async function deleteMovie() {
             const id = document.getElementById('updMovieId').value;
@@ -334,6 +504,10 @@
                 if (window.hideLoading) window.hideLoading();
             }
         }
+
+        // =============================================
+        // Form submissions
+        // =============================================
 
         document.getElementById('addMovieForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -369,6 +543,7 @@
 
         document.getElementById('updateMovieForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+
             const formData = new FormData(this);
             const payload = Object.fromEntries(formData.entries());
             

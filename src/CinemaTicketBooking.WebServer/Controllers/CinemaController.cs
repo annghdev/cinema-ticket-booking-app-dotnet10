@@ -2,6 +2,7 @@ using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Application.Common.Auth;
 using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Domain;
+using CinemaTicketBooking.WebServer.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
@@ -81,6 +82,42 @@ public class CinemaController(IMessageBus bus) : Controller
         {
             await bus.InvokeAsync(new DeleteCinemaCommand { Id = id });
             return Json(new { success = true, message = "Xóa rạp thành công!" });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Uploads a thumbnail image for a cinema via multipart form.
+    /// Returns the URL for the UI to include in create/update payloads.
+    /// </summary>
+    [HttpPost]
+    [Authorize(Policy = Permissions.CinemasManage)]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> UploadThumbnail(IFormFile file)
+    {
+        var error = FileUploadValidator.ValidateImageFile(file);
+        if (error is not null)
+        {
+            return Json(new { success = false, message = error });
+        }
+
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            var command = new UploadImageCommand
+            {
+                Group = "cinemas",
+                FileStream = stream,
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                FileSize = file.Length
+            };
+
+            var url = await bus.InvokeAsync<string>(command);
+            return Json(new { success = true, message = "Upload thumbnail thành công!", url });
         }
         catch (Exception ex)
         {

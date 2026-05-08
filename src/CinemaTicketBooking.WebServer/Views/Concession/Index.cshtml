@@ -145,45 +145,91 @@
 <!-- Modal: Add/Update Concession -->
 <div id="concessionModal" class="fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeConcessionModal()"></div>
-    <div class="absolute left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 animate-in zoom-in-95 duration-200">
+    <div class="absolute left-1/2 top-1/2 w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 animate-in zoom-in-95 duration-200">
         <div class="overflow-hidden rounded-3xl border border-white/10 bg-surface-container-highest shadow-2xl">
-            <div class="bg-gradient-to-r from-primary/20 to-transparent px-8 py-6 border-b border-white/5">
-                <h3 id="modalTitle" class="font-headline text-xl font-bold text-on-surface">THÊM BẮP NƯỚC</h3>
-                <p class="text-xs text-on-surface-variant mt-1">Vui lòng điền đầy đủ thông tin sản phẩm.</p>
+            <div class="bg-gradient-to-r from-primary/20 to-transparent px-8 py-6 border-b border-white/5 flex items-center justify-between">
+                <div>
+                    <h3 id="modalTitle" class="font-headline text-xl font-bold text-on-surface uppercase tracking-tight">THÊM BẮP NƯỚC</h3>
+                    <p class="text-[10px] font-medium text-on-surface-variant uppercase tracking-widest mt-0.5 opacity-60">Cấu hình thông tin sản phẩm</p>
+                </div>
+                <button onclick="closeConcessionModal()" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-white/5 hover:text-white transition-all">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
             
-            <form id="concessionForm" class="p-8 space-y-5">
+            <form id="concessionForm">
                 <input type="hidden" id="modalConcessionId" name="id" />
-                
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Tên sản phẩm</label>
-                    <input type="text" name="name" id="modalName" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" placeholder="Ví dụ: Combo Bắp Lớn + 2 Coke" />
-                </div>
-                
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Giá bán (VNĐ)</label>
-                    <input type="number" name="price" id="modalPrice" required min="0" step="1000" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm font-mono text-primary focus:outline-none focus:border-primary/50 transition-all" placeholder="0" />
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Link ảnh (URL)</label>
-                    <input type="url" name="imageUrl" id="modalImage" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" placeholder="https://..." />
-                </div>
-                
-                <div id="modalActiveField">
-                    <label class="flex items-center gap-3 cursor-pointer group">
-                        <div class="relative">
-                            <input type="checkbox" name="isAvailable" id="modalIsAvailable" class="peer hidden" checked />
-                            <div class="w-10 h-5 bg-white/10 rounded-full border border-white/10 peer-checked:bg-secondary/20 peer-checked:border-secondary/40 transition-all"></div>
-                            <div class="absolute left-1 top-1 w-3 h-3 bg-slate-500 rounded-full transition-all peer-checked:left-6 peer-checked:bg-secondary shadow-sm"></div>
+                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Left Side: Basic Info -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Tên sản phẩm</label>
+                            <input type="text" name="name" id="modalName" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" placeholder="Ví dụ: Combo Bắp Lớn + 2 Coke" />
                         </div>
-                        <span class="text-sm font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">Mở bán ngay khi tạo</span>
-                    </label>
+                        
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Giá bán (VNĐ)</label>
+                            <input type="number" name="price" id="modalPrice" required min="0" step="1000" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm font-mono text-primary focus:outline-none focus:border-primary/50 transition-all" placeholder="0" />
+                        </div>
+
+                        <div id="modalActiveField">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 ml-1">Trạng thái</label>
+                            <label class="flex items-center gap-3 cursor-pointer group bg-white/5 p-3 rounded-xl border border-white/5 hover:border-primary/20 transition-all">
+                                <div class="relative">
+                                    <input type="checkbox" name="isAvailable" id="modalIsAvailable" class="peer hidden" checked />
+                                    <div class="w-10 h-5 bg-white/10 rounded-full border border-white/10 peer-checked:bg-primary/20 peer-checked:border-primary/40 transition-all"></div>
+                                    <div class="absolute left-1 top-1 w-3 h-3 bg-slate-500 rounded-full transition-all peer-checked:left-6 peer-checked:bg-primary shadow-sm"></div>
+                                </div>
+                                <span class="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors">Mở bán ngay khi tạo</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Media -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Link ảnh (URL)</label>
+                            <input type="url" name="imageUrl" id="modalImage" required class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all" placeholder="https://..." />
+                        </div>
+                        
+                        <div class="relative group">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Upload ảnh</label>
+                            <div id="concessionDropZone" class="relative border-2 border-dashed border-white/10 rounded-2xl p-8 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group overflow-hidden">
+                                <input type="file" id="concessionFileInput" accept="image/jpeg,image/png,image/gif,image/webp,image/avif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                
+                                <div id="concessionUploadPrompt">
+                                    <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500">
+                                        <span class="material-symbols-outlined text-3xl text-slate-500 group-hover:text-primary transition-colors">cloud_upload</span>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-300 uppercase tracking-widest">Kéo thả ảnh vào đây</p>
+                                    <p class="text-[10px] text-slate-500 mt-1 uppercase font-medium">JPG, PNG, WEBP (Max 5MB)</p>
+                                </div>
+
+                                <div id="concessionPreview" class="hidden relative z-20">
+                                    <img id="concessionPreviewImg" class="max-h-40 mx-auto rounded-xl shadow-2xl border border-white/10" />
+                                    <div class="mt-4 flex items-center justify-center gap-3">
+                                        <p id="concessionFileName" class="text-[10px] text-slate-400 font-medium truncate max-w-[150px]"></p>
+                                        <button type="button" onclick="clearConcessionPreview()" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">
+                                            <span class="material-symbols-outlined text-sm">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Upload Loading Overlay -->
+                                <div id="concessionUploadLoading" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-30">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                        <p class="text-[10px] font-bold text-primary tracking-widest uppercase">Đang tải lên...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="closeConcessionModal()" class="flex-1 py-3 rounded-xl border border-white/10 font-headline text-xs font-bold uppercase tracking-widest text-slate-400 hover:bg-white/5 transition-all">Hủy</button>
-                    <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-container font-headline text-xs font-bold uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Lưu lại</button>
+                <div class="p-8 bg-white/5 flex gap-4 border-t border-white/5">
+                    <button type="button" onclick="closeConcessionModal()" class="flex-1 py-4 rounded-2xl border border-white/10 font-headline text-xs font-bold uppercase tracking-[0.2em] text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all">Hủy bỏ</button>
+                    <button type="submit" class="flex-[2] py-4 rounded-2xl bg-gradient-to-r from-primary to-primary-container font-headline text-xs font-bold uppercase tracking-[0.2em] text-on-primary shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Lưu sản phẩm</button>
                 </div>
             </form>
         </div>
@@ -195,6 +241,67 @@
         const modal = document.getElementById('concessionModal');
         const form = document.getElementById('concessionForm');
         let isUpdate = false;
+        let concessionFile = null;
+
+        // =============================================
+        // File upload preview helpers
+        // =============================================
+
+        function setupConcessionFilePreview() {
+            const input = document.getElementById('concessionFileInput');
+            input.addEventListener('change', async function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                // Show loading
+                document.getElementById('concessionUploadLoading').classList.remove('hidden');
+                document.getElementById('concessionUploadLoading').classList.add('flex');
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const resp = await fetch('/Concession/UploadImage', { method: 'POST', body: formData });
+                    const result = await resp.json();
+
+                    if (result.success) {
+                        // Auto-fill URL input
+                        document.getElementById('modalImage').value = result.url;
+                        
+                        // Update Preview
+                        document.getElementById('concessionPreviewImg').src = result.url;
+                        document.getElementById('concessionFileName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                        document.getElementById('concessionPreview').classList.remove('hidden');
+                        document.getElementById('concessionUploadPrompt').classList.add('hidden');
+                        
+                        concessionFile = file;
+                        showToast('Tải lên ảnh thành công!', 'success');
+                    } else {
+                        showToast(result.message, 'error');
+                        input.value = '';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Lỗi khi tải lên ảnh.', 'error');
+                    input.value = '';
+                } finally {
+                    document.getElementById('concessionUploadLoading').classList.add('hidden');
+                    document.getElementById('concessionUploadLoading').classList.remove('flex');
+                }
+            });
+        }
+        setupConcessionFilePreview();
+
+        function clearConcessionPreview() {
+            concessionFile = null;
+            document.getElementById('concessionFileInput').value = '';
+            document.getElementById('modalImage').value = '';
+            document.getElementById('concessionPreview').classList.add('hidden');
+            document.getElementById('concessionUploadPrompt').classList.remove('hidden');
+        }
+
+        // =============================================
+        // Modal functions
+        // =============================================
 
         function openAddConcessionModal() {
             isUpdate = false;
@@ -202,6 +309,7 @@
             document.getElementById('modalConcessionId').value = '';
             document.getElementById('modalActiveField').style.display = 'block';
             form.reset();
+            clearConcessionPreview();
             modal.classList.remove('hidden');
         }
 
@@ -215,12 +323,17 @@
             document.getElementById('modalPrice').value = btn.dataset.price;
             document.getElementById('modalImage').value = btn.dataset.image;
             
+            clearConcessionPreview();
             modal.classList.remove('hidden');
         }
 
         function closeConcessionModal() {
             modal.classList.add('hidden');
         }
+
+        // =============================================
+        // Form submission
+        // =============================================
 
         form.onsubmit = async (e) => {
             e.preventDefault();
@@ -253,6 +366,10 @@
                 showToast('Đã có lỗi xảy ra!', 'error');
             }
         };
+
+        // =============================================
+        // Status toggle & Delete
+        // =============================================
 
         async function toggleConcessionStatus(id, isAvailable) {
             try {
