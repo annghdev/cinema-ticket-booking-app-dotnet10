@@ -8,7 +8,7 @@ namespace CinemaTicketBooking.WebServer.Controllers;
 /// <summary>
 /// Handles authentication for the admin portal.
 /// </summary>
-public class AccountController(SignInManager<Account> signInManager, UserManager<Account> userManager) : Controller
+public class AuthController(SignInManager<Account> signInManager, UserManager<Account> userManager) : Controller
 {
     /// <summary>
     /// Displays the login page.

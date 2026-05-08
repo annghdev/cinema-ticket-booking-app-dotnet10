@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using CinemaTicketBooking.Application.Features;
 
-namespace CinemaTicketBooking.Infrastructure.Auth;
+namespace CinemaTicketBooking.Application.Abstractions;
 
 /// <summary>
 /// Identity-backed authentication operations (tokens, refresh cookies, password, lockout).
@@ -10,7 +11,7 @@ public interface IIdentityAuthService
     /// <summary>
     /// Issues access + refresh tokens and appends the refresh cookie when <see cref="Microsoft.AspNetCore.Http.HttpContext"/> is available.
     /// </summary>
-    Task<AuthTokenResponse?> IssueTokensAsync(Account user, string? remoteIp, CancellationToken cancellationToken = default);
+    Task<AuthTokenResponse?> IssueTokensAsync(Guid accountId, string? remoteIp, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Validates refresh cookie, rotates refresh, returns new access token.
@@ -40,7 +41,7 @@ public interface IIdentityAuthService
     /// <summary>
     /// Soft-removes the user after password confirmation and revokes refresh tokens.
     /// </summary>
-    Task<IdentityResult> DeleteAccountAsync(Account user, string password, CancellationToken cancellationToken = default);
+    Task<IdentityResult> DeleteAccountAsync(Guid accountId, string password, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Locks the account until <paramref name="lockoutEnd"/> (UTC) and revokes refresh tokens.
@@ -51,6 +52,26 @@ public interface IIdentityAuthService
     /// Clears lockout for the account.
     /// </summary>
     Task UnlockAccountAsync(Guid accountId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a new system account with specified roles.
+    /// </summary>
+    Task<IdentityResult> CreateAccountAsync(string email, string userName, string password, List<string> roles, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Fetches full account details including roles and specific permission claims.
+    /// </summary>
+    Task<SystemAccountDetailDto?> GetAccountDetailsAsync(Guid accountId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Synchronizes account roles and custom permission claims.
+    /// </summary>
+    Task<IdentityResult> UpdateAccountRolesAndClaimsAsync(Guid accountId, List<string> roles, List<string> permissions, CancellationToken ct = default);
+
+    /// <summary>
+    /// Force-resets the password to a randomly generated secure string and returns it.
+    /// </summary>
+    Task<string> AdminResetPasswordAsync(Guid accountId, CancellationToken ct = default);
 
     /// <summary>
     /// Clears the refresh token cookie on the response.

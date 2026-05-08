@@ -1,0 +1,479 @@
+@using CinemaTicketBooking.Application.Features
+@using CinemaTicketBooking.Application.Common.Auth
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@model CinemaTicketBooking.Application.PagedResult<AccountDto>
+
+@{
+    Layout = "_Layout";
+    var canLock = (await AuthorizationService.AuthorizeAsync(User, Permissions.AccountsLock)).Succeeded;
+    var canUnlock = (await AuthorizationService.AuthorizeAsync(User, Permissions.AccountsUnlock)).Succeeded;
+    var canManage = (await AuthorizationService.AuthorizeAsync(User, Permissions.AccountsManage)).Succeeded;
+    var availableRoles = ViewBag.AvailableRoles as List<string> ?? new List<string>();
+    var availablePermissions = ViewBag.AvailablePermissions as List<string> ?? new List<string>();
+}
+
+<div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Header -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="font-headline text-3xl font-black tracking-tight text-on-surface">TÀI KHOẢN HỆ THỐNG</h1>
+            <p class="text-sm text-on-surface-variant">Quản lý tài khoản nhân viên, quản trị viên và điều phối viên.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="relative group">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors">search</span>
+                <input type="text" id="searchInput" value="@Context.Request.Query["search"]" placeholder="Tìm tên, email..." 
+                       class="w-64 bg-surface-container-low border border-white/5 rounded-2xl py-3 pl-12 pr-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all placeholder:text-slate-600" />
+            </div>
+
+            @if (canManage)
+            {
+                <button onclick="openCreateModal()" class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-2xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-[20px]">person_add</span>
+                    TẠO TÀI KHOẢN
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-hidden rounded-3xl border border-white/5 bg-surface-container-low/40 backdrop-blur-xl shadow-2xl">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-white/[0.02] border-b border-white/5">
+                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Tài khoản</th>
+                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Vai trò</th>
+                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center">Trạng thái</th>
+                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Ngày tạo</th>
+                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                @foreach (var user in Model.Items)
+                {
+                    <tr class="group hover:bg-white/[0.02] transition-colors">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-4">
+                                <div class="relative">
+                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary-container/20 flex items-center justify-center border border-secondary/10">
+                                        <span class="text-secondary font-black text-lg">@(user.UserName?[0].ToString().ToUpper() ?? "S")</span>
+                                    </div>
+                                    @if (user.IsLockedOut)
+                                    {
+                                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-surface flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-[10px] text-white font-bold">lock</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div>
+                                    <div class="font-bold text-on-surface">@user.UserName</div>
+                                    <div class="text-xs text-slate-500">@user.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex flex-wrap gap-1">
+                                @foreach (var role in user.Roles)
+                                {
+                                    <span class="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-bold text-slate-300 uppercase tracking-tighter">@role</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex justify-center">
+                                @if (user.IsLockedOut)
+                                {
+                                    <span class="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-500">Bị khóa</span>
+                                }
+                                else
+                                {
+                                    <span class="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-black uppercase tracking-widest text-green-500">Hoạt động</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="text-xs text-on-surface-variant">@user.CreatedAt.ToString("dd/MM/yyyy")</div>
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            <div class="flex justify-end gap-2">
+                                @if (canManage)
+                                {
+                                    <button onclick="editAccount('@user.Id')" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all" title="Chỉnh sửa">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </button>
+                                    <button onclick="resetPassword('@user.Id', '@user.UserName')" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 transition-all" title="Đặt lại mật khẩu">
+                                        <span class="material-symbols-outlined">password</span>
+                                    </button>
+                                }
+
+                                @if (user.IsLockedOut)
+                                {
+                                    @if (canUnlock)
+                                    {
+                                        <button onclick="unlockAccount('@user.Id')" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-green-500 hover:bg-green-500/10 transition-all" title="Mở khóa">
+                                            <span class="material-symbols-outlined">lock_open</span>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    @if (canLock)
+                                    {
+                                        <button onclick="lockAccount('@user.Id')" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Khóa tài khoản">
+                                            <span class="material-symbols-outlined">lock</span>
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="px-8 py-4 bg-white/[0.01] flex items-center justify-between border-t border-white/5">
+                <span class="text-xs text-on-surface-variant">Hiển thị @Model.Items.Count() trên @Model.TotalItems tài khoản</span>
+                <div class="flex gap-1">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="?pageNumber=@i&search=@Context.Request.Query["search"]" 
+                           class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all @(i == Model.PageNumber ? "bg-secondary text-on-secondary shadow-lg shadow-secondary/20" : "text-slate-400 hover:bg-white/5")">@i</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div id="createModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-surface/80 backdrop-blur-sm" onclick="closeCreateModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-6">
+        <div class="bg-surface-container-high border border-white/10 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div class="px-8 py-6 border-b border-white/5">
+                <h2 class="text-xl font-black text-on-surface tracking-tight uppercase">Tạo tài khoản mới</h2>
+                <p class="text-xs text-on-surface-variant mt-1">Cấp quyền truy cập hệ thống cho nhân viên mới.</p>
+            </div>
+            
+            <form id="createForm" class="p-8 space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Username</label>
+                    <input type="text" name="userName" required class="w-full bg-surface-container-low border border-white/5 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all" />
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Email</label>
+                    <input type="email" name="email" required class="w-full bg-surface-container-low border border-white/5 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all" />
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Mật khẩu</label>
+                    <input type="password" name="password" required class="w-full bg-surface-container-low border border-white/5 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all" />
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Vai trò</label>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        @foreach (var role in availableRoles)
+                        {
+                            <label class="flex items-center gap-2 p-3 rounded-xl bg-surface-container-low border border-white/5 cursor-pointer hover:border-primary/30 transition-all">
+                                <input type="checkbox" name="roles" value="@role" class="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary/20" />
+                                <span class="text-[11px] font-bold text-on-surface">@role</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 pt-4">
+                    <button type="button" onclick="closeCreateModal()" class="flex-1 py-3 px-6 rounded-2xl font-bold text-xs text-slate-400 hover:bg-white/5 transition-all uppercase tracking-widest">Hủy</button>
+                    <button type="submit" class="flex-1 py-3 px-6 rounded-2xl bg-primary text-on-primary font-black text-xs shadow-lg shadow-primary/20 hover:opacity-90 transition-all uppercase tracking-widest">Tạo tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div id="updateModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-surface/80 backdrop-blur-sm" onclick="closeUpdateModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl p-6">
+        <div class="bg-surface-container-high border border-white/10 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div class="px-8 py-6 border-b border-white/5">
+                <h2 class="text-xl font-black text-on-surface tracking-tight uppercase">Cập nhật tài khoản</h2>
+                <p id="updateUserSub" class="text-xs text-on-surface-variant mt-1"></p>
+            </div>
+            
+            <form id="updateForm" class="p-8 space-y-6">
+                <input type="hidden" name="accountId" id="updateAccountId" />
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Column 1: Roles -->
+                    <div class="space-y-4">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-primary ml-1">Vai trò hệ thống</label>
+                        <div class="space-y-2">
+                            @foreach (var role in availableRoles)
+                            {
+                                <label class="flex items-center gap-3 p-3 rounded-2xl bg-surface-container-low border border-white/5 cursor-pointer hover:border-primary/30 transition-all group">
+                                    <input type="checkbox" name="roles" value="@role" class="w-5 h-5 rounded-lg border-white/10 bg-white/5 text-primary focus:ring-primary/20" />
+                                    <span class="text-xs font-bold text-on-surface group-hover:text-primary transition-colors">@role</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Specific Permissions -->
+                    <div class="space-y-4">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-primary ml-1">Quyền hạn bổ sung</label>
+                        <div class="max-h-[300px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                            @foreach (var perm in availablePermissions)
+                            {
+                                <label class="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.02] border border-white/5 cursor-pointer hover:border-secondary/30 transition-all group">
+                                    <input type="checkbox" name="permissions" value="@perm" class="w-5 h-5 rounded-lg border-white/10 bg-white/5 text-secondary focus:ring-secondary/20" />
+                                    <span class="text-[11px] font-medium text-slate-400 group-hover:text-secondary transition-colors">@perm</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 pt-4">
+                    <button type="button" onclick="closeUpdateModal()" class="flex-1 py-3 px-6 rounded-2xl font-bold text-xs text-slate-400 hover:bg-white/5 transition-all uppercase tracking-widest">Hủy bỏ</button>
+                    <button type="submit" class="flex-1 py-3 px-6 rounded-2xl bg-primary text-on-primary font-black text-xs shadow-lg shadow-primary/20 hover:opacity-90 transition-all uppercase tracking-widest">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Result Modal -->
+<div id="resetResultModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-surface/80 backdrop-blur-sm"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm p-6">
+        <div class="bg-surface-container-high border border-white/10 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div class="p-8 text-center space-y-4">
+                <div class="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-green-500 text-3xl">check_circle</span>
+                </div>
+                <h3 class="text-xl font-black text-on-surface tracking-tight uppercase">Đặt lại mật khẩu thành công</h3>
+                <p class="text-xs text-on-surface-variant">Mật khẩu mới đã được tạo cho tài khoản này. Vui lòng sao chép và gửi cho người dùng.</p>
+                
+                <div class="relative group mt-6">
+                    <input type="text" id="newPasswordDisplay" readonly class="w-full bg-surface-container-low border border-white/5 rounded-2xl py-4 px-4 text-center font-mono text-lg text-primary focus:outline-none" />
+                    <button onclick="copyNewPassword()" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-white/5 text-slate-400 hover:text-primary transition-all">
+                        <span class="material-symbols-outlined text-[20px]">content_copy</span>
+                    </button>
+                </div>
+
+                <button onclick="closeResetResultModal()" class="w-full py-3 px-6 rounded-2xl bg-white/5 font-bold text-xs text-on-surface hover:bg-white/10 transition-all uppercase tracking-widest mt-4">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Search handling
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const val = searchInput.value;
+                location.href = `?search=${encodeURIComponent(val)}`;
+            }
+        });
+
+        // RESET PASSWORD
+        async function resetPassword(id, userName) {
+            if (!confirm(`Bạn có chắc chắn muốn đặt lại mật khẩu cho tài khoản "${userName}"?`)) return;
+
+            try {
+                const resp = await fetch('/UserManagement/ResetPassword', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountId: id })
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    document.getElementById('newPasswordDisplay').value = result.newPassword;
+                    document.getElementById('resetResultModal').classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Không thể đặt lại mật khẩu!', 'error');
+            }
+        }
+
+        function closeResetResultModal() {
+            document.getElementById('resetResultModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function copyNewPassword() {
+            const pwd = document.getElementById('newPasswordDisplay');
+            pwd.select();
+            document.execCommand('copy');
+            showToast('Đã sao chép mật khẩu vào bộ nhớ tạm!', 'success');
+        }
+
+        // CREATE
+        function openCreateModal() {
+            document.getElementById('createModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('createForm').reset();
+        }
+
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const roles = formData.getAll('roles');
+
+            const data = {
+                userName: formData.get('userName'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                roles: roles
+            };
+
+            if (roles.length === 0) {
+                showToast('Vui lòng chọn ít nhất một vai trò!', 'warning');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/UserManagement/Create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closeCreateModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Không thể tạo tài khoản!', 'error');
+            }
+        });
+
+        // UPDATE
+        async function editAccount(id) {
+            try {
+                const resp = await fetch(`/UserManagement/Details/${id}`);
+                if (!resp.ok) throw new Error('Failed to fetch details');
+                const user = await resp.json();
+
+                document.getElementById('updateAccountId').value = user.id;
+                document.getElementById('updateUserSub').innerText = `${user.userName} (${user.email})`;
+                
+                // Reset checkboxes
+                const form = document.getElementById('updateForm');
+                form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+                // Set roles
+                user.roles.forEach(r => {
+                    const cb = form.querySelector(`input[name="roles"][value="${r}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                // Set permissions
+                user.permissions.forEach(p => {
+                    const cb = form.querySelector(`input[name="permissions"][value="${p}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                document.getElementById('updateModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } catch (err) {
+                showToast('Không thể lấy thông tin tài khoản!', 'error');
+            }
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const roles = formData.getAll('roles');
+            const permissions = formData.getAll('permissions');
+
+            const data = {
+                accountId: formData.get('accountId'),
+                roles: roles,
+                permissions: permissions
+            };
+
+            try {
+                const resp = await fetch('/UserManagement/Update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closeUpdateModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Không thể cập nhật tài khoản!', 'error');
+            }
+        });
+
+        // LOCK/UNLOCK
+        async function lockAccount(id) {
+            if (!confirm('Bạn có chắc chắn muốn khóa tài khoản hệ thống này?')) return;
+            
+            try {
+                const resp = await fetch('/UserManagement/Lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountId: id })
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Không thể khóa tài khoản!', 'error');
+            }
+        }
+
+        async function unlockAccount(id) {
+            try {
+                const resp = await fetch('/UserManagement/Unlock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountId: id })
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                showToast('Không thể mở khóa tài khoản!', 'error');
+            }
+        }
+    </script>
+}

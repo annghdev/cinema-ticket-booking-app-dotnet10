@@ -64,8 +64,8 @@ public static class AuthDependencyInjection
         services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.HttpOnly = true;
-            options.LoginPath = "/Account/Login";
-            options.AccessDeniedPath = "/Account/AccessDenied";
+            options.LoginPath = "/Auth/Login";
+            options.AccessDeniedPath = "/Auth/AccessDenied";
         });
 
         var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()

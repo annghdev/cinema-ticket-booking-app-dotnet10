@@ -123,7 +123,7 @@ public static class AuthEndpoints
 
         user = await userManager.FindByIdAsync(user.Id.ToString()) ?? user;
 
-        var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
+        var tokens = await auth.IssueTokensAsync(user.Id, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
             return Results.Unauthorized();
 
@@ -150,7 +150,7 @@ public static class AuthEndpoints
         if (!check.Succeeded)
             return Results.Unauthorized();
 
-        var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
+        var tokens = await auth.IssueTokensAsync(user.Id, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
             return Results.Unauthorized();
 
@@ -265,7 +265,7 @@ public static class AuthEndpoints
         if (user is null)
             return Results.NotFound();
 
-        var result = await auth.DeleteAccountAsync(user, dto.Password, ct);
+        var result = await auth.DeleteAccountAsync(user.Id, dto.Password, ct);
         if (!result.Succeeded)
             return Results.ValidationProblem(result.ErrorDictionary());
 
@@ -397,7 +397,7 @@ public static class AuthEndpoints
 
         user = await userManager.FindByIdAsync(user.Id.ToString()) ?? user;
 
-        var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
+        var tokens = await auth.IssueTokensAsync(user.Id, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
             return Results.Unauthorized();
 
