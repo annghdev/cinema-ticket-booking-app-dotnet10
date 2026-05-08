@@ -7,7 +7,7 @@ public record ResetAccountPasswordCommand(Guid AccountId) : ICommand
     public string CorrelationId { get; set; } = string.Empty;
 }
 
-public class ResetAccountPasswordHandler(IIdentityAuthService auth, IEmailSender emailSender)
+public class ResetAccountPasswordHandler(IAuthService auth, IEmailSender emailSender)
 {
     public async Task<string> Handle(ResetAccountPasswordCommand cmd, CancellationToken ct)
     {

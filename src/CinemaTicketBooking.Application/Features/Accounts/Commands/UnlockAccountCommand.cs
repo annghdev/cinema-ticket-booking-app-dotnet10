@@ -8,7 +8,7 @@ public class UnlockAccountCommand : ICommand
     public string CorrelationId { get; set; } = string.Empty;
 }
 
-public class UnlockAccountHandler(IIdentityAuthService auth)
+public class UnlockAccountHandler(IAuthService auth)
 {
     public async Task Handle(UnlockAccountCommand cmd, CancellationToken ct)
     {

@@ -11,7 +11,7 @@ public class CreateSystemAccountCommand : ICommand
     public string CorrelationId { get; set; } = string.Empty;
 }
 
-public class CreateSystemAccountHandler(IIdentityAuthService auth)
+public class CreateSystemAccountHandler(IAuthService auth)
 {
     public async Task Handle(CreateSystemAccountCommand cmd, CancellationToken ct)
     {

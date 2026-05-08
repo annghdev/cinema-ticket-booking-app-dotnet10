@@ -23,7 +23,7 @@
         </div>
     }
 
-    <form method="post" asp-action="Login" asp-controller="Account" class="space-y-6">
+    <form method="post" asp-action="Login" asp-controller="Auth" class="space-y-6">
         @if (!string.IsNullOrEmpty(ViewData["ReturnUrl"]?.ToString()))
         {
             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />

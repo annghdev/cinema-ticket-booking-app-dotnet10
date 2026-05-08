@@ -57,7 +57,7 @@ namespace CinemaTicketBooking.WebServer.Controllers
             // Mặc định cho Customer hoặc Role không xác định
             if (User.IsInRole(RoleNames.Customer))
             {
-                return RedirectToAction("Logout", "Account");
+                return RedirectToAction("Logout", "Auth");
             }
 
             // Absolute fallback (No operations allowed)

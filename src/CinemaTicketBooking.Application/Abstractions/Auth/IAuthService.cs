@@ -6,7 +6,7 @@ namespace CinemaTicketBooking.Application.Abstractions;
 /// <summary>
 /// Identity-backed authentication operations (tokens, refresh cookies, password, lockout).
 /// </summary>
-public interface IIdentityAuthService
+public interface IAuthService
 {
     /// <summary>
     /// Issues access + refresh tokens and appends the refresh cookie when <see cref="Microsoft.AspNetCore.Http.HttpContext"/> is available.

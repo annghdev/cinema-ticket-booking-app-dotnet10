@@ -25,7 +25,7 @@ public sealed class IdentityAuthService(
     IOptions<RefreshTokenOptions> refreshOptions,
     IOptions<TestAuthOptions> testAuthOptions,
     IEmailSender emailSender,
-    IHttpContextAccessor httpContextAccessor) : IIdentityAuthService
+    IHttpContextAccessor httpContextAccessor) : IAuthService
 {
     private readonly JwtOptions _jwt = jwtOptions.Value;
     private readonly RefreshTokenOptions _refresh = refreshOptions.Value;

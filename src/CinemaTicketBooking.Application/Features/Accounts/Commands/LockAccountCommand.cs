@@ -9,7 +9,7 @@ public class LockAccountCommand : ICommand
     public string CorrelationId { get; set; } = string.Empty;
 }
 
-public class LockAccountHandler(IIdentityAuthService auth)
+public class LockAccountHandler(IAuthService auth)
 {
     public async Task Handle(LockAccountCommand cmd, CancellationToken ct)
     {

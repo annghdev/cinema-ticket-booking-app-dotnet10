@@ -40,7 +40,7 @@ public static class AuthDependencyInjection
         });
 
         services.AddScoped<IAccountCustomerLinker, AccountCustomerLinker>();
-        services.AddScoped<IIdentityAuthService, IdentityAuthService>();
+        services.AddScoped<IAuthService, IdentityAuthService>();
         services.AddScoped<IEmailSender, LogEmailSender>();
 
         services

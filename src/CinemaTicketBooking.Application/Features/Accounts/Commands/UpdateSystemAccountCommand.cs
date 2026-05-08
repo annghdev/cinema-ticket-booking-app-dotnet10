@@ -10,7 +10,7 @@ public class UpdateSystemAccountCommand : ICommand
     public string CorrelationId { get; set; } = string.Empty;
 }
 
-public class UpdateSystemAccountHandler(IIdentityAuthService auth)
+public class UpdateSystemAccountHandler(IAuthService auth)
 {
     public async Task Handle(UpdateSystemAccountCommand cmd, CancellationToken ct)
     {

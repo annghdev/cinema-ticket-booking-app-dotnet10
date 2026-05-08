@@ -8,7 +8,7 @@ public class GetAccountDetailsQuery(Guid accountId) : IQuery<SystemAccountDetail
     public string CorrelationId { get; set; } = string.Empty;
 }
 
-public class GetAccountDetailsHandler(IIdentityAuthService auth)
+public class GetAccountDetailsHandler(IAuthService auth)
 {
     public Task<SystemAccountDetailDto?> Handle(GetAccountDetailsQuery query, CancellationToken ct)
     {

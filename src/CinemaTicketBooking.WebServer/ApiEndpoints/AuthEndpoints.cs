@@ -77,7 +77,7 @@ public static class AuthEndpoints
         [FromBody] RegisterRequest dto,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -138,7 +138,7 @@ public static class AuthEndpoints
         [FromBody] LoginRequest dto,
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -163,7 +163,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> RefreshAsync(
         IOptions<RefreshTokenOptions> refreshOptions,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -183,7 +183,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> LogoutAsync(
         IOptions<RefreshTokenOptions> refreshOptions,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -229,7 +229,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> ForgotPasswordAsync(
         [FromBody] ForgotPasswordRequest dto,
-        IIdentityAuthService auth,
+        IAuthService auth,
         IConfiguration config,
         CancellationToken ct)
     {
@@ -240,7 +240,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> ResetPasswordAsync(
         [FromBody] ResetPasswordRequest dto,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         var result = await auth.ResetPasswordAsync(dto.UserId, dto.Code, dto.NewPassword, ct);
@@ -254,7 +254,7 @@ public static class AuthEndpoints
         [FromBody] DeleteAccountRequest dto,
         UserManager<Account> userManager,
         ClaimsPrincipal principal,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         var id = principal.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -291,7 +291,7 @@ public static class AuthEndpoints
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
         => ExternalCompleteAsync(signInManager, userManager, bus, auth, http, ct);
@@ -300,7 +300,7 @@ public static class AuthEndpoints
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
         => ExternalCompleteAsync(signInManager, userManager, bus, auth, http, ct);
@@ -309,7 +309,7 @@ public static class AuthEndpoints
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -411,7 +411,7 @@ public static class AuthEndpoints
     private static async Task<IResult> LockAccountAsync(
         Guid accountId,
         [FromBody] LockAccountRequest? body,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         var end = body?.LockoutEndUtc ?? DateTimeOffset.UtcNow.AddYears(100);
@@ -421,7 +421,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> UnlockAccountAsync(
         Guid accountId,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         await auth.UnlockAccountAsync(accountId, ct);
