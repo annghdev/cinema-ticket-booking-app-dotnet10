@@ -5,6 +5,8 @@ using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure.Cache;
 using CinemaTicketBooking.Infrastructure.FileStorages;
+using CinemaTicketBooking.Infrastructure.Notifications;
+using CinemaTicketBooking.Infrastructure.Notifications.Brevo;
 using CinemaTicketBooking.Infrastructure.Payments.Momo;
 using CinemaTicketBooking.Infrastructure.Payments;
 using CinemaTicketBooking.Infrastructure.Payments.Vnpay;
@@ -65,6 +67,19 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, EFUnitOfWork>();
         services.AddScoped<DataSeeder>();
         services.AddHttpClient();
+
+        // Email services
+        services.Configure<BrevoOptions>(configuration.GetSection(BrevoOptions.SectionName));
+        var brevoApiKey = configuration[$"{BrevoOptions.SectionName}:ApiKey"];
+        if (!string.IsNullOrWhiteSpace(brevoApiKey))
+        {
+            services.AddHttpClient(nameof(BrevoEmailSender));
+            services.AddScoped<IEmailSender, BrevoEmailSender>();
+        }
+        else
+        {
+            services.AddScoped<IEmailSender, LogEmailSender>();
+        }
 
         // Payment services
         services.Configure<MomoOptions>(configuration.GetSection(MomoOptions.SectionName));

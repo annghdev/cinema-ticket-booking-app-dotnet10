@@ -31,6 +31,7 @@ public class ResetAccountPasswordHandler(IAuthService auth, IEmailSender emailSe
                 <hr style='border: none; border-top: 1px solid #eee; margin: 20px 0;' />
                 <p style='font-size: 11px; color: #999;'>Đây là email tự động, vui lòng không phản hồi email này.</p>
             </div>",
+            details.UserName,
             ct);
 
         return newPassword;
