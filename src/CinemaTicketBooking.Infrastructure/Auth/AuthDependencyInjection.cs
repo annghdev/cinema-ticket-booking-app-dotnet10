@@ -41,7 +41,6 @@ public static class AuthDependencyInjection
 
         services.AddScoped<IAccountCustomerLinker, AccountCustomerLinker>();
         services.AddScoped<IAuthService, IdentityAuthService>();
-        services.AddScoped<IEmailSender, LogEmailSender>();
 
         services
             .AddIdentity<Account, Role>(options =>

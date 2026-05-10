@@ -165,6 +165,7 @@ public sealed class IdentityAuthService(
             user.Email ?? email,
             "Password reset",
             $"<p>Reset your password using this link (valid for a limited time):</p><p><a href=\"{link}\">Reset password</a></p>",
+            user.UserName,
             cancellationToken);
     }
 

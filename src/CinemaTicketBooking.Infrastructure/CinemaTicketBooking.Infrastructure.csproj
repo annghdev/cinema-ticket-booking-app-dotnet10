@@ -32,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Notifications\" />
     <Folder Include="Payments\Vnpay\" />
     <Folder Include="Persistence\Migrations\" />
   </ItemGroup>

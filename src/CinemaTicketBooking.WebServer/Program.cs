@@ -142,6 +142,7 @@ app.MapSlideEndpoints();
 app.MapConcessionEndpoints();
 app.MapScreenEndpoints();
 app.MapPaymentEndpoints();
+app.MapTestEndpoints();
 app.MapHub<TicketStatusHub>("/hubs/tickets").AllowAnonymous();
 app.MapHub<PaymentHub>("/hubs/payments").AllowAnonymous();
 

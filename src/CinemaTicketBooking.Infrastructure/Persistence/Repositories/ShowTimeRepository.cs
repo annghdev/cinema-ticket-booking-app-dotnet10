@@ -1,4 +1,4 @@
-﻿using CinemaTicketBooking.Domain;
+using CinemaTicketBooking.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace CinemaTicketBooking.Infrastructure.Persistence;
@@ -20,6 +20,8 @@ public class ShowTimeRepository(AppDbContext db) : BaseRepository<ShowTime>(db),
     public Task<ShowTime?> LoadFullAsync(Guid id, CancellationToken ct = default)
     {
         return _dbSet.Include(st => st.Movie)
+            .Include(st => st.Screen)
+                .ThenInclude(s => s!.Cinema)
             .Include(st => st.Screen)
                 .ThenInclude(s => s!.Seats)
             .Include(st => st.Tickets)
