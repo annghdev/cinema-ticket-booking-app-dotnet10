@@ -321,7 +321,11 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       <div className="grid grid-cols-2 gap-4">
                         <button
                           type="button"
-                          onClick={() => window.location.assign(resolveBackendUrl("/api/auth/external/google"))}
+                          onClick={() => {
+                            const currentUrl = window.location.pathname + window.location.search
+                            const sessionId = getOrCreateCustomerSessionId()
+                            window.location.assign(resolveBackendUrl(`/api/auth/external/google?returnUrl=${encodeURIComponent(currentUrl)}&sessionId=${sessionId}`))
+                          }}
                           className="flex items-center justify-center gap-2 border border-outline-variant/30 px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-surface-container-highest"
                         >
                           <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -346,7 +350,11 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => window.location.assign(resolveBackendUrl("/api/auth/external/facebook"))}
+                          onClick={() => {
+                            const currentUrl = window.location.pathname + window.location.search
+                            const sessionId = getOrCreateCustomerSessionId()
+                            window.location.assign(resolveBackendUrl(`/api/auth/external/facebook?returnUrl=${encodeURIComponent(currentUrl)}&sessionId=${sessionId}`))
+                          }}
                           className="flex items-center justify-center gap-2 border border-outline-variant/30 px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-surface-container-highest"
                         >
                           <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
