@@ -273,17 +273,27 @@ public static class AuthEndpoints
         return Results.NoContent();
     }
 
-    private static IResult GoogleChallenge(IConfiguration config)
+    private static IResult GoogleChallenge(string? returnUrl, string? sessionId, IConfiguration config)
     {
-        var redirect = $"{config["App:PublicBaseUrl"]?.TrimEnd('/')}/api/auth/external/google/complete";
+        var redirect = "/api/auth/external/google/complete";
         var props = new AuthenticationProperties { RedirectUri = redirect };
+        if (!string.IsNullOrEmpty(returnUrl))
+            props.Items["returnUrl"] = returnUrl;
+        if (!string.IsNullOrEmpty(sessionId))
+            props.Items["sessionId"] = sessionId;
+
         return Results.Challenge(properties: props, authenticationSchemes: [GoogleDefaults.AuthenticationScheme]);
     }
 
-    private static IResult FacebookChallenge(IConfiguration config)
+    private static IResult FacebookChallenge(string? returnUrl, string? sessionId, IConfiguration config)
     {
-        var redirect = $"{config["App:PublicBaseUrl"]?.TrimEnd('/')}/api/auth/external/facebook/complete";
+        var redirect = "/api/auth/external/facebook/complete";
         var props = new AuthenticationProperties { RedirectUri = redirect };
+        if (!string.IsNullOrEmpty(returnUrl))
+            props.Items["returnUrl"] = returnUrl;
+        if (!string.IsNullOrEmpty(sessionId))
+            props.Items["sessionId"] = sessionId;
+
         return Results.Challenge(properties: props, authenticationSchemes: [FacebookDefaults.AuthenticationScheme]);
     }
 
@@ -292,49 +302,71 @@ public static class AuthEndpoints
         UserManager<Account> userManager,
         IMessageBus bus,
         IAuthService auth,
+        IConfiguration config,
         HttpContext http,
         CancellationToken ct)
-        => ExternalCompleteAsync(signInManager, userManager, bus, auth, http, ct);
+        => ExternalCompleteAsync(signInManager, userManager, bus, auth, config, http, ct);
 
     private static Task<IResult> FacebookCompleteAsync(
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
         IAuthService auth,
+        IConfiguration config,
         HttpContext http,
         CancellationToken ct)
-        => ExternalCompleteAsync(signInManager, userManager, bus, auth, http, ct);
+        => ExternalCompleteAsync(signInManager, userManager, bus, auth, config, http, ct);
 
     private static async Task<IResult> ExternalCompleteAsync(
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
         IAuthService auth,
+        IConfiguration config,
         HttpContext http,
         CancellationToken ct)
     {
-        var info = await signInManager.GetExternalLoginInfoAsync();
-        if (info is null)
-            return Results.BadRequest();
+        var frontendBaseUrl = config["FrontendOrigin"] ?? "http://localhost:5173";
+        
+        // 1. Manually authenticate the external scheme
+        var authResult = await http.AuthenticateAsync(IdentityConstants.ExternalScheme);
+        if (!authResult.Succeeded)
+        {
+            return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=external_auth_failed");
+        }
+
+        // 2. Extract info from the authentication result
+        authResult.Properties.Items.TryGetValue("LoginProvider", out var loginProvider);
+        loginProvider ??= "Google";
+        var providerKey = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        if (string.IsNullOrEmpty(providerKey))
+        {
+            return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=provider_key_missing");
+        }
+
+        authResult.Properties.Items.TryGetValue("returnUrl", out var returnUrl);
+        authResult.Properties.Items.TryGetValue("sessionId", out var sessionId);
 
         var signIn = await signInManager.ExternalLoginSignInAsync(
-            info.LoginProvider,
-            info.ProviderKey,
+            loginProvider,
+            providerKey,
             isPersistent: false,
             bypassTwoFactor: true);
 
         Account? user;
         if (signIn.Succeeded)
         {
-            user = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            user = await userManager.FindByLoginAsync(loginProvider, providerKey);
             if (user is null)
-                return Results.Unauthorized();
+                return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=account_not_found");
         }
         else
         {
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var info = new ExternalLoginInfo(authResult.Principal, loginProvider, providerKey, loginProvider);
+            var email = authResult.Principal.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrWhiteSpace(email))
-                return Results.BadRequest();
+                return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=email_not_provided");
 
             user = await userManager.FindByEmailAsync(email);
             if (user is null)
@@ -350,20 +382,20 @@ public static class AuthEndpoints
                 var randomPassword = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)) + "aA1!";
                 var created = await userManager.CreateAsync(user, randomPassword);
                 if (!created.Succeeded)
-                    return Results.ValidationProblem(created.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=account_creation_failed");
 
                 var addLogin = await userManager.AddLoginAsync(user, info);
                 if (!addLogin.Succeeded)
                 {
                     await userManager.DeleteAsync(user);
-                    return Results.ValidationProblem(addLogin.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=external_link_failed");
                 }
 
                 var role = await userManager.AddToRoleAsync(user, RoleNames.Customer);
                 if (!role.Succeeded)
                 {
                     await userManager.DeleteAsync(user);
-                    return Results.ValidationProblem(role.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=role_assignment_failed");
                 }
 
                 try
@@ -374,8 +406,8 @@ public static class AuthEndpoints
                             AccountId = user.Id,
                             Email = email,
                             Name = name,
-                            PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone) ?? "—",
-                            SessionId = null,
+                            PhoneNumber = authResult.Principal.FindFirstValue(ClaimTypes.MobilePhone) ?? "—",
+                            SessionId = sessionId,
                             CorrelationId = http.TraceIdentifier
                         },
                         ct);
@@ -391,7 +423,7 @@ public static class AuthEndpoints
             {
                 var addLogin = await userManager.AddLoginAsync(user, info);
                 if (!addLogin.Succeeded)
-                    return Results.ValidationProblem(addLogin.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/login?error=external_link_failed");
             }
         }
 
@@ -399,13 +431,15 @@ public static class AuthEndpoints
 
         var tokens = await auth.IssueTokensAsync(user.Id, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
-            return Results.Unauthorized();
+            return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/login?error=token_issuance_failed");
 
-        return Results.Ok(new AuthTokenApiResponse(
-            tokens.AccessToken,
-            tokens.AccessTokenExpiresAtUtc,
-            tokens.AccountId,
-            tokens.RefreshTokenPlaintext));
+        var callbackUrl = $"{frontendBaseUrl.TrimEnd('/')}/auth-callback" +
+                         $"?accessToken={tokens.AccessToken}" +
+                         $"&expiresAt={tokens.AccessTokenExpiresAtUtc.ToUnixTimeSeconds()}" +
+                         $"&accountId={tokens.AccountId}" +
+                         (string.IsNullOrEmpty(returnUrl) ? "" : $"&returnUrl={Uri.EscapeDataString(returnUrl)}");
+
+        return Results.Redirect(callbackUrl);
     }
 
     private static async Task<IResult> LockAccountAsync(

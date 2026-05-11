@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path=".docs/OAuth2-flow.md" />
+  </Folder>
   <Folder Name="/solution-items/">
     <File Path=".dockerignore" />
     <File Path=".gitattributes" />
