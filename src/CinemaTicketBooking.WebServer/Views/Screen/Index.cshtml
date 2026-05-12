@@ -7,40 +7,51 @@
     ViewData["Title"] = "Quản lý phòng chiếu";
 }
 
-<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-    <div class="flex items-center gap-4">
-        <form method="get" class="flex items-center gap-2">
-            <select name="cinemaId" onchange="this.form.submit()" class="bg-surface-container border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-3 px-4">
-                <option value="">-- Tất cả rạp --</option>
-                @if (ViewBag.Cinemas != null)
-                {
-                    foreach (var c in (IReadOnlyList<CinemaDropdownDto>)ViewBag.Cinemas)
-                    {
-                        <!option value="@c.Id" @(ViewBag.SelectedCinemaId == c.Id ? "selected" : "")>@c.Name</!option>
-                    }
-                }
-            </select>
-        </form>
-        <button onclick="openAddScreenModal()" class="py-3 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-[0_4px_20px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_30px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center gap-2">
-            <span class="material-symbols-outlined">add</span>
-            <span>Thêm phòng</span>
-        </button>
-    </div>
-</div>
 
-<div class="glass-panel rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl">
-    <div class="px-8 py-6 flex items-center justify-between border-b border-white/5 bg-white/[0.01]">
+
+<div class="glass-panel rounded-2xl border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="px-8 py-6 flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b border-white/5 bg-white/[0.01]">
         <h4 class="font-headline font-bold text-xl text-on-surface flex items-center gap-3">
             <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
             Danh sách phòng chiếu
         </h4>
-        <form method="get" class="flex items-center gap-4">
-            <input type="hidden" name="cinemaId" value="@ViewBag.SelectedCinemaId" />
-            <input type="text" name="searchTerm" placeholder="Tìm mã phòng..." class="bg-surface-container-high border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-2 px-4 w-60" value="@Context.Request.Query["searchTerm"]" />
-            <button type="submit" class="p-2 bg-surface-container-high text-slate-400 hover:text-on-surface transition-colors rounded-xl">
-                <span class="material-symbols-outlined text-sm">search</span>
+        
+        <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
+            <button onclick="openAddScreenModal()" class="w-full md:w-auto h-10 py-2.5 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                <span class="material-symbols-outlined text-lg">add</span>
+                <span>Thêm phòng</span>
             </button>
-        </form>
+            
+            <form method="get" class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                <!-- Cinema Dropdown -->
+                <div class="w-full md:w-48">
+                    <select name="cinemaId" onchange="this.form.submit()" class="w-full bg-surface-container-high border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-2.5 px-4 h-10 transition-all cursor-pointer">
+                        <option value="">-- Tất cả rạp --</option>
+                        @if (ViewBag.Cinemas != null)
+                        {
+                            foreach (var c in (IReadOnlyList<CinemaDropdownDto>)ViewBag.Cinemas)
+                            {
+                                <!option value="@c.Id" @(ViewBag.SelectedCinemaId == c.Id ? "selected" : "")>@c.Name</!option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Search Input with Icon -->
+                <div class="flex items-center bg-surface-container-high rounded-xl border border-white/5 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary transition-all h-10 w-full md:w-64">
+                    <input type="text" name="searchTerm" id="searchInput" placeholder="Tìm mã phòng..." class="flex-1 bg-transparent border-none text-xs text-slate-300 py-2.5 px-4 focus:ring-0" value="@Context.Request.Query["searchTerm"]" />
+                    <div class="w-px h-4 bg-white/10"></div>
+                    <button type="submit" id="searchBtn" class="px-3 h-full text-slate-400 hover:text-on-surface transition-colors flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm" id="searchIcon">search</span>
+                    </button>
+                </div>
+                
+                <!-- Reset Button -->
+                <a asp-action="Index" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 transition-all" title="Reset">
+                    <span class="material-symbols-outlined text-base">restart_alt</span>
+                </a>
+            </form>
+        </div>
     </div>
     
     <div class="overflow-x-auto">
@@ -78,7 +89,12 @@
                                 </div>
                             </td>
                             <td class="px-8 py-6">
-                                <span class="px-3 py-1 rounded-full bg-white/5 text-slate-300 text-[10px] font-bold border border-white/10">@string.Join(", ", s.SupportedFormats)</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach (var format in s.SupportedFormats)
+                                    {
+                                        <span class="px-2.5 py-0.5 rounded-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">@format</span>
+                                    }
+                                </div>
                             </td>
                             <td class="px-8 py-6 text-sm text-slate-300 font-mono">@s.RowOfSeats x @s.ColumnOfSeats</td>
                             <td class="px-8 py-6 text-sm font-bold text-on-surface">@s.ActiveSeatCount / @s.TotalSeats ghế</td>
@@ -89,8 +105,8 @@
                                     data-cols="@s.ColumnOfSeats"
                                     data-map="@s.SeatMap"
                                     onclick="openViewSeatMapModal(this)" 
-                                    class="p-2 text-slate-500 hover:text-secondary transition-colors" title="Xem sơ đồ ghế">
-                                    <span class="material-symbols-outlined text-sm">grid_on</span>
+                                    class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-secondary hover:bg-secondary/10 transition-all" title="Xem sơ đồ ghế">
+                                    <span class="material-symbols-outlined text-xl">grid_on</span>
                                 </button>
                                 <button 
                                     data-id="@s.Id"
@@ -101,19 +117,19 @@
                                     data-type="@((int)s.SupportedFormats.FirstOrDefault())"
                                     data-map="@s.SeatMap"
                                     onclick="openUpdateScreenModal(this)" 
-                                    class="p-2 text-slate-500 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-sm">edit</span>
+                                    class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
                                 </button>
                                 @if (s.IsActive)
                                 {
-                                    <button onclick="toggleScreenStatus('@s.Id', false)" class="p-2 text-slate-500 hover:text-error transition-colors" title="Ngưng hoạt động">
-                                        <span class="material-symbols-outlined">toggle_on</span>
+                                    <button onclick="toggleScreenStatus('@s.Id', false)" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Ngưng hoạt động">
+                                        <span class="material-symbols-outlined text-xl">toggle_on</span>
                                     </button>
                                 }
                                 else
                                 {
-                                    <button onclick="toggleScreenStatus('@s.Id', true)" class="p-2 text-slate-500 hover:text-secondary transition-colors" title="Kích hoạt">
-                                        <span class="material-symbols-outlined">toggle_off</span>
+                                    <button onclick="toggleScreenStatus('@s.Id', true)" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-green-500 hover:bg-green-500/10 transition-all" title="Kích hoạt">
+                                        <span class="material-symbols-outlined text-xl">toggle_off</span>
                                     </button>
                                 }
                             </td>
@@ -123,6 +139,26 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="px-8 py-4 bg-white/[0.01] flex items-center justify-between border-t border-white/5">
+            <span class="text-[10px] font-medium text-on-surface-variant">Hiển thị <span class="text-on-surface">@Model.Items.Count() trên @Model.TotalItems</span> phòng chiếu</span>
+            <div class="flex gap-2">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a asp-action="Index" 
+                       asp-route-pageNumber="@i" 
+                       asp-route-cinemaId="@ViewBag.SelectedCinemaId"
+                       asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+                       class="w-10 h-10 flex items-center justify-center rounded-xl text-[10px] font-bold transition-all @(i == Model.PageNumber ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "bg-white/5 text-slate-400 hover:bg-white/10")">
+                        @i
+                    </a>
+                }
+            </div>
+        </div>
+    }
 </div>
 
 <!-- Full Modal Add Screen -->
@@ -149,7 +185,7 @@
             <form id="addScreenForm" class="space-y-4 text-sm">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Thuộc rạp</label>
-                    <select name="cinemaId" required class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                    <select name="cinemaId" required class="w-full h-10 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all text-xs">
                         <option value="">-- Chọn rạp --</option>
                         @if (ViewBag.Cinemas != null)
                         {
@@ -162,11 +198,11 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Mã phòng chiếu</label>
-                    <input type="text" name="code" required placeholder="Ví dụ: 01, GoldClass..." class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    <input type="text" name="code" required placeholder="Ví dụ: 01, GoldClass..." class="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all text-xs" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Loại phòng</label>
-                    <select name="type" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                    <select name="type" class="w-full h-10 px-4 rounded-xl bg-slate-800 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all text-xs">
                         <option value="0">2D</option>
                         <option value="1">3D</option>
                         <option value="2">IMAX</option>
@@ -176,15 +212,15 @@
                 <div class="grid grid-cols-2 gap-4 pt-2">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Số hàng ghế</label>
-                        <input type="number" id="addRows" value="10" min="1" max="25" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        <input type="number" id="addRows" value="10" min="1" max="25" class="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all text-xs" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Số cột ghế</label>
-                        <input type="number" id="addCols" value="12" min="1" max="25" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                        <input type="number" id="addCols" value="12" min="1" max="25" class="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all text-xs" />
                     </div>
                 </div>
 
-                <button type="button" onclick="initializeGrid()" class="w-full py-2.5 px-4 mt-2 rounded-xl bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary/20 font-bold text-xs transition-all flex items-center justify-center gap-2">
+                <button type="button" onclick="initializeGrid()" class="w-full h-10 px-4 mt-2 rounded-xl bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary/20 font-bold text-xs transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-sm">refresh</span>
                     Khởi tạo lại sơ đồ
                 </button>
@@ -210,12 +246,12 @@
                 <div class="border-t border-white/5 pt-4 mt-4 space-y-2">
                     <h4 class="text-xs font-bold text-slate-200 mb-2">Tiện ích đổ nhanh</h4>
                     <div class="flex items-center gap-2 text-xs">
-                        <input type="number" id="fillRowIdx" min="1" placeholder="Hàng (1...)" class="w-24 py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                        <button type="button" onclick="fillFullRow()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-white/5 transition-all text-xs">Đổ full hàng</button>
+                        <input type="number" id="fillRowIdx" min="1" placeholder="Hàng (1...)" class="w-24 h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all text-xs" />
+                        <button type="button" onclick="fillFullRow()" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-white/5 transition-all text-xs">Đổ full hàng</button>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
-                        <input type="number" id="fillColIdx" min="1" placeholder="Cột (1...)" class="w-24 py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                        <button type="button" onclick="fillFullCol()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-white/5 transition-all text-xs">Đổ full cột</button>
+                        <input type="number" id="fillColIdx" min="1" placeholder="Cột (1...)" class="w-24 h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all text-xs" />
+                        <button type="button" onclick="fillFullCol()" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-white/5 transition-all text-xs">Đổ full cột</button>
                     </div>
                 </div>
 
@@ -225,10 +261,10 @@
                 </div>
 
                 <div class="border-t border-white/5 pt-4 flex items-center gap-4 justify-end">
-                    <button type="button" onclick="document.getElementById('addScreenModal').classList.add('hidden')" class="py-2.5 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                    <button type="button" onclick="document.getElementById('addScreenModal').classList.add('hidden')" class="h-10 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
                         Đóng
                     </button>
-                    <button type="submit" class="py-2.5 px-8 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-lg hover:shadow-primary/30 transition-all">
+                    <button type="submit" class="h-10 px-8 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-lg hover:shadow-primary/30 transition-all text-xs">
                         Lưu phòng
                     </button>
                 </div>
@@ -242,17 +278,34 @@
                     <span class="mt-2 font-headline text-xs uppercase tracking-[0.3em] text-secondary">Màn hình chiếu</span>
                 </div>
                 
-                <div class="flex items-center justify-center p-4 overflow-x-auto">
-                    <div id="gridContainer" class="grid gap-2 select-none">
-                        <!-- Seats get generated here -->
+                <div class="flex items-center justify-center p-4 overflow-auto bg-slate-950/30 rounded-2xl border border-white/5 min-h-[400px] relative touch-none" id="zoomArea">
+                    <div id="gridWrapper" class="origin-center transition-transform duration-75">
+                        <div id="gridContainer" class="grid gap-2 select-none">
+                            <!-- Seats get generated here -->
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="border-t border-white/5 pt-4 flex items-center justify-between text-xs text-slate-400">
-                <span>Tổng số dòng: <span id="lblRows" class="text-on-surface font-mono">0</span></span>
-                <span>Tổng số cột: <span id="lblCols" class="text-on-surface font-mono">0</span></span>
-                <span>Tổng số ghế khả dụng: <span id="lblTotalSeats" class="text-primary font-mono font-bold">0</span></span>
+            <div class="border-t border-white/5 pt-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+                <div class="flex items-center gap-6">
+                    <span>Dòng: <span id="lblRows" class="text-on-surface font-mono">0</span></span>
+                    <span>Cột: <span id="lblCols" class="text-on-surface font-mono">0</span></span>
+                    <span>Ghế: <span id="lblTotalSeats" class="text-primary font-mono font-bold">0</span></span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span class="mr-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Thu phóng:</span>
+                    <button type="button" onclick="adjustZoom(-0.1)" class="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-sm">remove</span>
+                    </button>
+                    <button type="button" onclick="resetZoom()" class="px-3 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white text-[10px] font-bold transition-all">
+                        100%
+                    </button>
+                    <button type="button" onclick="adjustZoom(0.1)" class="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -355,6 +408,51 @@
 
 @section Scripts {
     <script>
+        // =============================================
+        // Search Input Logic
+        // =============================================
+        const searchInput = document.getElementById('searchInput');
+        const searchIcon = document.getElementById('searchIcon');
+        const searchBtn = document.getElementById('searchBtn');
+
+        function updateSearchIcon() {
+            if (searchInput.value.trim() !== '') {
+                searchIcon.textContent = 'close';
+                searchIcon.classList.add('text-red-500');
+                searchIcon.classList.remove('text-sm');
+                searchIcon.classList.add('text-base', 'font-bold');
+            } else {
+                searchIcon.textContent = 'search';
+                searchIcon.classList.remove('text-red-500', 'font-bold');
+                searchIcon.classList.add('text-sm');
+                searchIcon.classList.remove('text-base');
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', updateSearchIcon);
+            updateSearchIcon();
+        }
+
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
+                if (searchIcon.textContent === 'close' && e.detail > 0) {
+                    e.preventDefault();
+                    searchInput.value = '';
+                    
+                    const url = new URL(window.location.href);
+                    if (url.searchParams.has('searchTerm')) {
+                        url.searchParams.delete('searchTerm');
+                        url.searchParams.delete('pageNumber');
+                        window.location.href = url.toString();
+                    } else {
+                        updateSearchIcon();
+                        searchInput.focus();
+                    }
+                }
+            });
+        }
+
         let currentTool = 1; 
         let currentGrid = []; 
         let totalRows = 10;
@@ -372,7 +470,7 @@
             container.innerHTML = '';
             
             const gridCols = cols + 2;
-            container.style.gridTemplateColumns = `repeat(${gridCols}, minmax(0, 1fr))`;
+            container.style.gridTemplateColumns = `repeat(${gridCols}, 40px)`;
 
             try {
                 const parsed = JSON.parse(mapStr);
@@ -552,7 +650,7 @@
             container.innerHTML = '';
             
             const gridCols = totalCols + 2;
-            container.style.gridTemplateColumns = `repeat(${gridCols}, minmax(0, 1fr))`;
+            container.style.gridTemplateColumns = `repeat(${gridCols}, 40px)`;
 
             document.getElementById('lblRows').innerText = totalRows;
             document.getElementById('lblCols').innerText = totalCols;
@@ -864,5 +962,64 @@
                 if (window.hideLoading) window.hideLoading();
             }
         }
+        // =============================================
+        // Zoom & Pinch Logic
+        // =============================================
+        let zoomLevel = 1;
+        const gridWrapper = document.getElementById('gridWrapper');
+        const zoomArea = document.getElementById('zoomArea');
+
+        function adjustZoom(delta) {
+            zoomLevel = Math.max(0.3, Math.min(3, zoomLevel + delta));
+            updateZoom();
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            updateZoom();
+        }
+
+        function updateZoom() {
+            if (gridWrapper) {
+                gridWrapper.style.transform = `scale(${zoomLevel})`;
+                
+                // Update percentage label
+                const btn = document.querySelector('button[onclick="resetZoom()"]');
+                if (btn) {
+                    btn.innerText = Math.round(zoomLevel * 100) + '%';
+                }
+            }
+        }
+
+        // Pinch to Zoom Implementation
+        let initialDistance = 0;
+        let initialZoom = 1;
+
+        if (zoomArea) {
+            zoomArea.addEventListener('touchstart', e => {
+                if (e.touches.length === 2) {
+                    initialDistance = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    initialZoom = zoomLevel;
+                }
+            });
+
+            zoomArea.addEventListener('touchmove', e => {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    
+                    const delta = currentDistance / initialDistance;
+                    zoomLevel = Math.max(0.3, Math.min(3, initialZoom * delta));
+                    updateZoom();
+                }
+            }, { passive: false });
+        }
+
     </script>
 }

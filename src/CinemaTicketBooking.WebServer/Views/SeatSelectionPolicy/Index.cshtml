@@ -16,24 +16,13 @@
         @if (canManage)
         {
             <button onclick="openAddPolicyModal()" class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-container px-6 py-3 font-headline text-xs font-bold uppercase tracking-widest text-on-primary shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                <span class="material-symbols-outlined text-[18px]">add</span>
                 Tạo cấu hình mới
             </button>
         }
     </div>
 
-    <!-- Info Alert -->
-    <div class="flex items-start gap-4 rounded-2xl border border-secondary/20 bg-secondary/5 p-4 text-secondary/80 backdrop-blur-md">
-        <span class="material-symbols-outlined mt-0.5">info</span>
-        <div class="text-sm">
-            <p class="font-bold uppercase tracking-widest text-[10px] mb-1">Hướng dẫn</p>
-            <p>Hệ thống sử dụng cấu hình được đánh dấu <span class="font-bold text-secondary">Global Default</span> để kiểm tra lỗi khi khách hàng nhấn "Thanh toán". Các cấp độ bao gồm: 
-               <span class="inline-flex items-center px-2 py-0.5 rounded bg-green-500/10 text-green-500 text-[10px] font-bold mx-1">ALLOW</span> (Bỏ qua),
-               <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 text-[10px] font-bold mx-1">WARNING</span> (Cảnh báo nhưng cho phép),
-               <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-500/10 text-red-500 text-[10px] font-bold mx-1">BLOCK</span> (Ngăn chặn).
-            </p>
-        </div>
-    </div>
+
 
     <!-- Policy List -->
     <div class="grid gap-6">
@@ -47,14 +36,13 @@
                             <h2 class="font-headline text-2xl font-bold text-on-surface">@policy.Name</h2>
                             @if (policy.IsGlobalDefault)
                             {
-                                <span class="rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">Global Default</span>
+                                <span class="rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary">Mặc định</span>
                             }
                         </div>
-                        <p class="text-xs text-on-surface-variant italic">ID: @policy.Id · Tạo ngày @policy.CreatedAt.ToString("dd/MM/yyyy")</p>
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <div class="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-2">
+                        <div class="flex items-center gap-3 h-11 px-2">
                              <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" class="peer sr-only" @(policy.IsActive ? "checked" : "") 
                                        onchange="togglePolicyStatus('@policy.Id', this.checked)" @(canManage ? "" : "disabled") />
@@ -68,8 +56,8 @@
                         @if (canManage)
                         {
                             <button onclick='openUpdatePolicyModal(@Json.Serialize(policy))' 
-                                    class="p-3 rounded-2xl bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
-                                <span class="material-symbols-outlined">settings</span>
+                                    class="w-11 h-11 aspect-square flex items-center justify-center rounded-2xl bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
+                                <span class="material-symbols-outlined text-xl">settings</span>
                             </button>
                         }
                     </div>
@@ -97,6 +85,19 @@
                 </div>
             </div>
         }
+    </div>
+
+    <!-- Info Alert -->
+    <div class="flex items-start gap-4 rounded-2xl border border-secondary/20 bg-secondary/5 p-4 text-secondary/80 backdrop-blur-md mt-12">
+        <span class="material-symbols-outlined mt-0.5">info</span>
+        <div class="text-sm">
+            <p class="font-bold uppercase tracking-widest text-[10px] mb-1">Hướng dẫn</p>
+            <p>Hệ thống sử dụng cấu hình được đánh dấu <span class="font-bold text-secondary">Mặc định</span> để kiểm tra lỗi khi khách hàng nhấn "Thanh toán". Các cấp độ bao gồm: 
+               <span class="inline-flex items-center px-2 py-0.5 rounded bg-green-500/10 text-green-500 text-[10px] font-bold mx-1">ALLOW</span> (Bỏ qua),
+               <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 text-[10px] font-bold mx-1">WARNING</span> (Cảnh báo nhưng cho phép),
+               <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-500/10 text-red-500 text-[10px] font-bold mx-1">BLOCK</span> (Ngăn chặn).
+            </p>
+        </div>
     </div>
 </div>
 

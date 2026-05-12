@@ -11,32 +11,42 @@
 }
 
 <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <!-- Header -->
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-            <h1 class="font-headline text-3xl font-black tracking-tight text-on-surface">QUẢN LÝ KHÁCH HÀNG</h1>
-            <p class="text-sm text-on-surface-variant">Danh sách người dùng đã đăng ký tài khoản trên hệ thống.</p>
-        </div>
-        
-        <div class="flex items-center gap-3">
-            <div class="relative group">
-                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors">search</span>
-                <input type="text" id="searchInput" value="@Context.Request.Query["search"]" placeholder="Tìm tên, email..." 
-                       class="w-64 bg-surface-container-low border border-white/5 rounded-2xl py-3 pl-12 pr-4 text-sm text-on-surface focus:outline-none focus:border-primary/50 transition-all placeholder:text-slate-600" />
-            </div>
-        </div>
-    </div>
+
 
     <!-- Table -->
-    <div class="overflow-hidden rounded-3xl border border-white/5 bg-surface-container-low/40 backdrop-blur-xl shadow-2xl">
+<div class="glass-panel rounded-2xl border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 bg-white/[0.01]">
+        <h4 class="font-headline font-bold text-xl text-on-surface flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#61b4fe]"></span>
+            Danh sách khách hàng
+        </h4>
+        
+        <form method="get" class="flex items-center gap-3 w-full md:w-auto">
+            <!-- Search Input with Icon -->
+            <div class="flex items-center bg-surface-container-high rounded-xl border border-white/5 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary transition-all h-10 w-full md:w-72">
+                <input type="text" name="search" id="searchInput" placeholder="Tìm tên, email..." class="flex-1 bg-transparent border-none text-xs text-slate-300 py-2.5 px-4 focus:ring-0" value="@Context.Request.Query["search"]" />
+                <div class="w-px h-4 bg-white/10"></div>
+                <button type="submit" id="searchBtn" class="px-3 h-full text-slate-400 hover:text-on-surface transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm" id="searchIcon">search</span>
+                </button>
+            </div>
+            
+            <!-- Reset Button -->
+            <a href="/UserManagement/Customers" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 transition-all" title="Reset">
+                <span class="material-symbols-outlined text-base">restart_alt</span>
+            </a>
+        </form>
+    </div>
+    
+    <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-white/[0.02] border-b border-white/5">
-                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Khách hàng</th>
-                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Liên hệ</th>
-                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center">Trạng thái</th>
-                    <th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Ngày tham gia</th>
-                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-right">Thao tác</th>
+                    <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Khách hàng</th>
+                    <th class="px-6 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Liên hệ</th>
+                    <th class="px-6 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 text-center">Trạng thái</th>
+                    <th class="px-6 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Ngày tham gia</th>
+                    <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 text-right">Thao tác</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/5">
@@ -99,15 +109,15 @@
                         </td>
                         <td class="px-8 py-5 text-right">
                             <div class="flex justify-end gap-2">
-                                <button onclick="resetPassword('@user.Id', '@user.UserName')" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 transition-all" title="Đặt lại mật khẩu">
-                                    <span class="material-symbols-outlined">password</span>
+                                <button onclick="resetPassword('@user.Id', '@user.UserName')" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 transition-all" title="Đặt lại mật khẩu">
+                                    <span class="material-symbols-outlined text-xl">password</span>
                                 </button>
                                 @if (user.IsLockedOut)
                                 {
                                     @if (canUnlock)
                                     {
-                                        <button onclick="unlockAccount('@user.Id')" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-green-500 hover:bg-green-500/10 transition-all" title="Mở khóa">
-                                            <span class="material-symbols-outlined">lock_open</span>
+                                        <button onclick="unlockAccount('@user.Id')" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-green-500 hover:bg-green-500/10 transition-all" title="Mở khóa">
+                                            <span class="material-symbols-outlined text-xl">lock_open</span>
                                         </button>
                                     }
                                 }
@@ -115,8 +125,8 @@
                                 {
                                     @if (canLock)
                                     {
-                                        <button onclick="lockAccount('@user.Id')" class="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Khóa tài khoản">
-                                            <span class="material-symbols-outlined">lock</span>
+                                        <button onclick="lockAccount('@user.Id')" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all" title="Khóa tài khoản">
+                                            <span class="material-symbols-outlined text-xl">lock</span>
                                         </button>
                                     }
                                 }
@@ -131,12 +141,14 @@
         @if (Model.TotalPages > 1)
         {
             <div class="px-8 py-4 bg-white/[0.01] flex items-center justify-between border-t border-white/5">
-                <span class="text-xs text-on-surface-variant">Hiển thị @Model.Items.Count() trên @Model.TotalItems khách hàng</span>
-                <div class="flex gap-1">
+                <span class="text-[10px] font-medium text-on-surface-variant">Hiển thị <span class="text-on-surface">@Model.Items.Count() trên @Model.TotalItems</span> khách hàng</span>
+                <div class="flex gap-2">
                     @for (int i = 1; i <= Model.TotalPages; i++)
                     {
                         <a href="?pageNumber=@i&search=@Context.Request.Query["search"]" 
-                           class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all @(i == Model.PageNumber ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "text-slate-400 hover:bg-white/5")">@i</a>
+                           class="w-10 h-10 flex items-center justify-center rounded-xl text-[10px] font-bold transition-all @(i == Model.PageNumber ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "bg-white/5 text-slate-400 hover:bg-white/10")">
+                            @i
+                        </a>
                     }
                 </div>
             </div>
@@ -171,14 +183,50 @@
 
 @section Scripts {
     <script>
-        // Search handling
+        // =============================================
+        // Search Input Logic
+        // =============================================
         const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const val = searchInput.value;
-                location.href = `?search=${encodeURIComponent(val)}`;
+        const searchIcon = document.getElementById('searchIcon');
+        const searchBtn = document.getElementById('searchBtn');
+
+        function updateSearchIcon() {
+            if (searchInput.value.trim() !== '') {
+                searchIcon.textContent = 'close';
+                searchIcon.classList.add('text-red-500');
+                searchIcon.classList.remove('text-sm');
+                searchIcon.classList.add('text-base', 'font-bold');
+            } else {
+                searchIcon.textContent = 'search';
+                searchIcon.classList.remove('text-red-500', 'font-bold');
+                searchIcon.classList.add('text-sm');
+                searchIcon.classList.remove('text-base');
             }
-        });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', updateSearchIcon);
+            updateSearchIcon();
+        }
+
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
+                if (searchIcon.textContent === 'close' && e.detail > 0) {
+                    e.preventDefault();
+                    searchInput.value = '';
+                    
+                    const url = new URL(window.location.href);
+                    if (url.searchParams.has('search')) {
+                        url.searchParams.delete('search');
+                        url.searchParams.delete('pageNumber');
+                        window.location.href = url.toString();
+                    } else {
+                        updateSearchIcon();
+                        searchInput.focus();
+                    }
+                }
+            });
+        }
 
         // RESET PASSWORD
         async function resetPassword(id, userName) {
