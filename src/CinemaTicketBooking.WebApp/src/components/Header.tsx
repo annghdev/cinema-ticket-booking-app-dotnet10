@@ -23,10 +23,6 @@ function Header() {
   const mobileMenuBtnRef = useRef<HTMLButtonElement | null>(null)
   const accountMenuRef = useRef<HTMLDivElement | null>(null)
 
-  const avatarFallback = useMemo(() => {
-    const first = (displayName ?? "").trim().charAt(0)
-    return first ? first.toUpperCase() : "U"
-  }, [displayName])
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -130,17 +126,11 @@ function Header() {
                   onClick={() => setIsAccountMenuOpen((prev) => !prev)}
                   className="flex items-center gap-2 rounded-full border border-outline-variant/30 bg-surface-container-highest px-2 py-1 transition-colors hover:border-secondary/50"
                 >
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={displayName ?? "Avatar"}
-                      className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8"
-                    />
-                  ) : (
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-secondary/20 text-xs font-semibold text-secondary sm:h-8 sm:w-8 sm:text-base">
-                      {avatarFallback}
-                    </span>
-                  )}
+                  <img
+                    src={avatarUrl && avatarUrl.trim() !== "" ? avatarUrl : `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(displayName || "User")}`}
+                    alt={displayName ?? "Avatar"}
+                    className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8"
+                  />
                   <span className="hidden max-w-[160px] truncate text-sm text-on-surface md:block">{displayName}</span>
                   <span className="material-symbols-outlined text-lg text-on-surface-variant">keyboard_arrow_down</span>
                 </button>
@@ -177,11 +167,11 @@ function Header() {
             ) : (
               <button
                 type="button"
-                aria-label="Mở đăng nhập"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="material-symbols-outlined text-[#61b4fe] transition-all hover:text-[#00f4fe]"
+                className="flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-container px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-on-primary shadow-[0_0_15px_rgba(97,180,254,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(0,244,254,0.5)] active:scale-95 sm:px-6 sm:py-2 sm:text-sm"
               >
-                account_circle
+                <span className="material-symbols-outlined text-lg sm:text-xl">account_circle</span>
+                <span>Đăng nhập</span>
               </button>
             )}
           </div>

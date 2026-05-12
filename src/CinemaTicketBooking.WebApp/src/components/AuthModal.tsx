@@ -16,6 +16,7 @@ type AuthFormValues = {
   email: string
   phoneNumber: string
   password: string
+  confirmPassword: string
 }
 
 function emptyForm(): AuthFormValues {
@@ -24,6 +25,7 @@ function emptyForm(): AuthFormValues {
     email: "",
     phoneNumber: "",
     password: "",
+    confirmPassword: "",
   }
 }
 
@@ -103,11 +105,19 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
       toastError(msg)
       return
     }
-    if (isSignup && (!authForm.name.trim() || !authForm.phoneNumber.trim())) {
-      const msg = "Vui lòng nhập đầy đủ họ tên và số điện thoại."
-      setSubmitError(msg)
-      toastError(msg)
-      return
+    if (isSignup) {
+      if (!authForm.name.trim() || !authForm.phoneNumber.trim() || !authForm.confirmPassword.trim()) {
+        const msg = "Vui lòng nhập đầy đủ thông tin đăng ký."
+        setSubmitError(msg)
+        toastError(msg)
+        return
+      }
+      if (authForm.password !== authForm.confirmPassword) {
+        const msg = "Mật khẩu xác nhận không khớp."
+        setSubmitError(msg)
+        toastError(msg)
+        return
+      }
     }
 
     setIsSubmitting(true)
@@ -181,7 +191,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
       <Dialog.Portal>
         <Dialog.Overlay className="auth-modal-overlay fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm" />
         <Dialog.Content className="auth-modal-content fixed left-1/2 top-1/2 z-[100] w-[95vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 overflow-hidden border border-outline-variant/20 bg-surface-container-low text-on-background shadow-2xl focus:outline-none">
-          <Dialog.Close className="absolute right-4 top-4 z-20 text-on-surface-variant transition-colors hover:text-secondary" aria-label="Đóng">
+          <Dialog.Close className="absolute right-6 top-6 z-20 text-on-surface-variant transition-colors hover:text-secondary" aria-label="Đóng">
             <span className="material-symbols-outlined">close</span>
           </Dialog.Close>
 
@@ -215,6 +225,22 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   <footer className="mt-4 text-xs uppercase tracking-widest text-outline">Martin Scorsese</footer>
                 </blockquote>
               </div>
+
+              <div className="relative z-20 mt-auto">
+                <p className="mb-4 text-sm text-on-surface-variant/80">
+                  {isSignup ? "Bạn đã là thành viên của Absolute Cinema?" : "Bạn chưa có tài khoản Absolute Cinema?"}
+                </p>
+                <button
+                  type="button"
+                  onClick={onToggleSignup}
+                  className="group flex w-full items-center justify-center gap-3 border border-primary/50 bg-primary/10 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-primary transition-all hover:border-primary hover:bg-primary hover:text-on-primary active:scale-95"
+                >
+                  {isSignup ? "Đăng nhập" : "Đăng ký ngay"}
+                  <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-1">
+                    {isSignup ? "login" : "person_add"}
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div
@@ -226,22 +252,19 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   className={`absolute inset-0 transition-transform duration-500 ease-in-out ${isForgotPassword ? "-translate-x-full" : "translate-x-0"
                     }`}
                 >
-                  <div className="mb-12">
+                  <div className={`${isSignup ? "mb-6" : "mb-12"}`}>
                     <Dialog.Title className="font-headline text-2xl font-bold text-on-surface">
                       {isSignup ? "Tạo tài khoản" : "Chào mừng trở lại"}
                     </Dialog.Title>
-                    <Dialog.Description className="mt-1 text-sm text-on-surface-variant">
-                      {isSignup ? "Bắt đầu hành trình điện ảnh của bạn" : "Đăng nhập để tiếp tục trải nghiệm"}
-                    </Dialog.Description>
                   </div>
 
                   <form className="space-y-6" onSubmit={(event) => void onSubmitAuthForm(event)}>
                     <div className="space-y-4">
                       {isSignup && (
                         <div>
-                          <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-outline">Họ và tên</label>
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-outline">Họ và tên</label>
                           <input
-                            className="w-full border-b-2 border-outline-variant bg-surface-container-low px-0 py-2 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
+                            className="w-full border-b-2 border-outline-variant bg-surface-container-low px-4 py-1.5 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
                             placeholder="Nguyễn Văn A"
                             type="text"
                             autoComplete="name"
@@ -251,9 +274,9 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         </div>
                       )}
                       <div>
-                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-outline">Địa chỉ email</label>
+                        <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-outline">Địa chỉ email</label>
                         <input
-                          className={`w-full border-b-2 border-outline-variant bg-surface-container-low px-0 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none ${isSignup ? "py-2" : "py-3"}`}
+                          className={`w-full border-b-2 border-outline-variant bg-surface-container-low px-4 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none ${isSignup ? "py-1.5" : "py-3"}`}
                           placeholder="ban@email.com"
                           type="email"
                           autoComplete="email"
@@ -263,9 +286,9 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       </div>
                       {isSignup && (
                         <div>
-                          <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-outline">Số điện thoại</label>
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-outline">Số điện thoại</label>
                           <input
-                            className="w-full border-b-2 border-outline-variant bg-surface-container-low px-0 py-2 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
+                            className="w-full border-b-2 border-outline-variant bg-surface-container-low px-4 py-1.5 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
                             placeholder="09xxxxxxxx"
                             type="tel"
                             autoComplete="tel"
@@ -275,7 +298,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         </div>
                       )}
                       <div>
-                        <div className="mb-2 flex items-end justify-between">
+                        <div className="mb-1 flex items-end justify-between">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-outline">Mật khẩu</label>
                           {!isSignup && (
                             <button
@@ -288,7 +311,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           )}
                         </div>
                         <input
-                          className={`w-full border-b-2 border-outline-variant bg-surface-container-low px-0 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none ${isSignup ? "py-2" : "py-3"}`}
+                          className={`w-full border-b-2 border-outline-variant bg-surface-container-low px-4 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none ${isSignup ? "py-1.5" : "py-3"}`}
                           placeholder="••••••••"
                           type="password"
                           autoComplete={isSignup ? "new-password" : "current-password"}
@@ -296,6 +319,20 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           onChange={(event) => onAuthInputChange("password", event.target.value)}
                         />
                       </div>
+
+                      {isSignup && (
+                        <div>
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-outline">Xác nhận mật khẩu</label>
+                          <input
+                            className="w-full border-b-2 border-outline-variant bg-surface-container-low px-4 py-1.5 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
+                            placeholder="••••••••"
+                            type="password"
+                            autoComplete="new-password"
+                            value={authForm.confirmPassword}
+                            onChange={(event) => onAuthInputChange("confirmPassword", event.target.value)}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-4 pt-4">
@@ -363,7 +400,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                           Facebook
                         </button>
                       </div>
-                      <p className="pt-2 text-center text-xs text-outline">
+                      <p className="pt-2 text-center text-xs text-outline lg:hidden">
                         {isSignup ? "Đã có tài khoản?" : "Chưa có tài khoản?"}{" "}
                         <button
                           type="button"
@@ -390,7 +427,7 @@ function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     <div>
                       <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-outline">Địa chỉ email</label>
                       <input
-                        className="w-full border-b-2 border-outline-variant bg-surface-container-low px-0 py-2 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
+                        className="w-full border-b-2 border-outline-variant bg-surface-container-low px-4 py-2 text-on-surface placeholder:text-outline/40 transition-all focus:border-secondary focus:outline-none"
                         placeholder="ban@email.com"
                         type="email"
                         autoComplete="email"

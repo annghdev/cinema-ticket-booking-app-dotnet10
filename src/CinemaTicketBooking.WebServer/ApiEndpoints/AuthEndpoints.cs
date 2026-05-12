@@ -223,7 +223,7 @@ public static class AuthEndpoints
             account.CustomerId,
             displayName,
             account.Email ?? customer?.Email,
-            null,
+            account.AvatarUrl,
             customer?.PhoneNumber));
     }
 
@@ -377,7 +377,11 @@ public static class AuthEndpoints
                     Id = Guid.CreateVersion7(),
                     UserName = email,
                     Email = email,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    AvatarUrl = authResult.Principal.FindFirstValue("picture") 
+                                ?? authResult.Principal.FindFirstValue("image")
+                                ?? authResult.Principal.FindFirstValue("avatar_url")
+                                ?? authResult.Principal.FindFirstValue(ClaimTypes.Uri) // Some providers use this for picture
                 };
                 var randomPassword = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)) + "aA1!";
                 var created = await userManager.CreateAsync(user, randomPassword);

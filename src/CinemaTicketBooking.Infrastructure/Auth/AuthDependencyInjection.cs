@@ -8,6 +8,7 @@ using CinemaTicketBooking.Infrastructure.Notifications;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -111,6 +112,7 @@ public static class AuthDependencyInjection
                 options.ClientId = configuration["Authentication:Google:ClientId"]!;
                 options.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
                 options.SignInScheme = IdentityConstants.ExternalScheme;
+                options.ClaimActions.MapJsonKey("picture", "picture");
             });
         }
 
@@ -121,6 +123,7 @@ public static class AuthDependencyInjection
                 options.AppId = configuration["Authentication:Facebook:AppId"]!;
                 options.AppSecret = configuration["Authentication:Facebook:AppSecret"]!;
                 options.SignInScheme = IdentityConstants.ExternalScheme;
+                options.ClaimActions.MapJsonKey("picture", "picture");
             });
         }
 
