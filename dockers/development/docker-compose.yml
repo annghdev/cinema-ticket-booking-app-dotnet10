@@ -18,6 +18,12 @@ services:
       Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:-http://localhost:5173}
       LOKI_ENDPOINT: http://loki:3100
       TEMPO_OTLP_ENDPOINT: http://tempo:4317
+      Minio__Endpoint: minio:9000
+      Minio__AccessKey: ${MINIO_ROOT_USER:-minioadmin}
+      Minio__SecretKey: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      Minio__BucketName: ${MINIO_BUCKET_NAME:-cinema-ticket-booking}
+      Minio__UseSsl: "false"
+      Minio__PublicBaseUrl: ${MINIO_PUBLIC_URL:-http://localhost:9000}/${MINIO_BUCKET_NAME:-cinema-ticket-booking}
     ports:
       - "${WEBSERVER_PORT:-8080}:8080"
     depends_on:
@@ -29,6 +35,8 @@ services:
         condition: service_started
       tempo:
         condition: service_started
+      minio:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - cinema_dev
@@ -190,6 +198,27 @@ services:
     networks:
       - cinema_dev
 
+  minio:
+    image: minio/minio:latest
+    container_name: cinema-dev-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - cinema_dev
+
   grafana:
     image: grafana/grafana:11.6.11
     container_name: cinema-dev-grafana
@@ -224,3 +253,4 @@ volumes:
   loki_data:
   tempo_data:
   grafana_data:
+  minio_data:
