@@ -41,7 +41,7 @@ public static class DomainTestBuilders
             Id = Guid.CreateVersion7(),
             CinemaId = cinemaId,
             Code = code,
-            Type = type,
+            SupportedFormats = [type],
             IsActive = true,
             SeatMap = seatMapJson
         };

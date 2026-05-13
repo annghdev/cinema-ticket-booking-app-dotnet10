@@ -77,7 +77,7 @@ public static class AuthEndpoints
         [FromBody] RegisterRequest dto,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -123,7 +123,7 @@ public static class AuthEndpoints
 
         user = await userManager.FindByIdAsync(user.Id.ToString()) ?? user;
 
-        var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
+        var tokens = await auth.IssueTokensAsync(user.Id, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
             return Results.Unauthorized();
 
@@ -138,7 +138,7 @@ public static class AuthEndpoints
         [FromBody] LoginRequest dto,
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -150,7 +150,7 @@ public static class AuthEndpoints
         if (!check.Succeeded)
             return Results.Unauthorized();
 
-        var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
+        var tokens = await auth.IssueTokensAsync(user.Id, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
             return Results.Unauthorized();
 
@@ -163,7 +163,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> RefreshAsync(
         IOptions<RefreshTokenOptions> refreshOptions,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -183,7 +183,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> LogoutAsync(
         IOptions<RefreshTokenOptions> refreshOptions,
-        IIdentityAuthService auth,
+        IAuthService auth,
         HttpContext http,
         CancellationToken ct)
     {
@@ -223,13 +223,13 @@ public static class AuthEndpoints
             account.CustomerId,
             displayName,
             account.Email ?? customer?.Email,
-            null,
+            account.AvatarUrl,
             customer?.PhoneNumber));
     }
 
     private static async Task<IResult> ForgotPasswordAsync(
         [FromBody] ForgotPasswordRequest dto,
-        IIdentityAuthService auth,
+        IAuthService auth,
         IConfiguration config,
         CancellationToken ct)
     {
@@ -240,7 +240,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> ResetPasswordAsync(
         [FromBody] ResetPasswordRequest dto,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         var result = await auth.ResetPasswordAsync(dto.UserId, dto.Code, dto.NewPassword, ct);
@@ -254,7 +254,7 @@ public static class AuthEndpoints
         [FromBody] DeleteAccountRequest dto,
         UserManager<Account> userManager,
         ClaimsPrincipal principal,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         var id = principal.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -265,7 +265,7 @@ public static class AuthEndpoints
         if (user is null)
             return Results.NotFound();
 
-        var result = await auth.DeleteAccountAsync(user, dto.Password, ct);
+        var result = await auth.DeleteAccountAsync(user.Id, dto.Password, ct);
         if (!result.Succeeded)
             return Results.ValidationProblem(result.ErrorDictionary());
 
@@ -273,17 +273,27 @@ public static class AuthEndpoints
         return Results.NoContent();
     }
 
-    private static IResult GoogleChallenge(IConfiguration config)
+    private static IResult GoogleChallenge(string? returnUrl, string? sessionId, IConfiguration config)
     {
-        var redirect = $"{config["App:PublicBaseUrl"]?.TrimEnd('/')}/api/auth/external/google/complete";
+        var redirect = "/api/auth/external/google/complete";
         var props = new AuthenticationProperties { RedirectUri = redirect };
+        if (!string.IsNullOrEmpty(returnUrl))
+            props.Items["returnUrl"] = returnUrl;
+        if (!string.IsNullOrEmpty(sessionId))
+            props.Items["sessionId"] = sessionId;
+
         return Results.Challenge(properties: props, authenticationSchemes: [GoogleDefaults.AuthenticationScheme]);
     }
 
-    private static IResult FacebookChallenge(IConfiguration config)
+    private static IResult FacebookChallenge(string? returnUrl, string? sessionId, IConfiguration config)
     {
-        var redirect = $"{config["App:PublicBaseUrl"]?.TrimEnd('/')}/api/auth/external/facebook/complete";
+        var redirect = "/api/auth/external/facebook/complete";
         var props = new AuthenticationProperties { RedirectUri = redirect };
+        if (!string.IsNullOrEmpty(returnUrl))
+            props.Items["returnUrl"] = returnUrl;
+        if (!string.IsNullOrEmpty(sessionId))
+            props.Items["sessionId"] = sessionId;
+
         return Results.Challenge(properties: props, authenticationSchemes: [FacebookDefaults.AuthenticationScheme]);
     }
 
@@ -291,50 +301,72 @@ public static class AuthEndpoints
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
+        IConfiguration config,
         HttpContext http,
         CancellationToken ct)
-        => ExternalCompleteAsync(signInManager, userManager, bus, auth, http, ct);
+        => ExternalCompleteAsync(signInManager, userManager, bus, auth, config, http, ct);
 
     private static Task<IResult> FacebookCompleteAsync(
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
+        IConfiguration config,
         HttpContext http,
         CancellationToken ct)
-        => ExternalCompleteAsync(signInManager, userManager, bus, auth, http, ct);
+        => ExternalCompleteAsync(signInManager, userManager, bus, auth, config, http, ct);
 
     private static async Task<IResult> ExternalCompleteAsync(
         SignInManager<Account> signInManager,
         UserManager<Account> userManager,
         IMessageBus bus,
-        IIdentityAuthService auth,
+        IAuthService auth,
+        IConfiguration config,
         HttpContext http,
         CancellationToken ct)
     {
-        var info = await signInManager.GetExternalLoginInfoAsync();
-        if (info is null)
-            return Results.BadRequest();
+        var frontendBaseUrl = config["FrontendOrigin"] ?? "http://localhost:5173";
+        
+        // 1. Manually authenticate the external scheme
+        var authResult = await http.AuthenticateAsync(IdentityConstants.ExternalScheme);
+        if (!authResult.Succeeded)
+        {
+            return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=external_auth_failed");
+        }
+
+        // 2. Extract info from the authentication result
+        authResult.Properties.Items.TryGetValue("LoginProvider", out var loginProvider);
+        loginProvider ??= "Google";
+        var providerKey = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        if (string.IsNullOrEmpty(providerKey))
+        {
+            return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=provider_key_missing");
+        }
+
+        authResult.Properties.Items.TryGetValue("returnUrl", out var returnUrl);
+        authResult.Properties.Items.TryGetValue("sessionId", out var sessionId);
 
         var signIn = await signInManager.ExternalLoginSignInAsync(
-            info.LoginProvider,
-            info.ProviderKey,
+            loginProvider,
+            providerKey,
             isPersistent: false,
             bypassTwoFactor: true);
 
         Account? user;
         if (signIn.Succeeded)
         {
-            user = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            user = await userManager.FindByLoginAsync(loginProvider, providerKey);
             if (user is null)
-                return Results.Unauthorized();
+                return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=account_not_found");
         }
         else
         {
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var info = new ExternalLoginInfo(authResult.Principal, loginProvider, providerKey, loginProvider);
+            var email = authResult.Principal.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrWhiteSpace(email))
-                return Results.BadRequest();
+                return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=email_not_provided");
 
             user = await userManager.FindByEmailAsync(email);
             if (user is null)
@@ -345,25 +377,29 @@ public static class AuthEndpoints
                     Id = Guid.CreateVersion7(),
                     UserName = email,
                     Email = email,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    AvatarUrl = authResult.Principal.FindFirstValue("picture") 
+                                ?? authResult.Principal.FindFirstValue("image")
+                                ?? authResult.Principal.FindFirstValue("avatar_url")
+                                ?? authResult.Principal.FindFirstValue(ClaimTypes.Uri) // Some providers use this for picture
                 };
                 var randomPassword = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)) + "aA1!";
                 var created = await userManager.CreateAsync(user, randomPassword);
                 if (!created.Succeeded)
-                    return Results.ValidationProblem(created.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=account_creation_failed");
 
                 var addLogin = await userManager.AddLoginAsync(user, info);
                 if (!addLogin.Succeeded)
                 {
                     await userManager.DeleteAsync(user);
-                    return Results.ValidationProblem(addLogin.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=external_link_failed");
                 }
 
                 var role = await userManager.AddToRoleAsync(user, RoleNames.Customer);
                 if (!role.Succeeded)
                 {
                     await userManager.DeleteAsync(user);
-                    return Results.ValidationProblem(role.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/auth-callback?error=role_assignment_failed");
                 }
 
                 try
@@ -374,8 +410,8 @@ public static class AuthEndpoints
                             AccountId = user.Id,
                             Email = email,
                             Name = name,
-                            PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone) ?? "—",
-                            SessionId = null,
+                            PhoneNumber = authResult.Principal.FindFirstValue(ClaimTypes.MobilePhone) ?? "—",
+                            SessionId = sessionId,
                             CorrelationId = http.TraceIdentifier
                         },
                         ct);
@@ -391,27 +427,29 @@ public static class AuthEndpoints
             {
                 var addLogin = await userManager.AddLoginAsync(user, info);
                 if (!addLogin.Succeeded)
-                    return Results.ValidationProblem(addLogin.ErrorDictionary());
+                    return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/login?error=external_link_failed");
             }
         }
 
         user = await userManager.FindByIdAsync(user.Id.ToString()) ?? user;
 
-        var tokens = await auth.IssueTokensAsync(user, http.Connection.RemoteIpAddress?.ToString(), ct);
+        var tokens = await auth.IssueTokensAsync(user.Id, http.Connection.RemoteIpAddress?.ToString(), ct);
         if (tokens is null)
-            return Results.Unauthorized();
+            return Results.Redirect($"{frontendBaseUrl.TrimEnd('/')}/login?error=token_issuance_failed");
 
-        return Results.Ok(new AuthTokenApiResponse(
-            tokens.AccessToken,
-            tokens.AccessTokenExpiresAtUtc,
-            tokens.AccountId,
-            tokens.RefreshTokenPlaintext));
+        var callbackUrl = $"{frontendBaseUrl.TrimEnd('/')}/auth-callback" +
+                         $"?accessToken={tokens.AccessToken}" +
+                         $"&expiresAt={tokens.AccessTokenExpiresAtUtc.ToUnixTimeSeconds()}" +
+                         $"&accountId={tokens.AccountId}" +
+                         (string.IsNullOrEmpty(returnUrl) ? "" : $"&returnUrl={Uri.EscapeDataString(returnUrl)}");
+
+        return Results.Redirect(callbackUrl);
     }
 
     private static async Task<IResult> LockAccountAsync(
         Guid accountId,
         [FromBody] LockAccountRequest? body,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         var end = body?.LockoutEndUtc ?? DateTimeOffset.UtcNow.AddYears(100);
@@ -421,7 +459,7 @@ public static class AuthEndpoints
 
     private static async Task<IResult> UnlockAccountAsync(
         Guid accountId,
-        IIdentityAuthService auth,
+        IAuthService auth,
         CancellationToken ct)
     {
         await auth.UnlockAccountAsync(accountId, ct);

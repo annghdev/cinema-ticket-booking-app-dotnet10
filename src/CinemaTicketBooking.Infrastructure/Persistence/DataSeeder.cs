@@ -55,42 +55,43 @@ public class DataSeeder(
 
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        if (await dbContext.Cinemas.AnyAsync(cancellationToken))
+        // 1. Seed root catalogs if they don't exist.
+        if (!await dbContext.Cinemas.AnyAsync(cancellationToken))
         {
-            logger.LogInformation("Skip seed data because cinemas already exist.");
-            return;
+            var cinemas = SeedCinemas();
+            var movies = SeedMovies();
+            var concessions = SeedConcessions();
+            var seatSelectionPolicy = SeatSelectionPolicy.CreateDefault();
+            var pricingPolicies = SeedPricingPolicies();
+            
+            var screens = SeedScreens(cinemas);
+            var showTimes = SeedShowTimes(movies, screens, pricingPolicies);
+            var customers = SeedCustomers();
+            var bookings = SeedBookings(showTimes, customers, concessions);
+
+            dbContext.Cinemas.AddRange(cinemas);
+            dbContext.Movies.AddRange(movies);
+            dbContext.Concessions.AddRange(concessions);
+            dbContext.SeatSelectionPolicies.Add(seatSelectionPolicy);
+            dbContext.PricingPolicies.AddRange(pricingPolicies);
+            dbContext.Screens.AddRange(screens);
+            dbContext.ShowTimes.AddRange(showTimes);
+            dbContext.Customers.AddRange(customers);
+            dbContext.Bookings.AddRange(bookings);
+            
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await SeedRegisteredAccountsAsync(customers, cancellationToken);
+            logger.LogInformation("Seeded core demo data successfully.");
         }
 
-        // 1. Seed root catalogs first.
-        var cinemas = SeedCinemas();
-        var movies = SeedMovies();
-        var concessions = SeedConcessions();
-        var seatSelectionPolicy = SeatSelectionPolicy.CreateDefault();
-        var pricingPolicies = SeedPricingPolicies();
-
-        // 2. Build screens and seats for each cinema.
-        var screens = SeedScreens(cinemas);
-
-        // 3. Build showtimes and generated tickets.
-        var showTimes = SeedShowTimes(movies, screens, pricingPolicies);
-
-        // 4. Build customers and booking with tickets + concessions.
-        var customers = SeedCustomers();
-        var bookings = SeedBookings(showTimes, customers, concessions);
-
-        dbContext.Cinemas.AddRange(cinemas);
-        dbContext.Movies.AddRange(movies);
-        dbContext.Concessions.AddRange(concessions);
-        dbContext.SeatSelectionPolicies.Add(seatSelectionPolicy);
-        dbContext.PricingPolicies.AddRange(pricingPolicies);
-        dbContext.Screens.AddRange(screens);
-        dbContext.ShowTimes.AddRange(showTimes);
-        dbContext.Customers.AddRange(customers);
-        dbContext.Bookings.AddRange(bookings);
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await SeedRegisteredAccountsAsync(customers, cancellationToken);
-        logger.LogInformation("Seeded demo data for cinema booking domain successfully.");
+        // 2. Ensure Slides exist.
+        if (!await dbContext.Slides.AnyAsync(cancellationToken))
+        {
+            var slides = SeedSlides();
+            dbContext.Slides.AddRange(slides);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Seeded slide data successfully.");
+        }
     }
 
     private static List<Cinema> SeedCinemas()
@@ -111,48 +112,120 @@ public class DataSeeder(
             isActive: true);
         cinema2.Id = CinemaId2;
 
-        return [cinema1, cinema2];
+        var cinema3 = Cinema.Create(
+            name: "Lotte Gò Vấp",
+            thumbnailUrl: "https://images.unsplash.com/photo-1595769816263-9b910be24d5f",
+            geo: "10.828800,106.683400",
+            address: "242 Nguyen Van Luong, Go Vap, Ho Chi Minh City",
+            isActive: true);
+        cinema3.Id = new Guid("00000000-0000-0000-0000-000000000003");
+
+        var cinema4 = Cinema.Create(
+            name: "CGV Vincom Landmark 81",
+            thumbnailUrl: "https://images.unsplash.com/photo-1517602302552-471fe67acf66",
+            geo: "10.794600,106.721400",
+            address: "720A Dien Bien Phu, Ward 22, Binh Thanh, Ho Chi Minh City",
+            isActive: true);
+        cinema4.Id = new Guid("00000000-0000-0000-0000-000000000004");
+
+        var cinema5 = Cinema.Create(
+            name: "BHD Star Thao Dien",
+            thumbnailUrl: "https://images.unsplash.com/photo-1595769816263-9b910be24d5f",
+            geo: "10.803700,106.736000",
+            address: "159 Xa Lo Ha Noi, Thao Dien, Thu Duc City",
+            isActive: true);
+        cinema5.Id = new Guid("00000000-0000-0000-0000-000000000005");
+
+        return [cinema1, cinema2, cinema3, cinema4, cinema5];
+    }
+
+    private static List<Slide> SeedSlides()
+    {
+        return [
+            Slide.Create("MORTAL KOMBAT II", "Cuộc chiến sinh tử tiếp tục bùng nổ với những võ sĩ huyền thoại.", "https://images.unsplash.com/photo-1542204165-65bf26472b9b", "/movies", 1, SlideType.ShowingMovie, "https://www.youtube.com/watch?v=TcMBFSGVi1c"),
+            Slide.Create("DORAEMON MOVIE 45", "Tân Nobita và lâu đài dưới đáy biển - Hành trình khám phá đại dương kỳ ảo.", "https://images.unsplash.com/photo-1518709268805-4e9042af9f23", "/movies", 2, SlideType.UpcomingMovie),
+            Slide.Create("MANDALORIAN & GROGU", "Sự trở lại của thợ săn tiền thưởng và cậu bé Grogu trên màn ảnh rộng.", "https://images.unsplash.com/photo-1440404653325-ab127d49abc1", "/movies", 3, SlideType.UpcomingMovie),
+            Slide.Create("LỄ HỘI PHIM:CIBEF 2026", "Tham gia ngay lễ hội phim quốc tế lớn nhất năm tại Absolute Cinema.", "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd", "/promos/cibef-2026", 4, SlideType.Event),
+            Slide.Create("SHIN - CẬU BÉ BÚT CHÌ", "Quậy tung Vương quốc Nguệch ngoạc cùng 4 dũng sĩ bất ổn.", "https://images.unsplash.com/photo-1536440136628-849c177e76a1", "/movies", 5, SlideType.ShowingMovie, "https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+            Slide.Create("YÊU NỮ THÍCH HÀNG HIỆU 2", "Sự trở lại của bà trùm thời trang Miranda Priestly.", "https://images.unsplash.com/photo-1509281373149-e957c6296406", "/movies", 6, SlideType.ShowingMovie),
+            Slide.Create("GẤU BOONIE:KUNGFU ẨN SĨ", "Hành trình tầm sư học đạo đầy hài hước của anh em nhà gấu.", "https://images.unsplash.com/photo-1585647347483-22b66260dfff", "/movies", 7, SlideType.ShowingMovie),
+            Slide.Create("THẨM MỸ VIỆN ÂM PHỦ", "Bí mật kinh hoàng đằng sau những ca phẫu thuật thay đổi cuộc đời.", "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba", "/movies", 8, SlideType.ShowingMovie, "https://www.youtube.com/watch?v=uYPbbksJxIg"),
+            Slide.Create("PHI VỤ THANH TOÁN", "Cuộc chiến khốc liệt trong giới thượng lưu để giành lấy quyền lực.", "https://images.unsplash.com/photo-1517602302552-471fe67acf66", "/movies", 9, SlideType.ShowingMovie),
+            Slide.Create("SLIME:NƯỚC MẮT ĐẠI DƯƠNG", "Rimuru và những người bạn trong cuộc phiêu lưu mới tại vương quốc biển.", "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0", "/movies", 10, SlideType.ShowingMovie),
+        ];
     }
 
     private static List<Movie> SeedMovies()
     {
-        var movie1 = Movie.Create(
-            name: "Chronicles of Orion",
-            description: "A rescue mission across collapsing star systems.",
-            thumbnailUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1",
-            studio: "Nova Pictures",
-            director: "A. Tran",
-            officialTrailerUrl: "https://www.youtube.com/watch?v=2g811Eo7K8U",
-            duration: 132,
-            genre: MovieGenre.SciFi,
-            status: MovieStatus.NowShowing);
-        movie1.Id = MovieId1;
+        var movies = new List<Movie>();
 
-        var movie2 = Movie.Create(
-            name: "Midnight Verdict",
-            description: "A legal thriller where one witness changes everything.",
-            thumbnailUrl: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1",
-            studio: "Lumen Studio",
-            director: "H. Nguyen",
-            officialTrailerUrl: "https://www.youtube.com/watch?v=EXeTwQWrcwY",
-            duration: 118,
-            genre: MovieGenre.Thriller,
-            status: MovieStatus.NowShowing);
-        movie2.Id = MovieId2;
+        // --- 10 Now Showing - Real Data Vietnam May 2026 ---
+        
+        // 1. Shin - Cậu Bé Bút Chì
+        var m1 = Movie.Create("Shin – Cậu Bé Bút Chì: Quậy Tung Vương Quốc Nguệch Ngoạc", "Cậu bé Shin vô tình nắm giữ cây bút chì màu kỳ diệu để bảo vệ vương quốc Rakuga.", "https://images.unsplash.com/photo-1536440136628-849c177e76a1", "Toho", "Masakazu Hashimoto", "https://www.youtube.com/watch?v=TcMBFSGVi1c", 104, MovieGenre.Animation, MovieStatus.NowShowing, 1500000000m);
+        m1.Id = MovieId1;
+        movies.Add(m1);
 
-        var movie3 = Movie.Create(
-            name: "Paper Boats",
-            description: "A coming-of-age story about friendship and courage.",
-            thumbnailUrl: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0",
-            studio: "Blue Harbor",
-            director: "K. Pham",
-            officialTrailerUrl: "https://www.youtube.com/watch?v=6ZfuNTqbHE8",
-            duration: 106,
-            genre: MovieGenre.Drama,
-            status: MovieStatus.Upcoming);
-        movie3.Id = MovieId3;
+        // 2. Mortal Kombat II
+        var m2 = Movie.Create("Mortal Kombat II: Cuộc Chiến Sinh Tử", "Cuộc chiến khốc liệt giữa phe Địa Giới và kẻ ác bước vào giai đoạn quyết định.", "https://images.unsplash.com/photo-1542204165-65bf26472b9b", "Warner Bros.", "Simon McQuoid", "https://www.youtube.com/watch?v=pBk4NYhWNMM", 125, MovieGenre.Action, MovieStatus.NowShowing, 2500000000m);
+        m2.Id = MovieId2;
+        movies.Add(m2);
 
-        return [movie1, movie2, movie3];
+        // 3. Thẩm Mỹ Viện Âm Phủ
+        movies.Add(Movie.Create("Thẩm Mỹ Viện Âm Phủ", "Câu chuyện kinh dị về Thanh rơi vào vòng xoáy của các nghi lễ ma quái tại một thẩm mỹ viện hẻo lánh.", "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba", "VN Films", "Đỗ Đức Thịnh", "https://www.youtube.com/watch?v=uYPbbksJxIg", 110, MovieGenre.Horror, MovieStatus.NowShowing, 1200000000m));
+
+        // 4. Yêu Nữ Thích Hàng Hiệu 2
+        movies.Add(Movie.Create("Yêu Nữ Thích Hàng Hiệu 2", "Sự trở lại của bà trùm thời trang Miranda Priestly và cuộc đối đầu với người trợ lý cũ.", "https://images.unsplash.com/photo-1509281373149-e957c6296406", "Disney", "David Frankel", "https://www.youtube.com/watch?v=JfVOs4VSpmA", 115, MovieGenre.Comedy, MovieStatus.NowShowing, 1800000000m));
+
+        // 5. Gấu Boonie
+        movies.Add(Movie.Create("Gấu Boonie: Kungfu Ẩn Sĩ", "Hành trình tầm sư học đạo đầy hài hước của anh em nhà gấu.", "https://images.unsplash.com/photo-1585647347483-22b66260dfff", "Fantawild", "Huida Lin", "https://www.youtube.com/watch?v=JfVOs4VSpmA", 95, MovieGenre.Animation, MovieStatus.NowShowing, 900000000m));
+
+        // 6. Phi Vụ Thanh Toán
+        movies.Add(Movie.Create("Phi Vụ Thanh Toán", "Một vụ giết người bí ẩn kéo theo những âm mưu thâm độc trong giới thượng lưu.", "https://images.unsplash.com/photo-1517602302552-471fe67acf66", "CJ ENM", "Park Sang-hyun", null, 118, MovieGenre.Thriller, MovieStatus.NowShowing, 1100000000m));
+
+        // 7. Slime: Nước Mắt Đại Dương
+        movies.Add(Movie.Create("Lúc Đó Tôi Đã Chuyển Sinh Thành Slime: Nước Mắt Đại Dương", "Rimuru bắt đầu chuyến phiêu lưu mới tại vương quốc biển xa xôi.", "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0", "Bandai Namco", "Yasuhito Kikuchi", null, 108, MovieGenre.Animation, MovieStatus.NowShowing, 1300000000m));
+
+        // 8. Vây Hãm: Kẻ Trừng Phạt
+        movies.Add(Movie.Create("Vây Hãm: Kẻ Trừng Phạt", "Thanh tra Ma Seok-do đối đầu với một tổ chức tội phạm công nghệ quy mô lớn.", "https://images.unsplash.com/photo-1536440136628-849c177e76a1", "ABO Entertainment", "Heo Myung-haeng", null, 109, MovieGenre.Action, MovieStatus.NowShowing, 2000000000m));
+
+        // 9. Phổi Sắt
+        movies.Add(Movie.Create("Phổi Sắt", "Một thủy thủ bị nhốt trong tàu ngầm mini khám phá đại dương máu trên hành tinh xa lạ.", "https://images.unsplash.com/photo-1507676184212-d0330a15183c", "Markiplier", "Mark Fischbach", null, 85, MovieGenre.Horror, MovieStatus.NowShowing, 700000000m));
+
+        // 10. Đội Thám Tử Cừu
+        movies.Add(Movie.Create("Đội Thám Tử Cừu: Án Mạng Lúc Nửa Đêm", "Vụ án mạng bí ẩn trong trang trại đòi hỏi sự thông minh của biệt đội thám tử cừu.", "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd", "Studio Canal", "Richard Starzak", null, 92, MovieGenre.Animation, MovieStatus.NowShowing, 600000000m));
+
+
+        // --- 6 Upcoming - Real Data Vietnam May 2026 ---
+
+        // 1. Doraemon Movie 45
+        var u1 = Movie.Create("Doraemon Movie 45: Tân Nobita Và Lâu Đài Dưới Đáy Biển", "Chuyến phiêu lưu mới của nhóm bạn Doraemon tại thế giới bí ẩn dưới đáy biển.", "https://images.unsplash.com/photo-1518709268805-4e9042af9f23", "Shin-Ei Animation", "Susumu Mitsunaka", null, 105, MovieGenre.Animation, MovieStatus.Upcoming, 2000000000m);
+        u1.Id = MovieId3;
+        movies.Add(u1);
+
+        // 2. Mandalorian & Grogu
+        movies.Add(Movie.Create("The Mandalorian and Grogu", "Hành trình mới của Mando và Grogu sau các sự kiện trong series.", "https://images.unsplash.com/photo-1440404653325-ab127d49abc1", "Lucasfilm", "Jon Favreau", null, 130, MovieGenre.SciFi, MovieStatus.Upcoming, 3000000000m));
+
+        // 3. Ma Da Hàn Quốc
+        movies.Add(Movie.Create("Ma Da Hàn Quốc: Hồ Nuốt Người", "Truyền thuyết kinh dị về linh hồn dưới hồ nước đang chờ đợi kẻ xấu số tiếp theo.", "https://images.unsplash.com/photo-1585647347483-22b66260dfff", "Showbox", "Jang Jae-hyun", null, 122, MovieGenre.Horror, MovieStatus.Upcoming, 1500000000m));
+
+        // 4. Mother Mary
+        movies.Add(Movie.Create("Mother Mary: Hào Quang Đơn Độc", "Mối quan hệ phức tạp giữa một ngôi sao nhạc Pop và nhà thiết kế thời trang tài năng.", "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0", "A24", "David Lowery", null, 112, MovieGenre.Drama, MovieStatus.Upcoming, 900000000m));
+
+        // 5. Một Thời Ta Đã Yêu
+        movies.Add(Movie.Create("Một Thời Ta Đã Yêu", "Câu chuyện tình lãng mạn đầy nuối tiếc của hai người trẻ giữa Sài Gòn hoa lệ.", "https://images.unsplash.com/photo-1517602302552-471fe67acf66", "Skyline", "Nguyễn Phan Quang Bình", null, 106, MovieGenre.Romance, MovieStatus.Upcoming, 800000000m));
+
+        // 6. KHÁCH
+        movies.Add(Movie.Create("KHÁCH", "Vị khách không mời mang theo những bí mật chết người đến ngôi biệt thự hẻo lánh.", "https://images.unsplash.com/photo-1509281373149-e957c6296406", "A24", "Ti West", null, 102, MovieGenre.Thriller, MovieStatus.Upcoming, 700000000m));
+
+
+        // --- 4 Classic / No Show ---
+        for (int i = 1; i <= 4; i++)
+        {
+            movies.Add(Movie.Create($"Phim Kinh Điển {i}", $"Tác phẩm điện ảnh kinh điển {i} đã từng nhận được nhiều giải thưởng lớn.", "https://images.unsplash.com/photo-1542204165-65bf26472b9b", "Heritage Films", "K. Master", null, 120 + i, MovieGenre.Drama, MovieStatus.NoShow, 10000000m * i));
+        }
+
+        return movies;
     }
 
     private static List<Concession> SeedConcessions()
@@ -185,20 +258,20 @@ public class DataSeeder(
     {
         return
         [
-            // TwoD
-            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Regular, 85000m, 1.00m, true),
-            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.VIP, 120000m, 1.00m, true),
-            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Couple, 170000m, 1.00m, true),
+            // TwoD - Weekend surcharge 20%
+            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Regular, 85000m, 1.00m, 1.20m, true),
+            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.VIP, 120000m, 1.00m, 1.20m, true),
+            PricingPolicy.Create(null, ScreenType.TwoD, SeatType.Sweetbox, 170000m, 1.00m, 1.20m, true),
 
-            // ThreeD
-            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Regular, 85000m, 1.25m, true),
-            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.VIP, 120000m, 1.25m, true),
-            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Couple, 170000m, 1.25m, true),
+            // ThreeD - Weekend surcharge 15%
+            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Regular, 85000m, 1.25m, 1.15m, true),
+            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.VIP, 120000m, 1.25m, 1.15m, true),
+            PricingPolicy.Create(null, ScreenType.ThreeD, SeatType.Sweetbox, 170000m, 1.25m, 1.15m, true),
 
-            // IMAX
-            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Regular, 85000m, 1.55m, true),
-            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.VIP, 120000m, 1.55m, true),
-            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Couple, 170000m, 1.55m, true)
+            // IMAX - Weekend surcharge 10%
+            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Regular, 85000m, 1.55m, 1.10m, true),
+            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.VIP, 120000m, 1.55m, 1.10m, true),
+            PricingPolicy.Create(null, ScreenType.IMAX, SeatType.Sweetbox, 170000m, 1.55m, 1.10m, true)
         ];
     }
 
@@ -229,25 +302,37 @@ public class DataSeeder(
             + "[4,3,4,3,0,4,3,4,3,4,3,4,3,0,4,3,4,3]]";
 
 
-        var screen1 = CreateScreen(cinemas[0].Id, "ND-S1", standardSeatMap, ScreenType.TwoD);
-        screen1.Id = ScreenId1;
+        var screenList = new List<Screen>();
+        int screenIndex = 1;
 
-        var screen2 = CreateScreen(cinemas[0].Id, "ND-S2", compactSeatMap, ScreenType.ThreeD);
-        screen2.Id = ScreenId2;
+        foreach (var cinema in cinemas)
+        {
+            var initials = string.Concat(cinema.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0])).ToUpper();
+            int screenNum = 1;
 
-        var screen3 = CreateScreen(cinemas[1].Id, "BQK-IMAX-1", standardSeatMap, ScreenType.IMAX);
-        screen3.Id = ScreenId3;
+            var s1 = CreateScreen(cinema.Id, $"{initials}-S{screenNum++}", standardSeatMap, ScreenType.TwoD, [ScreenType.TwoD]);
+            var s2 = CreateScreen(cinema.Id, $"{initials}-S{screenNum++}", compactSeatMap, ScreenType.ThreeD, [ScreenType.TwoD, ScreenType.ThreeD]);
+            var s3 = CreateScreen(cinema.Id, $"{initials}-S{screenNum++}", standardSeatMap, ScreenType.IMAX, [ScreenType.TwoD, ScreenType.ThreeD, ScreenType.IMAX]);
+            var s4 = CreateScreen(cinema.Id, $"{initials}-S{screenNum++}", mediumSeatMap, ScreenType.IMAX, [ScreenType.TwoD, ScreenType.ThreeD, ScreenType.IMAX]);
+            var s5 = CreateScreen(cinema.Id, $"{initials}-S{screenNum++}", largestSeatMap, ScreenType.IMAX, [ScreenType.TwoD, ScreenType.ThreeD, ScreenType.IMAX]);
 
-        var screen4 = CreateScreen(cinemas[1].Id, "BQK-IMAX-2", mediumSeatMap, ScreenType.IMAX);
-        screen4.Id = ScreenId4;
+            // Assign fixed IDs only to the first cinema's screens to preserve existing tests/seed references
+            if (cinema.Id == CinemaId1)
+            {
+                s1.Id = ScreenId1;
+                s2.Id = ScreenId2;
+                s3.Id = ScreenId3;
+                s4.Id = ScreenId4;
+                s5.Id = ScreenId5;
+            }
 
-        var screen5 = CreateScreen(cinemas[1].Id, "BQK-IMAX-3", largestSeatMap, ScreenType.IMAX);
-        screen5.Id = ScreenId5;
+            screenList.AddRange([s1, s2, s3, s4, s5]);
+        }
 
-        return [screen1, screen2, screen3, screen4, screen5];
+        return screenList;
     }
 
-    private static Screen CreateScreen(Guid cinemaId, string code, string seatMap, ScreenType type)
+    private static Screen CreateScreen(Guid cinemaId, string code, string seatMap, ScreenType type, List<ScreenType> supportedFormats)
     {
         var rowCount = seatMap.Count(c => c == '[') - 1;
         var firstRowStart = seatMap.IndexOf("[", StringComparison.Ordinal) + 1;
@@ -264,7 +349,8 @@ public class DataSeeder(
             totalSeats: totalSeats,
             seatMap: seatMap,
             type: type,
-            isActive: true);
+            isActive: true,
+            supportedFormats: supportedFormats);
 
         screen.GenerateSeats(seatMap);
         return screen;
@@ -275,71 +361,92 @@ public class DataSeeder(
         List<Screen> screens,
         List<PricingPolicy> pricingPolicies)
     {
+        var showTimes = new List<ShowTime>();
         var now = DateTimeOffset.UtcNow;
-        var showTime1 = ShowTime.Create(
-            movie: movies[0],
-            screen: screens[0],
-            startAt: now.AddHours(4),
-            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == screens[0].Type).ToList());
-        showTime1.Id = ShowTimeId1;
-        // IMPORTANT: Tickets generated by ShowTime.Create have the old (random) ShowTimeId.
-        // We must update them to match the new fixed ShowTimeId.
-        foreach (var ticket in showTime1.Tickets)
+        var nowShowingMovies = movies.Where(m => m.Status == MovieStatus.NowShowing).ToList();
+        
+        int showtimeIndex = 0;
+        var fixedIds = new[] { ShowTimeId1, ShowTimeId2, ShowTimeId3, ShowTimeId4, ShowTimeId5 };
+
+        // Create showtimes for the next 3 days
+        for (int day = 0; day < 3; day++)
         {
-            ticket.ShowTimeId = ShowTimeId1;
+            var date = now.Date.AddDays(day);
+            
+            // For each Cinema
+            for (int cinemaIdx = 0; cinemaIdx < 5; cinemaIdx++)
+            {
+                var cinemaScreens = screens.Skip(cinemaIdx * 5).Take(5).ToList();
+                
+                for (int screenIdx = 0; screenIdx < cinemaScreens.Count; screenIdx++)
+                {
+                    var screen = cinemaScreens[screenIdx];
+                    var lastEndTime = DateTimeOffset.MinValue;
+                    
+                    // 2 showtimes per screen per day
+                    for (int session = 0; session < 2; session++)
+                    {
+                        var movie = nowShowingMovies[showtimeIndex % nowShowingMovies.Count];
+                        
+                        var vnOffset = TimeSpan.FromHours(7);
+                        var vnDate = now.ToOffset(vnOffset).Date.AddDays(day);
+                        
+                        double hourOffset = (session == 0 ? 9.0 : 18.0) + (screenIdx * 0.5) + (cinemaIdx * 0.5);
+                        var startAt = new DateTimeOffset(vnDate, vnOffset).AddHours(hourOffset).ToUniversalTime();
+
+                        if (startAt <= now)
+                        {
+                            startAt = now.AddHours(2 + session * 3);
+                        }
+
+                        // Prevent overlap
+                        if (startAt < lastEndTime.AddMinutes(30))
+                        {
+                            startAt = lastEndTime.AddMinutes(30);
+                        }
+
+                        // Ensure not between 2 AM and 6 AM VN
+                        var startVn = startAt.ToOffset(vnOffset);
+                        if (startVn.Hour >= 2 && startVn.Hour < 6)
+                        {
+                            // push to 6 AM VN
+                            startAt = new DateTimeOffset(startVn.Year, startVn.Month, startVn.Day, 6, 0, 0, vnOffset).ToUniversalTime();
+                        }
+                        
+                        lastEndTime = startAt.AddMinutes(movie.Duration);
+
+                        // Pick format from supported formats
+                        var format = screen.SupportedFormats[showtimeIndex % screen.SupportedFormats.Count];
+                        
+                        var st = ShowTime.Create(
+                            movie: movie,
+                            screen: screen,
+                            startAt: startAt,
+                            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == format).ToList(),
+                            format: format);
+                        
+                        if (showtimeIndex < fixedIds.Length)
+                        {
+                            st.Id = fixedIds[showtimeIndex];
+                            foreach (var ticket in st.Tickets)
+                            {
+                                ticket.ShowTimeId = fixedIds[showtimeIndex];
+                            }
+                        }
+
+                        if (showtimeIndex == 0 && st.Tickets.Count > 0)
+                        {
+                            st.Tickets.Last().Id = TicketId1;
+                        }
+
+                        showTimes.Add(st);
+                        showtimeIndex++;
+                    }
+                }
+            }
         }
 
-        // Fix Ticket ID for a ticket that is guaranteed to stay available for sample request
-        if (showTime1.Tickets.Count > 0)
-        {
-            showTime1.Tickets.Last().Id = TicketId1;
-        }
-
-        var showTime2 = ShowTime.Create(
-            movie: movies[1],
-            screen: screens[1],
-            startAt: now.AddHours(7),
-            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == screens[1].Type).ToList());
-        showTime2.Id = ShowTimeId2;
-        foreach (var ticket in showTime2.Tickets)
-        {
-            ticket.ShowTimeId = ShowTimeId2;
-        }
-
-        var showTime3 = ShowTime.Create(
-            movie: movies[0],
-            screen: screens[2],
-            startAt: now.AddDays(1).AddHours(3),
-            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == screens[2].Type).ToList());
-        showTime3.Id = ShowTimeId3;
-        foreach (var ticket in showTime3.Tickets)
-        {
-            ticket.ShowTimeId = ShowTimeId3;
-        }
-
-        var showTime4 = ShowTime.Create(
-            movie: movies[0],
-            screen: screens[3],
-            startAt: now.AddDays(1).AddHours(6),
-            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == screens[3].Type).ToList());
-        showTime4.Id = ShowTimeId4;
-        foreach (var ticket in showTime4.Tickets)
-        {
-            ticket.ShowTimeId = ShowTimeId4;
-        }
-
-        var showTime5 = ShowTime.Create(
-            movie: movies[1],
-            screen: screens[4],
-            startAt: now.AddDays(1).AddHours(9),
-            pricingPolicies: pricingPolicies.Where(p => p.ScreenType == screens[4].Type).ToList());
-        showTime5.Id = ShowTimeId5; 
-        foreach (var ticket in showTime5.Tickets)
-        {
-            ticket.ShowTimeId = ShowTimeId5;
-        }
-
-        return [showTime1, showTime2, showTime3, showTime4, showTime5];
+        return showTimes;
     }
 
     private static List<Customer> SeedCustomers()

@@ -16,7 +16,8 @@ public class ScreenConfiguration : IEntityTypeConfiguration<Screen>
         builder.Property(x => x.ColumnOfSeats).IsRequired();
         builder.Property(x => x.TotalSeats).IsRequired();
         builder.Property(x => x.SeatMap).HasColumnType("text");
-        builder.Property(x => x.Type).IsRequired();
+        builder.Property(x => x.SupportedFormats).HasColumnType("jsonb");
+        builder.Ignore(x => x.Type);
         builder.Property(x => x.IsActive).IsRequired();
 
         builder.HasOne(x => x.Cinema)

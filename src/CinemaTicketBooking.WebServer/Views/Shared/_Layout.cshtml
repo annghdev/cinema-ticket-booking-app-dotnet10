@@ -4,100 +4,98 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>@ViewData["Title"] - Aether Cinema</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap"
+          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+          rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "tertiary-fixed": "#a7a9ff",
-                        "secondary": "#00f4fe",
-                        "on-tertiary": "#090079",
-                        "surface-bright": "#282c36",
-                        "surface-tint": "#61b4fe",
-                        "surface-container": "#161a21",
-                        "inverse-primary": "#00639f",
-                        "primary-dim": "#4fa3ed",
-                        "on-error-container": "#ffa8a3",
-                        "secondary-container": "#00696e",
-                        "on-surface": "#ecedf6",
-                        "surface-variant": "#22262f",
-                        "surface-dim": "#0b0e14",
-                        "surface-container-high": "#1c2028",
-                        "surface-container-lowest": "#000000",
-                        "error-container": "#9f0519",
-                        "surface": "#0b0e14",
-                        "on-secondary": "#00575b",
-                        "secondary-fixed-dim": "#00e5ee",
-                        "on-tertiary-fixed": "#060061",
-                        "primary": "#61b4fe",
-                        "surface-container-highest": "#22262f",
-                        "on-tertiary-fixed-variant": "#1600c3",
-                        "primary-fixed-dim": "#4fa3ed",
-                        "on-primary-container": "#00243f",
-                        "inverse-surface": "#f9f9ff",
-                        "inverse-on-surface": "#52555c",
-                        "outline-variant": "#45484f",
-                        "on-surface-variant": "#a9abb3",
-                        "secondary-fixed": "#00f4fe",
-                        "primary-fixed": "#5eb1fc",
-                        "secondary-dim": "#00e5ee",
-                        "error": "#ff716c",
-                        "on-tertiary-container": "#ffffff",
-                        "outline": "#73757d",
-                        "tertiary-container": "#4949fc",
-                        "on-primary-fixed-variant": "#00385d",
-                        "on-secondary-container": "#dffdff",
-                        "background": "#0b0e14",
-                        "on-primary-fixed": "#001222",
-                        "on-background": "#ecedf6",
-                        "on-secondary-fixed": "#004346",
-                        "primary-container": "#52a6f0",
-                        "on-error": "#490006",
-                        "tertiary-fixed-dim": "#9799ff",
-                        "tertiary": "#9093ff",
-                        "on-primary": "#003152",
-                        "error-dim": "#d7383b",
-                        "surface-container-low": "#10131a",
-                        "on-secondary-fixed-variant": "#006266",
-                        "tertiary-dim": "#5c5eff"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Space Grotesk"],
-                        "display": ["Space Grotesk"],
-                        "body": ["Manrope"],
-                        "label": ["Manrope"]
-                    }
-                },
-            },
+        darkMode: "class",
+        theme: {
+        extend: {
+        "colors": {
+        "tertiary-fixed": "#a7a9ff",
+        "secondary": "#00f4fe",
+        "on-tertiary": "#090079",
+        "surface-bright": "#282c36",
+        "surface-tint": "#61b4fe",
+        "surface-container": "#161a21",
+        "inverse-primary": "#00639f",
+        "primary-dim": "#4fa3ed",
+        "on-error-container": "#ffa8a3",
+        "secondary-container": "#00696e",
+        "on-surface": "#ecedf6",
+        "surface-variant": "#22262f",
+        "surface-dim": "#0b0e14",
+        "surface-container-high": "#1c2028",
+        "surface-container-lowest": "#000000",
+        "error-container": "#9f0519",
+        "surface": "#0b0e14",
+        "on-secondary": "#00575b",
+        "secondary-fixed-dim": "#00e5ee",
+        "on-tertiary-fixed": "#060061",
+        "primary": "#61b4fe",
+        "surface-container-highest": "#22262f",
+        "on-tertiary-fixed-variant": "#1600c3",
+        "primary-fixed-dim": "#4fa3ed",
+        "on-primary-container": "#00243f",
+        "inverse-surface": "#f9f9ff",
+        "inverse-on-surface": "#52555c",
+        "outline-variant": "#45484f",
+        "on-surface-variant": "#a9abb3",
+        "secondary-fixed": "#00f4fe",
+        "primary-fixed": "#5eb1fc",
+        "secondary-dim": "#00e5ee",
+        "error": "#ff716c",
+        "on-tertiary-container": "#ffffff",
+        "outline": "#73757d",
+        "tertiary-container": "#4949fc",
+        "on-primary-fixed-variant": "#00385d",
+        "on-secondary-container": "#dffdff",
+        "background": "#0b0e14",
+        "on-primary-fixed": "#001222",
+        "on-background": "#ecedf6",
+        "on-secondary-fixed": "#004346",
+        "primary-container": "#52a6f0",
+        "on-error": "#490006",
+        "tertiary-fixed-dim": "#9799ff",
+        "tertiary": "#9093ff",
+        "on-primary": "#003152",
+        "error-dim": "#d7383b",
+        "surface-container-low": "#10131a",
+        "on-secondary-fixed-variant": "#006266",
+        "tertiary-dim": "#5c5eff"
+        },
+        "borderRadius": {
+        "DEFAULT": "0.25rem",
+        "lg": "0.5rem",
+        "xl": "0.75rem",
+        "full": "9999px"
+        },
+        "fontFamily": {
+        "headline": ["Space Grotesk"],
+        "display": ["Space Grotesk"],
+        "body": ["Manrope"],
+        "label": ["Manrope"]
+        }
+        },
+        },
         }
     </script>
     <style>
         .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
         .glass-card {
-            background: rgba(34, 38, 47, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(69, 72, 79, 0.2);
+        background: rgba(34, 38, 47, 0.4);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(69, 72, 79, 0.2);
         }
 
         .neon-glow {
-            filter: drop-shadow(0 0 8px rgba(0, 244, 254, 0.5));
+        filter: drop-shadow(0 0 8px rgba(0, 244, 254, 0.5));
         }
     </style>
     @await RenderSectionAsync("Styles", required: false)
@@ -113,93 +111,144 @@
             currentUser = await UserManager.GetUserAsync(User);
         }
     }
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-[45] bg-black/60 backdrop-blur-sm hidden transition-opacity duration-300 lg:hidden"></div>
+
     <!-- SideNavBar -->
-    <aside
-        class="fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-[#0b0e14] border-r border-[#45484f]/10 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
-        <div class="p-8">
-            <h1 class="text-xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Absolute Cinema</h1>
-            <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản trị</p>
+    <aside id="sidebar"
+           class="fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-[#0b0e14] border-r border-[#45484f]/10 shadow-[10px_0_30px_rgba(0,0,0,0.5)] transition-all duration-300 -translate-x-full lg:translate-x-0">
+        <div class="p-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Absolute Cinema</h1>
+                <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Cổng quản trị</p>
+            </div>
+            <button id="closeSidebar" class="p-2 text-slate-400 lg:hidden hover:text-secondary">
+                <span class="material-symbols-outlined">close</span>
+            </button>
         </div>
-        <nav class="flex-1 mt-4">
+        <nav class="flex-1 mt-4 overflow-y-auto custom-scrollbar">
             @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin) || (await AuthorizationService.AuthorizeAsync(User, Permissions.ReportsView)).Succeeded)
             {
-                <!-- Dashboard Active -->
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Home" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                    asp-controller="Home" asp-action="Index">
+                       asp-controller="Home" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-                    Trang tổng quan
+                    <span class="sidebar-text">Trang tổng quan</span>
                 </a>
             }
             @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.MoviesView)).Succeeded)
             {
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Movie" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                    asp-controller="Movie" asp-action="Index">
+                       asp-controller="Movie" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="movie">movie</span>
-                    Thư viện phim
+                    <span class="sidebar-text">Quản lý phim</span>
                 </a>
             }
             @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.ShowTimesView)).Succeeded)
             {
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "ShowTime" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                    asp-controller="ShowTime" asp-action="Index">
+                       asp-controller="ShowTime" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="schedule">schedule</span>
-                    Lịch chiếu
+                    <span class="sidebar-text">Lịch chiếu phim</span>
                 </a>
             }
             @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.CinemasView)).Succeeded)
             {
                 <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Cinema" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                    asp-controller="Cinema" asp-action="Index">
+                       asp-controller="Cinema" asp-action="Index">
                     <span class="material-symbols-outlined" data-icon="store">store</span>
-                    Quản lý rạp
+                    <span class="sidebar-text">Quản lý rạp</span>
+                </a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.PricingPoliciesView)).Succeeded)
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Pricing" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                       asp-controller="Pricing" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="payments">payments</span>
+                    <span class="sidebar-text">Quản lý giá vé</span>
+                </a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.ConcessionsView)).Succeeded)
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Concession" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                       asp-controller="Concession" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="fastfood">fastfood</span>
+                    <span class="sidebar-text">Quản lý bắp nước</span>
+                </a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.SeatSelectionPoliciesView)).Succeeded)
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "SeatSelectionPolicy" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                       asp-controller="SeatSelectionPolicy" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="airline_seat_recline_extra">airline_seat_recline_extra</span>
+                    <span class="sidebar-text">Cấu hình chọn ghế</span>
+                </a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.AccountsView)).Succeeded)
+            {
+                <div class="px-6 py-2 mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Quản lý tài khoản</div>
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "UserManagement" && action == "Customers" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                       asp-controller="UserManagement" asp-action="Customers">
+                    <span class="material-symbols-outlined" data-icon="group">group</span>
+                    <span class="sidebar-text">Khách hàng</span>
+                </a>
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "UserManagement" && action == "SystemUsers" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                       asp-controller="UserManagement" asp-action="SystemUsers">
+                    <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+                    <span class="sidebar-text">Tài khoản hệ thống</span>
+                </a>
+            }
+            @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.TicketStaff))
+            {
+                <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
+                       href="#">
+                    <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+                    <span class="sidebar-text">Quầy vé</span>
+                </a>
+            }
+
+            @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin))
+            {
+                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Role" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
+                       asp-controller="Role" asp-action="Index">
+                    <span class="material-symbols-outlined" data-icon="security">security</span>
+                    <span class="sidebar-text">Quyền truy cập</span>
                 </a>
             }
             @if (User.IsInRole(RoleNames.SystemAdmin) || User.IsInRole(RoleNames.Admin))
             {
-                <a class="flex items-center gap-3 px-6 py-4 font-headline uppercase tracking-widest text-xs transition-all duration-200 @(controller == "Role" && action == "Index" ? "text-[#00f4fe] bg-[#61b4fe]/10 border-r-4 border-[#00f4fe] drop-shadow-[0_0_5px_rgba(0,244,254,0.3)] translate-x-1" : "text-slate-500 hover:text-slate-200 hover:bg-white/5")"
-                    asp-controller="Role" asp-action="Index">
-                    <span class="material-symbols-outlined" data-icon="security">security</span>
-                    Phân quyền
+                <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
+                       href="#">
+                    <span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+                    <span class="sidebar-text">Nhật ký hệ thống</span>
                 </a>
             }
-            <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
-                href="#">
-                <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
-                Phòng vé
-            </a>
-            <a class="flex items-center gap-3 px-6 py-4 text-slate-500 hover:text-slate-200 font-headline uppercase tracking-widest text-xs hover:bg-white/5 transition-all duration-300"
-                href="#">
-                <span class="material-symbols-outlined" data-icon="terminal">terminal</span>
-                Nhật ký hệ thống
-            </a>
         </nav>
-
     </aside>
+
     <!-- TopAppBar -->
-    <header
-        class="fixed top-0 right-0 left-64 z-40 bg-[#0b0e14]/60 backdrop-blur-xl border-b border-[#45484f]/20 shadow-2xl shadow-black/40 flex items-center justify-between px-8 h-20">
+    <header id="topAppBar"
+            class="fixed top-0 right-0 left-0 lg:left-64 z-40 bg-[#0b0e14]/60 backdrop-blur-xl border-b border-[#45484f]/20 shadow-2xl shadow-black/40 flex items-center justify-between px-8 h-20 transition-all duration-300">
         <div class="flex items-center gap-6">
-            <h2
-                class="text-2xl font-bold text-[#00f4fe] drop-shadow-[0_0_8px_rgba(0,244,254,0.5)] font-headline tracking-tight">
-                @ViewData["Title"]</h2>
-            <div class="relative hidden lg:block">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
-                    data-icon="search">search</span>
-                <input
-                    class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm w-80 focus:ring-1 focus:ring-secondary/50 text-on-surface"
-                    placeholder="Tìm kiếm phim, phòng chiếu, phân tích..." type="text" />
-            </div>
+            <button id="toggleSidebar" class="p-2 text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-lg active:scale-95 duration-200">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h2 class="text-xl font-bold text-[#00f4fe] drop-shadow-[0_0_8px_rgba(0,244,254,0.5)] font-headline tracking-tight md:text-2xl">
+                @ViewData["Title"]
+            </h2>
         </div>
         <div class="flex items-center gap-6">
-            <div class="flex items-center gap-4 border-r border-[#45484f]/20 pr-6">
-                <button
-                    class="p-2 text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-full relative scale-95 active:scale-90 duration-200">
+            <div class="relative hidden xl:block">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+                      data-icon="search">search</span>
+                <input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm w-80 focus:ring-1 focus:ring-secondary/50 text-on-surface"
+                       placeholder="Tìm kiếm phim, phòng chiếu, phân tích..." type="text" />
+            </div>
+            <div class="flex items-center gap-4 border-r border-[#45484f]/20 pr-6 hidden md:flex">
+                <button class="w-10 h-10 aspect-square flex items-center justify-center text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-full relative scale-95 active:scale-90 duration-200">
                     <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-                    <span
-                        class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-background"></span>
+                    <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-secondary rounded-full border-2 border-background"></span>
                 </button>
-                <button
-                    class="p-2 text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-full scale-95 active:scale-90 duration-200">
+                <button class="w-10 h-10 aspect-square flex items-center justify-center text-slate-400 hover:bg-[#61b4fe]/10 hover:text-[#61b4fe] transition-all rounded-full scale-95 active:scale-90 duration-200">
                     <span class="material-symbols-outlined" data-icon="settings">settings</span>
                 </button>
             </div>
@@ -210,8 +259,8 @@
                         <p class="text-[10px] text-outline italic">@(currentUser?.Email ?? "staff@cinema.com")</p>
                     </div>
                     <div class="w-10 h-10 rounded-full border-2 border-primary/30 p-0.5 shadow-[0_0_10px_rgba(97,180,254,0.2)]">
-                        <img class="w-full h-full rounded-full object-cover" 
-                             src="@(currentUser?.AvatarUrl ?? "https://api.dicebear.com/7.x/adventurer/svg?seed=staff")" 
+                        <img class="w-full h-full rounded-full object-cover"
+                             src="@(currentUser?.AvatarUrl ?? "https://api.dicebear.com/7.x/adventurer/svg?seed=staff")"
                              alt="Avatar" />
                     </div>
                 </button>
@@ -234,9 +283,10 @@
             </div>
         </div>
     </header>
+
     <!-- Main Content -->
-    <main
-        class="ml-64 pt-24 p-8 min-h-screen bg-gradient-to-br from-background via-surface-container-low to-background">
+    <main id="mainContent"
+          class="lg:ml-64 pt-28 p-8 min-h-screen bg-gradient-to-br from-background via-surface-container-low to-background transition-all duration-300">
         @RenderBody()
     </main>
     <!-- Global Toast Container -->
@@ -252,51 +302,78 @@
     </div>
 
     <script>
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.getElementById('mainContent');
+        const topAppBar = document.getElementById('topAppBar');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+
+        function toggleSidebar() {
+        const isMobile = window.innerWidth < 1024;
+        if (isMobile) {
+        sidebar.classList.toggle('-translate-x-full');
+        sidebarOverlay.classList.toggle('hidden');
+        document.body.classList.toggle('overflow-hidden');
+        } else {
+        sidebar.classList.toggle('lg:-translate-x-full');
+        mainContent.classList.toggle('lg:ml-0');
+        topAppBar.classList.toggle('lg:left-0');
+        }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
         // Global Loading Spinner Service
         window.showLoading = function() {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) overlay.classList.remove('hidden');
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.remove('hidden');
         };
 
         window.hideLoading = function() {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) overlay.classList.add('hidden');
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.add('hidden');
         };
 
         // Global Toast Service
         window.showToast = function(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border backdrop-blur-md shadow-2xl transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-auto max-w-sm`;
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
             
-            if (type === 'success') {
-                toast.classList.add('bg-slate-900/90', 'border-[#00f4fe]/30', 'text-slate-100');
-                toast.innerHTML = `
-                    <span class="material-symbols-outlined text-[#00f4fe]">check_circle</span>
-                    <p class="text-xs font-semibold">${message}</p>
-                `;
-            } else {
-                toast.classList.add('bg-slate-900/90', 'border-red-500/30', 'text-red-200');
-                toast.innerHTML = `
-                    <span class="material-symbols-outlined text-red-400">error</span>
-                    <p class="text-xs font-semibold">${message}</p>
-                `;
-            }
-
-            container.appendChild(toast);
+        const toast = document.createElement('div');
+        toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border backdrop-blur-md shadow-2xl transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-auto max-w-sm`;
             
-            // Animate in
-            setTimeout(() => {
-                toast.classList.remove('translate-y-10', 'opacity-0');
-            }, 50);
+        if (type === 'success') {
+        toast.classList.add('bg-slate-900/90', 'border-[#00f4fe]/30', 'text-slate-100');
+        toast.innerHTML = `
+        <span class="material-symbols-outlined text-[#00f4fe]">check_circle</span>
+        <p class="text-xs font-semibold">${message}</p>
+        `;
+        } else {
+        toast.classList.add('bg-slate-900/90', 'border-red-500/30', 'text-red-200');
+        toast.innerHTML = `
+        <span class="material-symbols-outlined text-red-400">error</span>
+        <p class="text-xs font-semibold">${message}</p>
+        `;
+        }
 
-            // Animate out
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-10');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 4000);
+        container.appendChild(toast);
+            
+        // Animate in
+        setTimeout(() => {
+        toast.classList.remove('translate-y-10', 'opacity-0');
+        }, 50);
+
+        // Animate out
+        setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-10');
+        setTimeout(() => {
+        toast.remove();
+        }, 300);
+        }, 4000);
         };
     </script>
 

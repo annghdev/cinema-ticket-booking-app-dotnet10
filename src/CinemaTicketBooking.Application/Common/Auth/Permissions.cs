@@ -10,8 +10,10 @@ public static class Permissions
     public const string BookingsManage = "bookings.manage";
 
     // === Accounts / Identity ===
+    public const string AccountsView = "accounts.view";
     public const string AccountsLock = "accounts.lock";
     public const string AccountsUnlock = "accounts.unlock";
+    public const string AccountsManage = "accounts.manage";
 
     // === Cinemas & Screens ===
     public const string CinemasView = "cinemas.view";

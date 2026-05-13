@@ -38,7 +38,7 @@ public class GetScreensHandler(IUnitOfWork uow)
                 screen.ColumnOfSeats,
                 screen.TotalSeats,
                 screen.SeatMap,
-                screen.Type,
+                screen.SupportedFormats,
                 screen.IsActive,
                 screen.Seats.Count(seat => seat.IsActive),
                 screen.CreatedAt

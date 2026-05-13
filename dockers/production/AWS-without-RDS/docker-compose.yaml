@@ -1,0 +1,77 @@
+services:
+  db:
+    image: "postgres:17-alpine"
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: "always"
+
+  minio:
+    image: "minio/minio:latest"
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    restart: "always"
+
+  cache:
+    image: "docker.io/library/redis:7.2-alpine"
+    command:
+      - "-c"
+      - "redis-server --requirepass $$REDIS_PASSWORD"
+    entrypoint:
+      - "/bin/sh"
+    environment:
+      REDIS_PASSWORD: "${CACHE_PASSWORD}"
+    expose:
+      - "6379"
+    restart: "always"
+
+  webserver:
+    image: "${WEBSERVER_IMAGE}"
+    pull_policy: always
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+      - ConnectionStrings__redis=cache:6379,password=${CACHE_PASSWORD}
+    ports:
+      - "${WEBSERVER_PORT:-7000}:8080"
+    depends_on:
+      cache:
+        condition: "service_started"
+      db:
+        condition: "service_healthy"
+      minio:
+        condition: "service_started"
+    restart: "always"
+
+  webapp:
+    image: "${WEBAPP_IMAGE}"
+    pull_policy: always
+    env_file:
+      - .env
+    ports:
+      - "${WEBAPP_PORT:-5173}:5173"
+    depends_on:
+      webserver:
+        condition: "service_started"
+    restart: "always"
+
+volumes:
+  postgres_data:
+  minio_data:

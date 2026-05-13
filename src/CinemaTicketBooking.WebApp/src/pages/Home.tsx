@@ -1,63 +1,167 @@
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import { getActiveSlides } from "../apis/slideApi"
+import { type Slide } from "../types/Slide"
+import { MovieTrailerModal } from "../components/MovieTrailerModal"
 
 function Home() {
+  const [slides, setSlides] = useState<Slide[]>([])
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+  const [isLoadingSlides, setIsLoadingSlides] = useState(true)
+  const [trailerData, setTrailerData] = useState<{ isOpen: boolean; url: string; name: string }>({
+    isOpen: false,
+    url: "",
+    name: "",
+  })
+
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const data = await getActiveSlides()
+        setSlides(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error("Failed to fetch slides:", error)
+      } finally {
+        setIsLoadingSlides(false)
+      }
+    }
+    fetchSlides()
+  }, [])
+
+  useEffect(() => {
+    if (slides.length <= 1) return
+
+    const interval = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % slides.length)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [slides.length])
+
+  const currentSlide = slides[currentSlideIndex]
+
   return (
     <main>
-      <section className="relative flex h-screen w-full items-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img
-            className="h-full w-full object-cover brightness-50 grayscale-[20%]"
-            alt="Cinematic atmospheric city background"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXFfKSlBIjWgJAXE2TSgP4bQr2F4Uw4bWNSF8ujCRXUkNKzCbCAR3zDdnq_7PRBiOtaIu_yZ3tVPyZZSf_t7yhF7McQ8FCetR3i0d-2hrlWjvCaFpVDa_kuGMPNnbe5ZUmE0izxS2Gbjhqn4pbytGwVCheCOx6NCMTpdH7fT5dxlHbTmWa0GXHAMoPOzbDNwuQBhFil2L4OgKBlOMZu1MH9-AeBpKh0sl7fvz92gPhzC44s_kANtNWI1myHc6X0X-as7Rsc3VHcow"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
-          <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-background to-transparent" />
+      <section className="relative flex min-h-[600px] h-[85vh] w-full items-center overflow-hidden bg-background md:h-screen">
+        {isLoadingSlides ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-md">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        ) : (
+          (slides || []).map((slide, index) => (
+            <div
+              key={slide.id}
+              className={`absolute inset-0 z-0 transition-all duration-1000 cubic-bezier(0.4, 0, 0.2, 1) ${
+                index === currentSlideIndex 
+                  ? "translate-x-0 opacity-100 z-10" 
+                  : "translate-x-full opacity-0 z-0"
+              }`}
+            >
+              <img
+                className="h-full w-full object-cover brightness-[0.35] grayscale-[5%]"
+                alt={slide.title}
+                src={slide.imageUrl}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-background to-transparent" />
+            </div>
+          ))
+        )}
+
+        <div className="relative z-10 mx-auto w-full max-w-screen-2xl px-6 md:px-8">
+          <div className="max-w-3xl">
+            {currentSlide && (
+              <div key={currentSlide.id} className={`transition-all duration-700 ${isLoadingSlides ? "opacity-0" : "opacity-100 translate-y-0"}`}>
+                <div className="flex items-center gap-3 mb-6">
+                  <span className={`px-3 py-1 font-headline text-xs font-bold tracking-widest uppercase backdrop-blur-sm border ${
+                    (currentSlide.type === 'ShowingMovie' || currentSlide.type as unknown as number === 0) ? 'bg-primary/20 border-primary/40 text-primary' :
+                    (currentSlide.type === 'UpcomingMovie' || currentSlide.type as unknown as number === 1) ? 'bg-secondary/20 border-secondary/40 text-secondary' :
+                    'bg-amber-500/20 border-amber-500/40 text-amber-500'
+                  }`}>
+                    {(currentSlide.type === 'ShowingMovie' || currentSlide.type as unknown as number === 0) ? 'Đang chiếu' : 
+                     (currentSlide.type === 'UpcomingMovie' || currentSlide.type as unknown as number === 1) ? 'Sắp khởi chiếu' : 'Sự kiện khuyến mãi'}
+                  </span>
+                  {(currentSlide.type === 'ShowingMovie' || currentSlide.type as unknown as number === 0) && (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-white/60 uppercase tracking-tighter">
+                      <span className="material-symbols-outlined text-xs">local_fire_department</span>
+                      Hot nhất tuần
+                    </span>
+                  )}
+                </div>
+                <h1 className="mb-6 font-headline text-5xl font-black leading-[1.1] tracking-tighter text-white sm:text-6xl md:text-8xl">
+                  {(currentSlide.title || "").split(":")[0]} <br />
+                  <span className="text-primary drop-shadow-[0_0_15px_rgba(97,180,254,0.4)]">
+                    {(currentSlide.title || "").split(":")[1] || ""}
+                  </span>
+                </h1>
+                <p className="mb-10 max-w-2xl text-base font-light leading-relaxed text-slate-400 sm:text-lg md:text-xl">
+                  {currentSlide.description || "Trải nghiệm đỉnh cao của điện ảnh với hệ thống âm thanh vòm thế hệ mới và hình ảnh sắc nét đến từng chi tiết tại hệ thống rạp Absolute Cinema."}
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {(currentSlide.type === 'UpcomingMovie' || currentSlide.type as unknown as number === 1) ? (
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-3 font-headline font-bold tracking-wide text-white transition-all hover:bg-white/20 active:scale-95 sm:px-8 sm:py-4"
+                    >
+                      <span className="material-symbols-outlined">notifications</span>
+                      <span>NHẮC TÔI KHI CÓ VÉ</span>
+                    </button>
+                  ) : (
+                    <Link
+                      to={currentSlide.targetUrl || "/movies"}
+                      className="flex items-center gap-2 bg-gradient-to-br from-primary to-primary-container px-6 py-3 font-headline font-bold tracking-wide text-on-primary transition-all hover:shadow-[0_0_25px_rgba(97,180,254,0.6)] active:scale-95 sm:px-8 sm:py-4"
+                    >
+                      <span>{(currentSlide.type === 'Event' || currentSlide.type as unknown as number === 2) ? 'XEM CHI TIẾT' : 'ĐẶT VÉ NGAY'}</span>
+                      <span className="material-symbols-outlined">{(currentSlide.type === 'Event' || currentSlide.type as unknown as number === 2) ? 'info' : 'confirmation_number'}</span>
+                    </Link>
+                  )}
+
+                  {(currentSlide.type !== 'Event' && currentSlide.type as unknown as number !== 2) && currentSlide.videoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setTrailerData({ isOpen: true, url: currentSlide.videoUrl!, name: currentSlide.title })}
+                      className="flex items-center gap-2 border border-outline-variant/30 bg-surface-variant/40 px-6 py-3 font-headline font-bold tracking-wide text-white backdrop-blur-md transition-all hover:bg-surface-variant/60 active:scale-95 sm:px-8 sm:py-4"
+                    >
+                      <span className="material-symbols-outlined text-2xl">play_circle</span>
+                      XEM TRAILER
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-screen-2xl px-8">
-          <div className="max-w-3xl">
-          <span className="mb-6 inline-block border border-secondary/20 bg-secondary/10 px-3 py-1 font-headline text-sm tracking-[0.2em] text-secondary backdrop-blur-sm">
-            PREMIERE PHIM MỚI
-          </span>
-          <h1 className="mb-6 font-headline text-6xl font-black leading-none tracking-tighter text-white md:text-8xl">
-            CHÂN TRỜI <br />
-            <span className="text-primary drop-shadow-[0_0_15px_rgba(97,180,254,0.4)]">VÔ TẬN</span>
-          </h1>
-          <p className="mb-10 max-w-2xl text-lg font-light leading-relaxed text-slate-400 md:text-xl">
-            Trải nghiệm đỉnh cao của điện ảnh với hệ thống âm thanh vòm thế hệ mới và hình ảnh sắc nét đến từng chi tiết tại hệ
-            thống rạp Andromeda.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Link
-              to="/movies/echoes-of-eternity/showtimes"
-              className="flex items-center gap-2 bg-gradient-to-br from-primary to-primary-container px-8 py-4 font-headline font-bold tracking-wide text-on-primary transition-all hover:shadow-[0_0_25px_rgba(97,180,254,0.6)] active:scale-95"
-            >
-              <span>ĐẶT VÉ NGAY</span>
-              <span className="material-symbols-outlined">confirmation_number</span>
-            </Link>
-            <button
-              type="button"
-              className="border border-outline-variant/30 bg-surface-variant/40 px-8 py-4 font-headline font-bold tracking-wide text-white backdrop-blur-md transition-all hover:bg-surface-variant/60 active:scale-95"
-            >
-              XEM TRAILER
-            </button>
+        {/* Carousel Indicators */}
+        {!isLoadingSlides && (slides || []).length > 1 && (
+          <div className="absolute bottom-12 left-1/2 z-20 flex -translate-x-1/2 gap-3">
+            {(slides || []).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlideIndex(index)}
+                className={`h-1.5 transition-all duration-300 ${
+                  index === currentSlideIndex ? "w-8 bg-primary shadow-[0_0_10px_rgba(0,244,254,0.8)]" : "w-3 bg-white/20 hover:bg-white/40"
+                } rounded-full`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
-          </div>
-        </div>
+        )}
       </section>
 
-      <section className="bg-surface py-24">
-        <div className="mx-auto max-w-screen-2xl px-8">
-          <div className="mb-12 flex items-end justify-between border-l-4 border-secondary pl-6">
+      <section className="bg-surface py-20 md:py-24">
+        <div className="mx-auto max-w-screen-2xl px-6 md:px-8">
+          <div className="mb-12 flex flex-col gap-6 border-l-4 border-secondary pl-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="font-headline text-4xl font-black uppercase tracking-tighter text-white">Phim Đang Chiếu</h2>
+              <h2 className="font-headline text-3xl font-black uppercase tracking-tighter text-white sm:text-4xl">Phim Đang Chiếu</h2>
               <p className="font-medium text-slate-500">Những siêu phẩm điện ảnh không thể bỏ lỡ tuần này</p>
             </div>
-            <Link className="group flex items-center gap-2 font-headline font-bold text-secondary" to="/movies/echoes-of-eternity/showtimes">
+            <Link className="group flex items-center gap-2 font-headline font-bold text-secondary transition-all hover:opacity-80" to="/movies">
               XEM TẤT CẢ
               <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
             </Link>
           </div>
+
 
           <div className="grid grid-cols-1 gap-0 md:grid-cols-2 lg:grid-cols-4">
             {[
@@ -338,6 +442,13 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <MovieTrailerModal 
+        isOpen={trailerData.isOpen}
+        onClose={() => setTrailerData(prev => ({ ...prev, isOpen: false }))}
+        movieName={trailerData.name}
+        trailerUrl={trailerData.url}
+      />
     </main>
   )
 }

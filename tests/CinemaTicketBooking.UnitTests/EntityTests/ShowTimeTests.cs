@@ -74,7 +74,7 @@ public class ShowTimeTests
             Id = Guid.CreateVersion7(),
             CinemaId = cinemaId,
             Code = "EMPTY",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true,
             Seats = []
         };

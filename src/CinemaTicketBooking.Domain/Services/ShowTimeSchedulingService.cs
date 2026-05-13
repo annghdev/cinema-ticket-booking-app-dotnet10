@@ -25,18 +25,51 @@ public class ShowTimeSchedulingService
         Movie movie,
         Screen screen,
         DateTimeOffset startAt,
+        ScreenType? format = null,
         CancellationToken ct = default)
     {
-        // 1. Load pricing policies for this Cinema + ScreenType
-        var pricingPolicies = await _pricingPolicyRepository
-            .GetActivePoliciesAsync(screen.CinemaId, screen.Type, ct);
+        // 1. Resolve format and load pricing policies
+        // If a format is provided, we strictly use it.
+        // If not, we "automatically" pick the first supported format from the screen that has defined pricing policies.
+        
+        ScreenType resolvedFormat;
+        List<PricingPolicy> pricingPolicies;
 
-        if (pricingPolicies.Count == 0)
-            throw new InvalidOperationException(
-                $"No pricing policies found for Cinema '{screen.CinemaId}', ScreenType '{screen.Type}'.");
+        if (format.HasValue)
+        {
+            resolvedFormat = format.Value;
+            pricingPolicies = await _pricingPolicyRepository.GetActivePoliciesAsync(screen.CinemaId, resolvedFormat, ct);
+
+            if (pricingPolicies.Count == 0)
+                throw new InvalidOperationException(
+                    $"No pricing policies found for requested Format '{resolvedFormat}' (Cinema: {screen.CinemaId}).");
+        }
+        else
+        {
+            // Automatic resolution logic
+            pricingPolicies = [];
+            resolvedFormat = screen.Type; // Fallback if no supported formats or policies found
+            bool found = false;
+
+            foreach (var supportedFormat in screen.SupportedFormats)
+            {
+                var policies = await _pricingPolicyRepository.GetActivePoliciesAsync(screen.CinemaId, supportedFormat, ct);
+                if (policies.Count > 0)
+                {
+                    resolvedFormat = supportedFormat;
+                    pricingPolicies = policies;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                throw new InvalidOperationException(
+                    $"No pricing policies found for any supported format of Screen '{screen.Code}' (Cinema: {screen.CinemaId}, Formats: [{string.Join(", ", screen.SupportedFormats)}]).");
+        }
 
         // 2. Create ShowTime (entity validates invariants + generates priced tickets)
-        var newShowTime = ShowTime.Create(movie, screen, startAt, pricingPolicies);
+        var newShowTime = ShowTime.Create(movie, screen, startAt, pricingPolicies, resolvedFormat);
 
         // 3. Check for schedule conflicts on the same Screen
         //    Query a generous range to cover edge cases (midnight crossover, etc.)

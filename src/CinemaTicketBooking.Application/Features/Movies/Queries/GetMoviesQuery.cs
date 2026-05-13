@@ -33,6 +33,7 @@ public class GetMoviesHandler(IUnitOfWork uow)
                 x.Duration,
                 x.Genre,
                 x.Status,
+                x.TargetReach,
                 x.CreatedAt))
             .ToListAsync(ct);
 

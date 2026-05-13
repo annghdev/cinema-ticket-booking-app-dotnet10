@@ -10,6 +10,7 @@ import ShowtimeSeatSelection from "./pages/ShowtimeSeatSelection"
 import PaymentResult from "./pages/PaymentResult"
 import RetryPayment from "./pages/RetryPayment"
 import Showtimes from "./pages/Showtimes"
+import AuthCallback from "./pages/AuthCallback"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/retry-payment" element={<RetryPayment />} />
           <Route path="/booking-history" element={<BookingHistory />} />
           <Route path="/member" element={<Member />} />
+          <Route path="/auth-callback" element={<AuthCallback />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Footer />

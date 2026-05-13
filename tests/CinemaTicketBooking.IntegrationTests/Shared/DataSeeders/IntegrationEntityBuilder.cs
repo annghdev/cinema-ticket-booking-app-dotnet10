@@ -37,7 +37,7 @@ public static class IntegrationEntityBuilder
             CinemaId = cinemaId,
             Code = code,
             SeatMap = seatMap,
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true
         };
 

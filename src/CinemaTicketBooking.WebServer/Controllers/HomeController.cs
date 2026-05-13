@@ -5,10 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using CinemaTicketBooking.Application.Common.Auth;
 
+using CinemaTicketBooking.Application.Features.Statistic.Queries;
+using CinemaTicketBooking.Application.Features;
+using Wolverine;
+
 namespace CinemaTicketBooking.WebServer.Controllers
 {
     [Authorize(AuthenticationSchemes = "Identity.Application")]
-    public class HomeController(IAuthorizationService authorizationService) : Controller
+    public class HomeController(IAuthorizationService authorizationService, IMessageBus bus) : Controller
     {
         public async Task<IActionResult> Index()
         {
@@ -17,7 +21,26 @@ namespace CinemaTicketBooking.WebServer.Controllers
                 User.IsInRole(RoleNames.Admin) || 
                 User.IsInRole(RoleNames.Manager))
             {
-                return View();
+                var summaryTask = bus.InvokeAsync<DashboardSummaryDto>(new GetDashboardSummaryQuery());
+                var weekChartTask = bus.InvokeAsync<RevenueChartDto>(new GetRevenueAnalyticsQuery("weekly"));
+                var monthChartTask = bus.InvokeAsync<RevenueChartDto>(new GetRevenueAnalyticsQuery("monthly"));
+                var yearChartTask = bus.InvokeAsync<RevenueChartDto>(new GetRevenueAnalyticsQuery("yearly"));
+                var cinemaTask = bus.InvokeAsync<IReadOnlyList<CinemaRevenueDto>>(new GetCinemaRevenueStatsQuery());
+                var movieTask = bus.InvokeAsync<IReadOnlyList<MoviePerformanceDto>>(new GetTopPerformingMoviesQuery());
+
+                await Task.WhenAll(summaryTask, weekChartTask, monthChartTask, yearChartTask, cinemaTask, movieTask);
+
+                var model = new DashboardViewModel
+                {
+                    Summary = await summaryTask,
+                    WeeklyRevenueChart = await weekChartTask,
+                    MonthlyRevenueChart = await monthChartTask,
+                    YearlyRevenueChart = await yearChartTask,
+                    CinemaRevenues = await cinemaTask,
+                    TopMovies = await movieTask
+                };
+
+                return View(model);
             }
 
             // 2. Specific operational landing zones per Role
@@ -34,7 +57,7 @@ namespace CinemaTicketBooking.WebServer.Controllers
             // Mặc định cho Customer hoặc Role không xác định
             if (User.IsInRole(RoleNames.Customer))
             {
-                return RedirectToAction("Logout", "Account");
+                return RedirectToAction("Logout", "Auth");
             }
 
             // Absolute fallback (No operations allowed)

@@ -45,7 +45,23 @@ public class Screen : AggregateRoot
     /// Parsed by GenerateSeats() to create Seat entities.
     /// </summary>
     public string SeatMap { get; set; } = string.Empty;
-    public ScreenType Type { get; set; }
+
+    /// <summary>
+    /// List of projection formats this screen supports (e.g. TwoD, ThreeD, IMAX).
+    /// Stored as a JSON array in PostgreSQL (jsonb column).
+    /// </summary>
+    public List<ScreenType> SupportedFormats { get; set; } = [];
+
+    /// <summary>
+    /// Primary format (first in the supported list). Used for backward-compat filters.
+    /// </summary>
+    public ScreenType Type => SupportedFormats.Count > 0 ? SupportedFormats[0] : ScreenType.TwoD;
+
+    /// <summary>
+    /// Checks whether this screen supports the given projection format.
+    /// </summary>
+    public bool SupportsFormat(ScreenType format) => SupportedFormats.Contains(format);
+
     public bool IsActive { get; set; } = true;
     public List<Seat> Seats { get; set; } = [];
 
@@ -64,8 +80,11 @@ public class Screen : AggregateRoot
         int totalSeats,
         string seatMap,
         ScreenType type,
-        bool isActive = true)
+        bool isActive = true,
+        List<ScreenType>? supportedFormats = null)
     {
+        var formats = supportedFormats ?? [type];
+
         var screen = new Screen
         {
             CinemaId = cinemaId,
@@ -74,7 +93,7 @@ public class Screen : AggregateRoot
             ColumnOfSeats = columnOfSeats,
             TotalSeats = totalSeats,
             SeatMap = seatMap,
-            Type = type,
+            SupportedFormats = formats,
             IsActive = isActive
         };
 
@@ -100,14 +119,15 @@ public class Screen : AggregateRoot
         int columnOfSeats,
         int totalSeats,
         string seatMap,
-        ScreenType type)
+        ScreenType type,
+        List<ScreenType>? supportedFormats = null)
     {
         Code = code;
         RowOfSeats = rowOfSeats;
         ColumnOfSeats = columnOfSeats;
         TotalSeats = totalSeats;
         SeatMap = seatMap;
-        Type = type;
+        SupportedFormats = supportedFormats ?? [type];
 
         RaiseEvent(new ScreenBasicInfoUpdated(
             ScreenId: Id,

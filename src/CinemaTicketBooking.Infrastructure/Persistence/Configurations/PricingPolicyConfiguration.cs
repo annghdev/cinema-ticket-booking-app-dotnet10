@@ -15,6 +15,7 @@ public class PricingPolicyConfiguration : IEntityTypeConfiguration<PricingPolicy
         builder.Property(x => x.SeatType).IsRequired();
         builder.Property(x => x.BasePrice).HasPrecision(18, 2).IsRequired();
         builder.Property(x => x.ScreenCoefficient).HasPrecision(8, 3).IsRequired();
+        builder.Property(x => x.WeekendCoefficient).HasPrecision(8, 3).IsRequired().HasDefaultValue(1.0m);
         builder.Property(x => x.IsActive).IsRequired();
 
         builder.HasOne(x => x.Cinema)

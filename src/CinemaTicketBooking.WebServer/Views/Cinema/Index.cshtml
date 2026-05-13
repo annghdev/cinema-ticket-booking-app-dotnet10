@@ -6,38 +6,36 @@
     ViewData["Title"] = "Quản lý rạp chiếu";
 }
 
-<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-    <div>
-        <h2 class="text-display-lg text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Quản lý rạp chiếu</h2>
-        <p class="text-on-surface-variant font-body max-w-md">Danh sách hệ thống rạp chiếu phim, hỗ trợ cập nhật vị trí, trạng thái hoạt động.</p>
-    </div>
-    <div class="flex items-center gap-4">
-        @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.CinemasManage)).Succeeded)
-        {
-            <button onclick="openAddCinemaModal()" class="py-3 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold shadow-[0_4px_20px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_30px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined">add</span>
-                <span>Thêm rạp</span>
-            </button>
-        }
-    </div>
-</div>
 
-<div class="glass-panel rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl">
-    <div class="px-8 py-6 flex items-center justify-between border-b border-white/5 bg-white/[0.01]">
+
+<div class="glass-panel rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+    <div class="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 bg-white/[0.01]">
         <h4 class="font-headline font-bold text-xl text-on-surface flex items-center gap-3">
             <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
             Danh sách rạp
         </h4>
-        <form method="get" class="flex items-center gap-4">
-            <input type="text" name="searchTerm" placeholder="Tìm rạp, địa chỉ..." class="bg-surface-container-high border-none text-xs rounded-xl text-slate-300 focus:ring-1 focus:ring-primary py-2 px-4 w-60" value="@Context.Request.Query["searchTerm"]" />
-            <button type="submit" class="p-2 bg-surface-container-high text-slate-400 hover:text-on-surface transition-colors rounded-xl">
-                <span class="material-symbols-outlined text-sm">search</span>
-            </button>
-        </form>
+        <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.CinemasManage)).Succeeded)
+            {
+                <button onclick="openAddCinemaModal()" class="w-full md:w-auto h-10 py-2.5 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    <span>Thêm rạp</span>
+                </button>
+            }
+            <form method="get" class="w-full md:w-auto">
+                <div class="flex items-center bg-surface-container-high rounded-xl border border-white/5 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary transition-all h-10">
+                    <input type="text" name="searchTerm" id="searchInput" placeholder="Tìm rạp, địa chỉ..." class="flex-1 md:w-60 bg-transparent border-none text-xs text-slate-300 py-2.5 px-4 focus:ring-0" value="@Context.Request.Query["searchTerm"]" />
+                    <div class="w-px h-4 bg-white/10"></div>
+                    <button type="submit" id="searchBtn" class="px-3 h-full text-slate-400 hover:text-on-surface transition-colors flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm" id="searchIcon">search</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
     
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full text-left border-collapse min-w-[800px]">
             <thead class="bg-white/[0.02]">
                 <tr>
                     <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">Rạp</th>
@@ -82,8 +80,8 @@
                                 <span class="px-3 py-1 rounded-full @(c.IsActive ? "bg-secondary/10 text-secondary border-secondary/20" : "bg-white/5 text-slate-400 border-white/10") text-[10px] font-bold border uppercase">@(c.IsActive ? "Hoạt động" : "Tạm ngưng")</span>
                             </td>
                             <td class="px-8 py-6 text-right flex justify-end gap-2">
-                                <a href="/Screen?cinemaId=@c.Id" class="p-2 text-slate-500 hover:text-secondary transition-colors flex items-center" title="Quản lý phòng chiếu">
-                                    <span class="material-symbols-outlined text-sm">dataset</span>
+                                <a href="/Screen?cinemaId=@c.Id" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-secondary hover:bg-secondary/10 transition-all" title="Quản lý phòng chiếu">
+                                    <span class="material-symbols-outlined text-xl">dataset</span>
                                 </a>
                                 <button 
                                     data-id="@c.Id"
@@ -92,8 +90,8 @@
                                     data-thumb="@c.ThumbnailUrl"
                                     data-geo="@c.Geo"
                                     onclick="openUpdateCinemaModal(this)" 
-                                    class="p-2 text-slate-500 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined">edit</span>
+                                    class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
                                 </button>
                             </td>
                         </tr>
@@ -109,13 +107,13 @@
         <div class="flex items-center gap-2">
             @if (Model.PageNumber > 1)
             {
-                <a href="?pageNumber=@(Model.PageNumber - 1)&searchTerm=@Context.Request.Query["searchTerm"]" class="p-2 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-on-surface transition-colors flex items-center">
+                <a href="?pageNumber=@(Model.PageNumber - 1)&searchTerm=@Context.Request.Query["searchTerm"]" class="w-10 h-10 aspect-square rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-on-surface transition-colors flex items-center justify-center">
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
                 </a>
             }
             @if (Model.PageNumber < Math.Ceiling((double)Model.TotalItems / Model.PageSize))
             {
-                <a href="?pageNumber=@(Model.PageNumber + 1)&searchTerm=@Context.Request.Query["searchTerm"]" class="p-2 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-on-surface transition-colors flex items-center">
+                <a href="?pageNumber=@(Model.PageNumber + 1)&searchTerm=@Context.Request.Query["searchTerm"]" class="w-10 h-10 aspect-square rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-on-surface transition-colors flex items-center justify-center">
                     <span class="material-symbols-outlined text-sm">chevron_right</span>
                 </a>
             }
@@ -125,45 +123,85 @@
 
 <!-- Add Cinema Modal -->
 <div id="addCinemaModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-lg rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
-        <button onclick="document.getElementById('addCinemaModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
-            <span class="material-symbols-outlined">close</span>
-        </button>
+    <div class="glass-panel w-full max-w-4xl rounded-3xl border border-white/10 p-0 shadow-2xl bg-slate-900/90 relative overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex items-center justify-between">
+            <h3 class="font-headline font-bold text-xl text-on-surface flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_#61b4fe]"></span>
+                THÊM RẠP MỚI
+            </h3>
+            <button onclick="document.getElementById('addCinemaModal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
         
-        <h3 class="font-headline font-bold text-2xl text-on-surface mb-6 flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_#61b4fe]"></span>
-            Thêm rạp mới
-        </h3>
-        
-        <form id="addCinemaForm" class="space-y-4 text-sm">
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Tên rạp</label>
-                    <input type="text" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+        <form id="addCinemaForm">
+            <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left Side: Basic Info -->
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tên rạp</label>
+                        <input type="text" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Địa chỉ</label>
+                        <input type="text" name="address" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Toạ độ Geo (Kinh độ, Vĩ độ)</label>
+                        <input type="text" name="geo" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="10.762, 106.660" />
+                    </div>
+                    <div class="flex items-center gap-2 pt-2">
+                        <input type="checkbox" name="isActive" value="true" checked class="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-offset-0 focus:ring-primary" />
+                        <label class="text-xs font-semibold text-slate-400">Đang hoạt động</label>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Địa chỉ</label>
-                    <input type="text" name="address" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Toạ độ Geo (Kinh độ, Vĩ độ)</label>
-                    <input type="text" name="geo" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="10.762, 106.660" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
-                    <input type="url" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="https://..." />
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" name="isActive" value="true" checked class="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-offset-0 focus:ring-primary" />
-                    <label class="text-xs font-semibold text-slate-400">Đang hoạt động</label>
+
+                <!-- Right Side: Media -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
+                        <input type="url" id="addThumbnailUrl" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" placeholder="https://..." />
+                    </div>
+                    
+                    <div class="relative group">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Upload Thumbnail</label>
+                        <div id="addCinemaDropZone" class="relative border-2 border-dashed border-white/10 rounded-2xl p-8 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group overflow-hidden">
+                            <input type="file" id="addCinemaFileInput" accept="image/jpeg,image/png,image/gif,image/webp,image/avif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            
+                            <div id="addCinemaUploadPrompt">
+                                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500">
+                                    <span class="material-symbols-outlined text-3xl text-slate-500 group-hover:text-primary transition-colors">cloud_upload</span>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-300">Kéo thả hoặc click để chọn ảnh</p>
+                                <p class="text-xs text-slate-500 mt-1">Max 5MB</p>
+                            </div>
+
+                            <div id="addCinemaPreview" class="hidden relative z-20">
+                                <img id="addCinemaPreviewImg" class="max-h-48 mx-auto rounded-xl shadow-2xl border border-white/10" />
+                                <div class="mt-4 flex items-center justify-center gap-3">
+                                    <p id="addCinemaFileName" class="text-xs text-slate-400 truncate max-w-[150px]"></p>
+                                    <button type="button" onclick="clearAddCinemaPreview()" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">
+                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="addCinemaUploadLoading" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-30">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    <p class="text-[10px] font-bold text-primary tracking-widest uppercase">Đang tải lên...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/5 mt-4">
-                <button type="button" onclick="document.getElementById('addCinemaModal').classList.add('hidden')" class="py-2.5 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+            <div class="p-6 bg-white/5 flex items-center justify-end gap-3">
+                <button type="button" onclick="document.getElementById('addCinemaModal').classList.add('hidden')" class="py-2.5 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
                     Đóng
                 </button>
-                <button type="submit" class="py-2.5 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] transition-all">
+                <button type="submit" class="py-2.5 px-8 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] transition-all">
                     Thêm rạp
                 </button>
             </div>
@@ -173,48 +211,87 @@
 
 <!-- Update Cinema Modal -->
 <div id="updateCinemaModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-lg rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
-        <button onclick="document.getElementById('updateCinemaModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
-            <span class="material-symbols-outlined">close</span>
-        </button>
+    <div class="glass-panel w-full max-w-4xl rounded-3xl border border-white/10 p-0 shadow-2xl bg-slate-900/90 relative overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex items-center justify-between">
+            <h3 class="font-headline font-bold text-xl text-on-surface flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_10px_#00f4fe]"></span>
+                CẬP NHẬT RẠP
+            </h3>
+            <button onclick="document.getElementById('updateCinemaModal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
         
-        <h3 class="font-headline font-bold text-2xl text-on-surface mb-6 flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_10px_#00f4fe]"></span>
-            Cập nhật rạp
-        </h3>
-        
-        <form id="updateCinemaForm" class="space-y-4 text-sm">
+        <form id="updateCinemaForm">
             <input type="hidden" name="id" id="updCinemaId" />
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Tên rạp</label>
-                    <input type="text" id="updName" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+            <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Left Side: Basic Info -->
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tên rạp</label>
+                        <input type="text" id="updName" name="name" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Địa chỉ</label>
+                        <input type="text" id="updAddress" name="address" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Toạ độ Geo (Kinh độ, Vĩ độ)</label>
+                        <input type="text" id="updGeo" name="geo" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Địa chỉ</label>
-                    <input type="text" id="updAddress" name="address" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Toạ độ Geo (Kinh độ, Vĩ độ)</label>
-                    <input type="text" id="updGeo" name="geo" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
-                    <input type="url" id="updThumbnailUrl" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+
+                <!-- Right Side: Media -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Thumbnail URL</label>
+                        <input type="url" id="updThumbnailUrl" name="thumbnailUrl" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" />
+                    </div>
+                    
+                    <div class="relative group">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">Update Thumbnail</label>
+                        <div id="updCinemaDropZone" class="relative border-2 border-dashed border-white/10 rounded-2xl p-8 text-center cursor-pointer hover:border-secondary/40 hover:bg-secondary/5 transition-all group overflow-hidden">
+                            <input type="file" id="updCinemaFileInput" accept="image/jpeg,image/png,image/gif,image/webp,image/avif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            
+                            <div id="updCinemaUploadPrompt">
+                                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-secondary/10 transition-all duration-500">
+                                    <span class="material-symbols-outlined text-3xl text-slate-500 group-hover:text-secondary transition-colors">cloud_upload</span>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-300">Kéo thả hoặc click để thay đổi</p>
+                                <p class="text-xs text-slate-500 mt-1">Max 5MB</p>
+                            </div>
+
+                            <div id="updCinemaPreview" class="hidden relative z-20">
+                                <img id="updCinemaPreviewImg" class="max-h-48 mx-auto rounded-xl shadow-2xl border border-white/10" />
+                                <div class="mt-4 flex items-center justify-center gap-3">
+                                    <p id="updCinemaFileName" class="text-xs text-slate-400 truncate max-w-[150px]"></p>
+                                    <button type="button" onclick="clearUpdCinemaPreview()" class="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all">
+                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="updCinemaUploadLoading" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-30">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin"></div>
+                                    <p class="text-[10px] font-bold text-secondary tracking-widest uppercase">Đang tải lên...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between pt-4 border-t border-white/5 mt-4">
+            <div class="p-6 bg-white/5 flex items-center justify-between">
                 <button type="button" onclick="deleteCinema()" class="py-2.5 px-4 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">delete</span>
                     Xóa rạp
                 </button>
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="document.getElementById('updateCinemaModal').classList.add('hidden')" class="py-2.5 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                    <button type="button" onclick="document.getElementById('updateCinemaModal').classList.add('hidden')" class="py-2.5 px-6 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
                         Đóng
                     </button>
-                    <button type="submit" class="py-2.5 px-6 rounded-xl bg-gradient-to-r from-secondary to-secondary text-on-secondary text-xs font-bold shadow-[0_4px_15px_rgba(0,244,254,0.3)] hover:shadow-[0_4px_25px_rgba(0,244,254,0.5)] transition-all">
+                    <button type="submit" class="py-2.5 px-8 rounded-xl bg-gradient-to-r from-secondary to-secondary text-on-secondary text-xs font-bold shadow-[0_4px_15px_rgba(0,244,254,0.3)] hover:shadow-[0_4px_25px_rgba(0,244,254,0.5)] transition-all">
                         Lưu thay đổi
                     </button>
                 </div>
@@ -225,13 +302,133 @@
 
 @section Scripts {
     <script>
+        // =============================================
+        // Search Input Logic
+        // =============================================
+        const searchInput = document.getElementById('searchInput');
+        const searchIcon = document.getElementById('searchIcon');
+        const searchBtn = document.getElementById('searchBtn');
+
+        function updateSearchIcon() {
+            if (searchInput.value.trim() !== '') {
+                searchIcon.textContent = 'close';
+                searchIcon.classList.add('text-red-500');
+                searchIcon.classList.remove('text-sm');
+                searchIcon.classList.add('text-base', 'font-bold');
+            } else {
+                searchIcon.textContent = 'search';
+                searchIcon.classList.remove('text-red-500', 'font-bold');
+                searchIcon.classList.add('text-sm');
+                searchIcon.classList.remove('text-base');
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', updateSearchIcon);
+            updateSearchIcon();
+        }
+
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
+                if (searchIcon.textContent === 'close' && e.detail > 0) {
+                    e.preventDefault();
+                    searchInput.value = '';
+                    
+                    const url = new URL(window.location.href);
+                    if (url.searchParams.has('searchTerm')) {
+                        url.searchParams.delete('searchTerm');
+                        url.searchParams.delete('pageNumber');
+                        window.location.href = url.toString();
+                    } else {
+                        updateSearchIcon();
+                        searchInput.focus();
+                    }
+                }
+            });
+        }
+
+        // =============================================
+        // File upload preview helpers
+        // =============================================
+
+        let addCinemaFile = null;
+        let updCinemaFile = null;
+
+        function setupFilePreview(inputId, previewContainerId, previewImgId, fileNameId, promptId, loadingId, urlInputId, fileSetter) {
+            const input = document.getElementById(inputId);
+            input.addEventListener('change', async function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                // Show loading
+                document.getElementById(loadingId).classList.remove('hidden');
+                document.getElementById(loadingId).classList.add('flex');
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const resp = await fetch('/Cinema/UploadThumbnail', { method: 'POST', body: formData });
+                    const result = await resp.json();
+
+                    if (result.success) {
+                        // Auto-fill URL input
+                        document.getElementById(urlInputId).value = result.url;
+                        
+                        // Update Preview
+                        document.getElementById(previewImgId).src = result.url;
+                        document.getElementById(fileNameId).textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                        document.getElementById(previewContainerId).classList.remove('hidden');
+                        document.getElementById(promptId).classList.add('hidden');
+                        
+                        fileSetter(file);
+                        window.showToast('Tải lên ảnh thành công!', 'success');
+                    } else {
+                        window.showToast(result.message, 'error');
+                        input.value = '';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    window.showToast('Lỗi khi tải lên ảnh.', 'error');
+                    input.value = '';
+                } finally {
+                    document.getElementById(loadingId).classList.add('hidden');
+                    document.getElementById(loadingId).classList.remove('flex');
+                }
+            });
+        }
+
+        setupFilePreview('addCinemaFileInput', 'addCinemaPreview', 'addCinemaPreviewImg', 'addCinemaFileName', 'addCinemaUploadPrompt', 'addCinemaUploadLoading', 'addThumbnailUrl', f => addCinemaFile = f);
+        setupFilePreview('updCinemaFileInput', 'updCinemaPreview', 'updCinemaPreviewImg', 'updCinemaFileName', 'updCinemaUploadPrompt', 'updCinemaUploadLoading', 'updThumbnailUrl', f => updCinemaFile = f);
+
+        function clearAddCinemaPreview() {
+            addCinemaFile = null;
+            document.getElementById('addCinemaFileInput').value = '';
+            document.getElementById('addThumbnailUrl').value = '';
+            document.getElementById('addCinemaPreview').classList.add('hidden');
+            document.getElementById('addCinemaUploadPrompt').classList.remove('hidden');
+        }
+
+        function clearUpdCinemaPreview() {
+            updCinemaFile = null;
+            document.getElementById('updCinemaFileInput').value = '';
+            document.getElementById('updThumbnailUrl').value = '';
+            document.getElementById('updCinemaPreview').classList.add('hidden');
+            document.getElementById('updCinemaUploadPrompt').classList.remove('hidden');
+        }
+
+        // =============================================
+        // Modal functions
+        // =============================================
+
         function openAddCinemaModal() {
             document.getElementById('addCinemaForm').reset();
+            clearAddCinemaPreview();
             document.getElementById('addCinemaModal').classList.remove('hidden');
         }
 
         function openUpdateCinemaModal(btn) {
             document.getElementById('updateCinemaForm').reset();
+            clearUpdCinemaPreview();
             
             document.getElementById('updCinemaId').value = btn.getAttribute('data-id');
             document.getElementById('updName').value = btn.getAttribute('data-name');
@@ -241,6 +438,10 @@
 
             document.getElementById('updateCinemaModal').classList.remove('hidden');
         }
+
+        // =============================================
+        // Form submissions
+        // =============================================
 
         document.getElementById('addCinemaForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -274,6 +475,7 @@
 
         document.getElementById('updateCinemaForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+
             const formData = new FormData(this);
             const payload = Object.fromEntries(formData.entries());
 
@@ -299,6 +501,10 @@
                 if (window.hideLoading) window.hideLoading();
             }
         });
+
+        // =============================================
+        // Delete
+        // =============================================
 
         async function deleteCinema() {
             const id = document.getElementById('updCinemaId').value;

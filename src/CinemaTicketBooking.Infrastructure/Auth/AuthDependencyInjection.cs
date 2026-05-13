@@ -8,7 +8,9 @@ using CinemaTicketBooking.Infrastructure.Notifications;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,8 +42,7 @@ public static class AuthDependencyInjection
         });
 
         services.AddScoped<IAccountCustomerLinker, AccountCustomerLinker>();
-        services.AddScoped<IIdentityAuthService, IdentityAuthService>();
-        services.AddScoped<IEmailSender, LogEmailSender>();
+        services.AddScoped<IAuthService, IdentityAuthService>();
 
         services
             .AddIdentity<Account, Role>(options =>
@@ -64,8 +65,15 @@ public static class AuthDependencyInjection
         services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.HttpOnly = true;
-            options.LoginPath = "/Account/Login";
-            options.AccessDeniedPath = "/Account/AccessDenied";
+            options.LoginPath = "/Auth/Login";
+            options.AccessDeniedPath = "/Auth/AccessDenied";
+        });
+
+        services.Configure<CookieAuthenticationOptions>(IdentityConstants.ExternalScheme, options =>
+        {
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         });
 
         var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
@@ -80,6 +88,7 @@ public static class AuthDependencyInjection
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -103,6 +112,7 @@ public static class AuthDependencyInjection
                 options.ClientId = configuration["Authentication:Google:ClientId"]!;
                 options.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
                 options.SignInScheme = IdentityConstants.ExternalScheme;
+                options.ClaimActions.MapJsonKey("picture", "picture");
             });
         }
 
@@ -113,6 +123,7 @@ public static class AuthDependencyInjection
                 options.AppId = configuration["Authentication:Facebook:AppId"]!;
                 options.AppSecret = configuration["Authentication:Facebook:AppSecret"]!;
                 options.SignInScheme = IdentityConstants.ExternalScheme;
+                options.ClaimActions.MapJsonKey("picture", "picture");
             });
         }
 

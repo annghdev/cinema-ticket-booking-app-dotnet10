@@ -15,6 +15,7 @@ public class ShowTimeConfiguration : IEntityTypeConfiguration<ShowTime>
         builder.Property(x => x.StartAt).IsRequired();
         builder.Property(x => x.EndAt).IsRequired();
         builder.Property(x => x.Status).IsRequired();
+        builder.Property(x => x.Format).IsRequired();
 
         builder.HasOne(x => x.Movie)
             .WithMany()

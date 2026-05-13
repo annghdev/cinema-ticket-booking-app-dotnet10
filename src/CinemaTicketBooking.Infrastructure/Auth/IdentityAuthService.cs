@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Common.Auth;
+using CinemaTicketBooking.Application.Features;
 using CinemaTicketBooking.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -24,16 +25,17 @@ public sealed class IdentityAuthService(
     IOptions<RefreshTokenOptions> refreshOptions,
     IOptions<TestAuthOptions> testAuthOptions,
     IEmailSender emailSender,
-    IHttpContextAccessor httpContextAccessor) : IIdentityAuthService
+    IHttpContextAccessor httpContextAccessor) : IAuthService
 {
     private readonly JwtOptions _jwt = jwtOptions.Value;
     private readonly RefreshTokenOptions _refresh = refreshOptions.Value;
     private readonly TestAuthOptions _testAuth = testAuthOptions.Value;
 
     /// <inheritdoc />
-    public async Task<AuthTokenResponse?> IssueTokensAsync(Account user, string? remoteIp, CancellationToken cancellationToken = default)
+    public async Task<AuthTokenResponse?> IssueTokensAsync(Guid accountId, string? remoteIp, CancellationToken cancellationToken = default)
     {
-        if (await userManager.IsLockedOutAsync(user))
+        var user = await userManager.FindByIdAsync(accountId.ToString());
+        if (user is null || await userManager.IsLockedOutAsync(user))
             return null;
 
         var accessToken = await CreateAccessTokenAsync(user, cancellationToken);
@@ -163,6 +165,7 @@ public sealed class IdentityAuthService(
             user.Email ?? email,
             "Password reset",
             $"<p>Reset your password using this link (valid for a limited time):</p><p><a href=\"{link}\">Reset password</a></p>",
+            user.UserName,
             cancellationToken);
     }
 
@@ -185,8 +188,12 @@ public sealed class IdentityAuthService(
     }
 
     /// <inheritdoc />
-    public async Task<IdentityResult> DeleteAccountAsync(Account user, string password, CancellationToken cancellationToken = default)
+    public async Task<IdentityResult> DeleteAccountAsync(Guid accountId, string password, CancellationToken cancellationToken = default)
     {
+        var user = await userManager.FindByIdAsync(accountId.ToString());
+        if (user is null)
+            return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+
         if (!await userManager.CheckPasswordAsync(user, password))
             return IdentityResult.Failed(new IdentityError { Description = "Invalid password." });
 
@@ -218,6 +225,119 @@ public sealed class IdentityAuthService(
 
         await userManager.SetLockoutEndDateAsync(user, null);
         await userManager.ResetAccessFailedCountAsync(user);
+    }
+
+    /// <inheritdoc />
+    public async Task<IdentityResult> CreateAccountAsync(string email, string userName, string password, List<string> roles, CancellationToken cancellationToken = default)
+    {
+        var account = new Account
+        {
+            Id = Guid.CreateVersion7(),
+            UserName = userName,
+            Email = email,
+            EmailConfirmed = true,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        var result = await userManager.CreateAsync(account, password);
+        if (!result.Succeeded) return result;
+
+        foreach (var roleName in roles)
+        {
+            if (await roleManager.RoleExistsAsync(roleName))
+            {
+                await userManager.AddToRoleAsync(account, roleName);
+            }
+        }
+
+        return IdentityResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<SystemAccountDetailDto?> GetAccountDetailsAsync(Guid accountId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(accountId.ToString());
+        if (user is null) return null;
+
+        var roles = await userManager.GetRolesAsync(user);
+        var claims = await userManager.GetClaimsAsync(user);
+        var permissions = claims
+            .Where(c => c.Type == AuthClaimTypes.Permission)
+            .Select(c => c.Value)
+            .ToList();
+
+        return new SystemAccountDetailDto(
+            Id: user.Id,
+            UserName: user.UserName ?? string.Empty,
+            Email: user.Email ?? string.Empty,
+            Roles: roles.ToList(),
+            Permissions: permissions);
+    }
+
+    /// <inheritdoc />
+    public async Task<IdentityResult> UpdateAccountRolesAndClaimsAsync(Guid accountId, List<string> roles, List<string> permissions, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(accountId.ToString());
+        if (user is null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        // 1. Sync roles
+        var currentRoles = await userManager.GetRolesAsync(user);
+        var rolesToRemove = currentRoles.Except(roles).ToList();
+        var rolesToAdd = roles.Except(currentRoles).ToList();
+
+        if (rolesToRemove.Any()) await userManager.RemoveFromRolesAsync(user, rolesToRemove);
+        if (rolesToAdd.Any()) await userManager.AddToRolesAsync(user, rolesToAdd);
+
+        // 2. Sync permission claims
+        var currentClaims = await userManager.GetClaimsAsync(user);
+        var currentPermissions = currentClaims
+            .Where(c => c.Type == AuthClaimTypes.Permission)
+            .ToList();
+
+        // Remove old permissions
+        foreach (var claim in currentPermissions)
+        {
+            if (!permissions.Contains(claim.Value))
+            {
+                await userManager.RemoveClaimAsync(user, claim);
+            }
+        }
+
+        // Add new permissions
+        foreach (var perm in permissions)
+        {
+            if (!currentPermissions.Any(c => c.Value == perm))
+            {
+                await userManager.AddClaimAsync(user, new Claim(AuthClaimTypes.Permission, perm));
+            }
+        }
+
+        await RevokeAllRefreshTokensAsync(accountId, ct);
+        return IdentityResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<string> AdminResetPasswordAsync(Guid accountId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(accountId.ToString());
+        if (user is null) throw new Exception("Tài khoản không tồn tại.");
+
+        // Generate a random password: 8 chars base64 + "aA1!" to satisfy most policies
+        var bytes = RandomNumberGenerator.GetBytes(9);
+        var base64 = Convert.ToBase64String(bytes).Substring(0, 8);
+        var newPassword = base64 + "aA1!"; 
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"Không thể đặt lại mật khẩu: {errors}");
+        }
+
+        await RevokeAllRefreshTokensAsync(accountId, ct);
+        return newPassword;
     }
 
     /// <inheritdoc />

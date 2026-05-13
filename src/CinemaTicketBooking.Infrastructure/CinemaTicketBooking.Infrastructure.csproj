@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.72" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="10.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.4" />
@@ -20,6 +21,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.4" />
+    <PackageReference Include="Minio" Version="7.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.30.0" />
     <PackageReference Include="WolverineFx.Postgresql" Version="5.30.0" />
@@ -30,8 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="FileStorages\" />
-    <Folder Include="Notifications\" />
     <Folder Include="Payments\Vnpay\" />
     <Folder Include="Persistence\Migrations\" />
   </ItemGroup>

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path=".docs/OAuth2-flow.md" />
+  </Folder>
   <Folder Name="/solution-items/">
     <File Path=".dockerignore" />
     <File Path=".gitattributes" />
@@ -19,8 +22,7 @@
     <Project Path="src/Aspire.AppHost/Aspire.AppHost.csproj" />
     <Project Path="src/Aspire.ServiceDefaults/Aspire.ServiceDefaults.csproj" />
   </Folder>
-  <Folder Name="/dockers/" />
-  <Folder Name="/dockers/development/">
+  <Folder Name="/dockers/">
     <Project Path="dockers/development/docker-compose.dcproj">
       <Build />
     </Project>

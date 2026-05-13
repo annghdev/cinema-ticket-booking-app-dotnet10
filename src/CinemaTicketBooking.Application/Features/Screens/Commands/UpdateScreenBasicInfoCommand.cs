@@ -11,7 +11,7 @@ public class UpdateScreenBasicInfoCommand : ICommand
     public int ColumnOfSeats { get; set; }
     public int TotalSeats { get; set; }
     public string SeatMap { get; set; } = string.Empty;
-    public ScreenType Type { get; set; }
+    public List<ScreenType> SupportedFormats { get; set; } = [];
     public string CorrelationId { get; set; } = string.Empty;
 }
 
@@ -37,7 +37,8 @@ public class UpdateScreenBasicInfoHandler(IUnitOfWork uow)
             columnOfSeats: cmd.ColumnOfSeats,
             totalSeats: cmd.TotalSeats,
             seatMap: cmd.SeatMap,
-            type: cmd.Type);
+            type: cmd.SupportedFormats.FirstOrDefault(),
+            supportedFormats: cmd.SupportedFormats);
 
         screen.GenerateSeats(cmd.SeatMap);
         uow.Screens.Update(screen);
@@ -72,7 +73,9 @@ public class UpdateScreenBasicInfoValidator : AbstractValidator<UpdateScreenBasi
         RuleFor(x => x.SeatMap)
             .NotEmpty().WithMessage("SeatMap is required.");
 
-        RuleFor(x => x.Type)
-            .IsInEnum().WithMessage("Invalid screen type.");
+        RuleFor(x => x.SupportedFormats)
+            .NotEmpty().WithMessage("At least one supported format is required.")
+            .Must(formats => formats != null && formats.All(f => Enum.IsDefined(f)))
+            .WithMessage("Invalid screen format in supported formats.");
     }
 }

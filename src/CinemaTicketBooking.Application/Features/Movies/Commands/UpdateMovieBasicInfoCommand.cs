@@ -14,6 +14,7 @@ public class UpdateMovieBasicInfoCommand : ICommand
     public string? OfficialTrailerUrl { get; set; }
     public int Duration { get; set; }
     public MovieGenre Genre { get; set; }
+    public decimal TargetReach { get; set; }
     public string CorrelationId { get; set; } = string.Empty;
 }
 
@@ -41,7 +42,8 @@ public class UpdateMovieBasicInfoCommandHandler(IUnitOfWork uow)
             command.Director,
             command.OfficialTrailerUrl,
             command.Duration,
-            command.Genre);
+            command.Genre,
+            command.TargetReach);
 
         uow.Movies.Update(movie);
         await uow.CommitAsync(ct);
@@ -100,5 +102,7 @@ public class UpdateMovieBasicInfoValidator : AbstractValidator<UpdateMovieBasicI
         RuleFor(x => x.Genre)
             .IsInEnum().WithMessage("Invalid movie genre.");
 
+        RuleFor(x => x.TargetReach)
+            .GreaterThanOrEqualTo(0).WithMessage("Target reach cannot be negative.");
     }
 }

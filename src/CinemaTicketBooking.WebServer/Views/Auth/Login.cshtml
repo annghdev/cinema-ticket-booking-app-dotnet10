@@ -1,0 +1,82 @@
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Sign In";
+}
+
+<div class="w-full max-w-md p-8 glass-card rounded-3xl shadow-2xl relative overflow-hidden group">
+    <!-- Accent line -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00f4fe] to-transparent"></div>
+
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-[#00f4fe]/10 text-[#00f4fe] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(0,244,254,0.2)]">
+            <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">theaters</span>
+        </div>
+        <h1 class="text-2xl font-black text-[#00f4fe] font-headline uppercase tracking-widest">Absolute Cinema</h1>
+        <p class="text-[10px] text-slate-500 font-headline uppercase tracking-[0.2em] mt-1">Đăng nhập</p>
+    </div>
+
+    <!-- Error Validation -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="p-4 mb-6 rounded-xl bg-error-container text-on-error-container text-xs flex flex-col gap-1 border border-error/20">
+            @Html.ValidationSummary(false, "", new { @class = "list-none" })
+        </div>
+    }
+
+    <form method="post" asp-action="Login" asp-controller="Auth" class="space-y-6">
+        @if (!string.IsNullOrEmpty(ViewData["ReturnUrl"]?.ToString()))
+        {
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+        }
+
+        <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2" for="email">
+                Email Address
+            </label>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" data-icon="mail">mail</span>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    class="w-full bg-surface-container border border-outline-variant/30 focus:border-[#00f4fe]/50 focus:ring-1 focus:ring-[#00f4fe]/50 rounded-xl pl-10 pr-4 py-3 text-sm text-on-surface transition-all duration-300 placeholder-slate-600"
+                    placeholder="name@example.com" />
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2" for="password">
+                Password
+            </label>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" data-icon="lock">lock</span>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    class="w-full bg-surface-container border border-outline-variant/30 focus:border-[#00f4fe]/50 focus:ring-1 focus:ring-[#00f4fe]/50 rounded-xl pl-10 pr-4 py-3 text-sm text-on-surface transition-all duration-300 placeholder-slate-600"
+                    placeholder="••••••••" />
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                    name="rememberMe"
+                    type="checkbox"
+                    value="true"
+                    class="rounded bg-surface-container border-outline-variant/30 text-[#00f4fe] focus:ring-0 focus:ring-offset-0" />
+                <span class="text-xs text-on-surface-variant">Remember me</span>
+            </label>
+        </div>
+
+        <button
+            type="submit"
+            class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-[#00f4fe] to-[#61b4fe] text-[#090079] font-bold text-sm tracking-widest uppercase shadow-[0_4px_20px_rgba(0,244,254,0.3)] hover:shadow-[0_4px_30px_rgba(0,244,254,0.5)] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
+            <span>Sign In</span>
+            <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+        </button>
+    </form>
+</div>

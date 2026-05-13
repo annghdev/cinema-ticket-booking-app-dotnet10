@@ -245,7 +245,7 @@ public class SweetBoxSelectionTests
             Id = Guid.CreateVersion7(),
             CinemaId = Guid.CreateVersion7(),
             Code = "TEST",
-            Type = ScreenType.TwoD,
+            SupportedFormats = [ScreenType.TwoD],
             IsActive = true,
             SeatMap = seatMap
         };

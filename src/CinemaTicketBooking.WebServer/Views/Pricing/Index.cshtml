@@ -1,0 +1,407 @@
+@using CinemaTicketBooking.Application
+@using CinemaTicketBooking.Application.Features
+@using CinemaTicketBooking.Domain
+@model PagedResult<PricingPolicyDto>
+
+@{
+    ViewData["Title"] = "Quản lý giá vé";
+    var cinemas = ViewBag.Cinemas as IReadOnlyList<CinemaDropdownDto> ?? new List<CinemaDropdownDto>();
+}
+
+
+
+<div class="glass-panel rounded-2xl border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="px-8 py-6 flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b border-white/5 bg-white/[0.01]">
+        <h4 class="font-headline font-bold text-xl text-on-surface flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#00f4fe]"></span>
+            Danh sách chính sách giá
+        </h4>
+        
+        <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
+            @if ((await AuthorizationService.AuthorizeAsync(User, Permissions.PricingPoliciesManage)).Succeeded)
+            {
+                <button onclick="openAddPricingModal()" class="w-full md:w-auto h-10 py-2.5 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    <span>Thêm chính sách</span>
+                </button>
+            }
+            
+            <form method="get" class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                <!-- Cinema Dropdown -->
+                <select name="cinemaId" onchange="this.form.submit()" class="w-full md:w-40 bg-surface-container-high border-none text-[10px] rounded-xl text-slate-300 focus:ring-1 focus:ring-primary h-10 px-4 transition-all cursor-pointer font-bold uppercase tracking-wider">
+                    <option value="">Tất cả rạp</option>
+                    @foreach (var c in cinemas)
+                    {
+                        <option value="@c.Id" selected="@(Context.Request.Query["cinemaId"] == c.Id.ToString())">@c.Name</option>
+                    }
+                </select>
+
+                <!-- Screen Type -->
+                <select name="screenType" onchange="this.form.submit()" class="w-full md:w-32 bg-surface-container-high border-none text-[10px] rounded-xl text-slate-300 focus:ring-1 focus:ring-primary h-10 px-4 transition-all cursor-pointer font-bold uppercase tracking-wider">
+                    <option value="">Loại phòng</option>
+                    @foreach (var type in Enum.GetValues<ScreenType>())
+                    {
+                        <option value="@type" selected="@(Context.Request.Query["screenType"] == type.ToString())">@type</option>
+                    }
+                </select>
+
+                <!-- Seat Type -->
+                <select name="seatType" onchange="this.form.submit()" class="w-full md:w-32 bg-surface-container-high border-none text-[10px] rounded-xl text-slate-300 focus:ring-1 focus:ring-primary h-10 px-4 transition-all cursor-pointer font-bold uppercase tracking-wider">
+                    <option value="">Loại ghế</option>
+                    @foreach (var type in Enum.GetValues<SeatType>())
+                    {
+                        <option value="@type" selected="@(Context.Request.Query["seatType"] == type.ToString())">@type</option>
+                    }
+                </select>
+                
+                <!-- Reset Button -->
+                <a href="/Pricing" class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 transition-all" title="Reset">
+                    <span class="material-symbols-outlined text-base">restart_alt</span>
+                </a>
+            </form>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-white/[0.02]">
+                <tr>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">LOẠI VÉ</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5">Rạp áp dụng</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">Giá gốc</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-center">Hệ số P.</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">Giá ngày thường</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-center">Hệ số CT.</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">Giá cuối tuần</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-center">Trạng thái</th>
+                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant border-b border-white/5 text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                @if (Model.Items == null || !Model.Items.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="px-8 py-10 text-center text-sm text-on-surface-variant">Không tìm thấy chính sách giá nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var p in Model.Items)
+                    {
+                        var cinemaName = cinemas.FirstOrDefault(c => c.Id == p.CinemaId)?.Name ?? "Tất cả rạp";
+                        var weekendPrice = p.FinalPrice * p.WeekendCoefficient;
+                        
+                        <tr class="hover:bg-white/[0.03] transition-colors group">
+                            <td class="px-8 py-6">
+                                <span class="font-headline font-bold text-on-surface uppercase">@p.ScreenType-@p.SeatType</span>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="text-sm @(p.CinemaId.HasValue ? "text-primary" : "text-slate-400 font-italic")">@cinemaName</span>
+                            </td>
+                            <td class="px-8 py-6 text-right font-mono text-sm text-on-surface-variant">
+                                @p.BasePrice.ToString("N0") <span class="text-[8px] opacity-50">₫</span>
+                            </td>
+                            <td class="px-8 py-6 text-center">
+                                <span class="px-2 py-0.5 rounded-lg bg-surface-container text-[10px] font-bold text-slate-400">x@(p.ScreenCoefficient.ToString("0.00"))</span>
+                            </td>
+                            <td class="px-8 py-6 text-right font-mono font-bold text-on-surface">
+                                @p.FinalPrice.ToString("N0") <span class="text-[8px] opacity-50">₫</span>
+                            </td>
+                            <td class="px-8 py-6 text-center">
+                                <span class="px-2 py-0.5 rounded-lg bg-secondary/10 text-[10px] font-bold text-secondary">x@(p.WeekendCoefficient.ToString("0.00"))</span>
+                            </td>
+                            <td class="px-8 py-6 text-right font-mono font-bold text-secondary">
+                                @weekendPrice.ToString("N0") <span class="text-[8px] opacity-50">₫</span>
+                            </td>
+                            <td class="px-8 py-6 text-center">
+                                <button onclick="togglePricingStatus('@p.Id', @((!p.IsActive).ToString().ToLower()))" class="px-3 py-1 rounded-full @(p.IsActive ? "bg-secondary/10 text-secondary border-secondary/20" : "bg-white/5 text-slate-400 border-white/10") text-[10px] font-bold border uppercase hover:scale-105 transition-all">
+                                    @(p.IsActive ? "Đang áp dụng" : "Tạm ngưng")
+                                </button>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button 
+                                        data-id="@p.Id"
+                                        data-cinema="@p.CinemaId"
+                                        data-screen="@p.ScreenType"
+                                        data-seat="@p.SeatType"
+                                        data-base="@p.BasePrice"
+                                        data-screencoeff="@p.ScreenCoefficient"
+                                        data-weekendcoeff="@p.WeekendCoefficient"
+                                        data-active="@p.IsActive.ToString().ToLower()"
+                                        onclick="openUpdatePricingModal(this)" 
+                                        class="w-10 h-10 aspect-square flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
+                                        <span class="material-symbols-outlined text-xl">edit</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="px-8 py-4 bg-white/[0.01] flex items-center justify-between border-t border-white/5">
+            <p class="text-[10px] text-on-surface-variant font-medium">Hiển thị <span class="text-on-surface">@Model.Items?.Count() trên @Model.TotalItems</span> chính sách</p>
+            <div class="flex items-center gap-2">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a href="?pageNumber=@i&cinemaId=@Context.Request.Query["cinemaId"]&screenType=@Context.Request.Query["screenType"]&seatType=@Context.Request.Query["seatType"]" 
+                       class="w-10 h-10 flex items-center justify-center rounded-xl text-[10px] font-bold transition-all @(i == Model.PageNumber ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "bg-white/5 text-slate-400 hover:bg-white/10")">
+                        @i
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Pricing Modal (Add/Update) -->
+<div id="pricingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-xl rounded-3xl border border-white/10 p-8 shadow-2xl bg-slate-900/90 relative">
+        <button onclick="closePricingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        
+        <h3 id="modalTitle" class="font-headline font-bold text-2xl text-on-surface mb-6 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_#61b4fe]"></span>
+            Thiết lập giá vé
+        </h3>
+        
+        <form id="pricingForm" class="space-y-6 text-sm">
+            <input type="hidden" name="id" id="pricingId" />
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Rạp áp dụng</label>
+                    <select name="cinemaId" id="modalCinemaId" class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                        <option value="">Tất cả rạp (Global)</option>
+                        @foreach (var c in cinemas)
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Trạng thái</label>
+                    <div class="flex items-center gap-2 h-[42px]">
+                        <input type="checkbox" name="isActive" id="modalIsActive" value="true" checked class="w-4 h-4 rounded border-white/10 bg-white/5 text-primary focus:ring-offset-0 focus:ring-primary" />
+                        <label class="text-xs font-semibold text-slate-300">Kích hoạt ngay</label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Loại phòng</label>
+                    <select name="screenType" id="modalScreenType" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                        @foreach (var type in Enum.GetValues<ScreenType>())
+                        {
+                            <option value="@((int)type)">@type</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Loại ghế</label>
+                    <select name="seatType" id="modalSeatType" required class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all">
+                        @foreach (var type in Enum.GetValues<SeatType>())
+                        {
+                            <option value="@((int)type)">@type</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+                <h5 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">calculate</span>
+                    Tham số giá
+                </h5>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Giá gốc (Base)</label>
+                        <input type="number" name="basePrice" id="modalBasePrice" required min="0" step="1000" class="w-full py-2 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" value="50000" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Hệ số Phòng</label>
+                        <input type="number" name="screenCoefficient" id="modalScreenCoeff" required min="0.1" step="0.01" class="w-full py-2 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" value="1.0" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Hệ số Cuối tuần</label>
+                        <input type="number" name="weekendCoefficient" id="modalWeekendCoeff" required min="1.0" step="0.01" class="w-full py-2 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-200 focus:border-primary/50 focus:ring-primary focus:outline-none transition-all" value="1.2" />
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div class="text-xs text-slate-400">Giá dự kiến:</div>
+                    <div id="previewPrice" class="text-xl font-bold text-secondary">0 ₫</div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-white/5 mt-4">
+                <button type="button" id="btnDelete" onclick="deletePricing()" class="py-2.5 px-4 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all hidden flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                    Xóa
+                </button>
+                <div class="flex items-center gap-3 ml-auto">
+                    <button type="button" onclick="closePricingModal()" class="py-2.5 px-5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 text-xs font-bold transition-all">
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="py-2.5 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-bold shadow-[0_4px_15px_rgba(97,180,254,0.3)] hover:shadow-[0_4px_25px_rgba(97,180,254,0.5)] transition-all">
+                        Lưu thông tin
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updatePreview() {
+            const base = parseFloat(document.getElementById('modalBasePrice').value) || 0;
+            const coeff = parseFloat(document.getElementById('modalScreenCoeff').value) || 1;
+            const price = base * coeff;
+            document.getElementById('previewPrice').innerText = price.toLocaleString('vi-VN') + ' ₫';
+        }
+
+        document.getElementById('modalBasePrice').addEventListener('input', updatePreview);
+        document.getElementById('modalScreenCoeff').addEventListener('input', updatePreview);
+
+        function openAddPricingModal() {
+            document.getElementById('pricingForm').reset();
+            document.getElementById('pricingId').value = '';
+            document.getElementById('modalTitle').innerText = 'Thêm chính sách giá mới';
+            document.getElementById('btnDelete').classList.add('hidden');
+            document.getElementById('pricingModal').classList.remove('hidden');
+            updatePreview();
+        }
+
+        function openUpdatePricingModal(btn) {
+            document.getElementById('pricingForm').reset();
+            
+            document.getElementById('pricingId').value = btn.getAttribute('data-id');
+            document.getElementById('modalCinemaId').value = btn.getAttribute('data-cinema') || '';
+            
+            // Map string enum names to values for select
+            const screenType = btn.getAttribute('data-screen');
+            const seatType = btn.getAttribute('data-seat');
+            
+            setSelectByText('modalScreenType', screenType);
+            setSelectByText('modalSeatType', seatType);
+            
+            document.getElementById('modalBasePrice').value = btn.getAttribute('data-base');
+            document.getElementById('modalScreenCoeff').value = btn.getAttribute('data-screencoeff');
+            document.getElementById('modalWeekendCoeff').value = btn.getAttribute('data-weekendcoeff');
+            document.getElementById('modalIsActive').checked = btn.getAttribute('data-active') === 'true';
+
+            document.getElementById('modalTitle').innerText = 'Cập nhật chính sách giá';
+            document.getElementById('btnDelete').classList.remove('hidden');
+            document.getElementById('pricingModal').classList.remove('hidden');
+            updatePreview();
+        }
+
+        function setSelectByText(id, text) {
+            const el = document.getElementById(id);
+            for (let i = 0; i < el.options.length; i++) {
+                if (el.options[i].text === text) {
+                    el.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        function closePricingModal() {
+            document.getElementById('pricingModal').classList.add('hidden');
+        }
+
+        document.getElementById('pricingForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const payload = Object.fromEntries(formData.entries());
+            
+            payload.isActive = formData.has('isActive');
+            payload.cinemaId = payload.cinemaId || null;
+            payload.screenType = parseInt(payload.screenType);
+            payload.seatType = parseInt(payload.seatType);
+            payload.basePrice = parseFloat(payload.basePrice);
+            payload.screenCoefficient = parseFloat(payload.screenCoefficient);
+            payload.weekendCoefficient = parseFloat(payload.weekendCoefficient);
+
+            const isUpdate = !!payload.id;
+            const url = isUpdate ? '/Pricing/Update' : '/Pricing/Create';
+
+            if (window.showLoading) window.showLoading();
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                window.showToast('Có lỗi xảy ra khi xử lý yêu cầu.', 'error');
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        });
+
+        async function togglePricingStatus(id, isActive) {
+            if (window.showLoading) window.showLoading();
+            try {
+                const response = await fetch('/Pricing/ToggleStatus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, isActive })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                window.showToast('Không thể thay đổi trạng thái.', 'error');
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        }
+
+        async function deletePricing() {
+            const id = document.getElementById('pricingId').value;
+            if (!confirm('Bạn có chắc chắn muốn xóa chính sách giá này?')) return;
+
+            if (window.showLoading) window.showLoading();
+            try {
+                const response = await fetch('/Pricing/Delete?id=' + id, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.showToast(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    window.showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                window.showToast('Có lỗi xảy ra khi xóa.', 'error');
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        }
+    </script>
+}

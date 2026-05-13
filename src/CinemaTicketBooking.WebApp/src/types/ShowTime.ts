@@ -14,12 +14,17 @@ export type ShowTimeDtoRaw = {
   screenCode: string
   cinemaId: string
   cinemaName: string
+  cinemaAddress: string
+  movieThumbnailUrl: string
+  movieGenre: string
+  movieDuration: number
   date: string
   startAt: string
   endAt: string
   status: ShowTimeStatusValue
   ticketCount: number
   availableTicketCount: number
+  format: string | number
   createdAt: string
 }
 
@@ -49,6 +54,10 @@ export type ShowTimeDetailDtoRaw = {
   screenCode: string
   cinemaId: string
   cinemaName: string
+  cinemaAddress: string
+  movieThumbnailUrl: string
+  movieGenre: string
+  movieDuration: number
   seatMap: string
   date: string
   startAt: string
@@ -56,6 +65,7 @@ export type ShowTimeDetailDtoRaw = {
   status: ShowTimeStatusValue
   ticketCount: number
   availableTicketCount: number
+  format: string | number
   createdAt: string
   tickets: ShowTimeTicketDtoRaw[]
 }
@@ -79,6 +89,12 @@ export const ticketStatusFromNumber: Record<number, ApiTicketStatus> = {
   3: "Sold",
 }
 
+export const screenTypeFromNumber: Record<number, string> = {
+  0: "2D",
+  1: "3D",
+  2: "IMAX",
+}
+
 function extractSeatCodeFromTicketCode(ticketCode: string): string {
   if (!ticketCode) {
     return ticketCode
@@ -100,6 +116,7 @@ export function normalizeShowTimeDto(raw: ShowTimeDtoRaw): ShowTimeDto {
   return {
     ...raw,
     status: normalizeEnumValue(raw.status, showTimeStatusFromNumber, "Upcoming"),
+    format: typeof raw.format === "number" ? (screenTypeFromNumber[raw.format] || "2D") : raw.format,
   }
 }
 
@@ -116,6 +133,7 @@ export function normalizeShowTimeDetailDto(raw: ShowTimeDetailDtoRaw): ShowTimeD
   return {
     ...raw,
     status: normalizeEnumValue(raw.status, showTimeStatusFromNumber, "Upcoming"),
+    format: typeof raw.format === "number" ? (screenTypeFromNumber[raw.format] || "2D") : raw.format,
     tickets: raw.tickets.map(normalizeShowTimeTicketDto),
   }
 }

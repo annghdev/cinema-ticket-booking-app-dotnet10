@@ -37,6 +37,11 @@ public class PricingPolicy : AggregateRoot
     /// </summary>
     public decimal ScreenCoefficient { get; set; } = 1.0m;
 
+    /// <summary>
+    /// Surcharge multiplier applied if the showtime falls on a weekend (Saturday/Sunday).
+    /// </summary>
+    public decimal WeekendCoefficient { get; set; } = 1.0m;
+
     public bool IsActive { get; set; } = true;
 
     // =============================================================
@@ -52,6 +57,7 @@ public class PricingPolicy : AggregateRoot
         SeatType seatType,
         decimal basePrice,
         decimal screenCoefficient,
+        decimal weekendCoefficient = 1.0m,
         bool isActive = true)
     {
         if (basePrice < 0)
@@ -64,6 +70,11 @@ public class PricingPolicy : AggregateRoot
             throw new ArgumentException("Screen coefficient must be positive.", nameof(screenCoefficient));
         }
 
+        if (weekendCoefficient <= 0)
+        {
+            throw new ArgumentException("Weekend coefficient must be positive.", nameof(weekendCoefficient));
+        }
+
         var pricingPolicy = new PricingPolicy
         {
             CinemaId = cinemaId,
@@ -71,6 +82,7 @@ public class PricingPolicy : AggregateRoot
             SeatType = seatType,
             BasePrice = basePrice,
             ScreenCoefficient = screenCoefficient,
+            WeekendCoefficient = weekendCoefficient,
             IsActive = isActive
         };
 
@@ -95,6 +107,7 @@ public class PricingPolicy : AggregateRoot
         SeatType seatType,
         decimal basePrice,
         decimal screenCoefficient,
+        decimal weekendCoefficient,
         bool isActive)
     {
         if (basePrice < 0)
@@ -107,11 +120,17 @@ public class PricingPolicy : AggregateRoot
             throw new ArgumentException("Screen coefficient must be positive.", nameof(screenCoefficient));
         }
 
+        if (weekendCoefficient <= 0)
+        {
+            throw new ArgumentException("Weekend coefficient must be positive.", nameof(weekendCoefficient));
+        }
+
         CinemaId = cinemaId;
         ScreenType = screenType;
         SeatType = seatType;
         BasePrice = basePrice;
         ScreenCoefficient = screenCoefficient;
+        WeekendCoefficient = weekendCoefficient;
         IsActive = isActive;
 
         RaiseEvent(new PricingPolicyBasicInfoUpdated(
@@ -121,13 +140,18 @@ public class PricingPolicy : AggregateRoot
             SeatType: SeatType,
             BasePrice: BasePrice,
             ScreenCoefficient: ScreenCoefficient,
+            WeekendCoefficient: WeekendCoefficient,
             IsActive: IsActive));
     }
 
     /// <summary>
     /// Calculates the final ticket price.
+    /// Formula: TicketPrice = BasePrice × ScreenCoefficient × (isWeekend ? WeekendCoefficient : 1.0)
     /// </summary>
-    public decimal CalculatePrice() => BasePrice * ScreenCoefficient;
+    public decimal CalculatePrice(bool isWeekend = false) 
+    {
+        return BasePrice * ScreenCoefficient * (isWeekend ? WeekendCoefficient : 1.0m);
+    }
 
     // =============================================================
     // Update Pricing

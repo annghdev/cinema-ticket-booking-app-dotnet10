@@ -45,20 +45,20 @@ public class ShowTimeController(IMessageBus bus) : Controller
     /// </summary>
     [HttpPost]
     [Authorize(Policy = Permissions.ShowTimesManage)]
-    public async Task<IActionResult> Create(Guid movieId, Guid screenId, DateTimeOffset startAt)
+    public async Task<IActionResult> Create(Guid movieId, Guid screenId, DateTimeOffset startAt, ScreenType? format = null)
     {
         var command = new AddShowTimeCommand
         {
             MovieId = movieId,
             ScreenId = screenId,
-            StartAt = startAt.ToUniversalTime()
+            StartAt = startAt.ToUniversalTime(),
+            Format = format
         };
 
         try
         {
             var showtimeId = await bus.InvokeAsync<Guid>(command);
-            var dateString = startAt.ToUniversalTime().ToString("yyyy-MM-dd");
-            return Json(new { success = true, message = "Showtime scheduled successfully!", id = showtimeId });
+            return Json(new { success = true, message = "Lịch chiếu đã được tạo thành công!", id = showtimeId });
         }
         catch (Exception ex)
         {
